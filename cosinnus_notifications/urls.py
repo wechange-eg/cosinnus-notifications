@@ -9,7 +9,7 @@ cosinnus_root_patterns = patterns('',
 )
 
 
-cosinnus_group_patterns = patterns('cosinnus_stream.views',
+cosinnus_group_patterns = patterns('cosinnus_notifications.views',
 )
 
 urlpatterns = cosinnus_group_patterns + cosinnus_root_patterns

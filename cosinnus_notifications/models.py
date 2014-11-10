@@ -13,5 +13,5 @@ from django.utils.timezone import now
 
 import django
 if django.VERSION[:2] < (1, 7):
-    from cosinnus_stream import cosinnus_app
+    from cosinnus_notifications import cosinnus_app
     cosinnus_app.register()
