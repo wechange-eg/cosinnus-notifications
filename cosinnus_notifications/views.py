@@ -34,14 +34,38 @@ class NotificationPreferenceView(UpdateView):
         Handles POST requests, instantiating a form instance with the passed
         POST variables and then checked for validity.
         """
-        group_minicache = {}
         for name, value in request.POST.items():
             if not name.startswith('notif_'):
                 continue
-            if name.startswith('notif_choice__'):
-                group_id = int(name.split('__')[1])
+            if name.startswith('notif_choice:'):
+                group_id = int(name.split(':')[1])
                 group = CosinnusGroup.objects.get_cached(pks=group_id)
                 set_user_group_notifications_special(request.user, group, value)
+            elif name.startswith('notif_option:'):
+                # if we are looking at a group item, check if the choice field is set to custom,
+                # otherwise ignore it
+                print ">>> splitting", name, value
+                value = int(value)
+                _, group_id, notification_id = name.split(':')
+                if request.POST.get('notif_choice:%s' % group_id, None) == 'custom':
+                    # save / erase setting
+                    try:
+                        pref = UserNotificationPreference.objects.get(user=request.user, group=group, notification_id=notification_id)
+                        if value == 1:
+                            if not pref.is_active:
+                                pref.is_active = True
+                                pref.save()
+                                print ">>> saved"
+                        else:
+                            pref.delete()
+                            print ">>> deleted"
+                    except:
+                        if value == 1:
+                            UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=True)
+                            print ">>> created"
+                    
+                else:
+                    print ">> ignoring non-custom field ", name
         
         return HttpResponseRedirect(self.success_url)
     
@@ -69,11 +93,13 @@ class NotificationPreferenceView(UpdateView):
             notification_rows = [] # [[id, label, value], ...]
             for notification_id, options in notifications.items():
                 notif_id = '%s:%s' % (group.pk, notification_id)
-                if notification_id == ALL_NOTIFICATIONS_ID and notif_id in prefs:
-                    choice_selected = "all"
+                if notification_id == ALL_NOTIFICATIONS_ID:
+                    if notif_id in prefs:
+                        choice_selected = "all"
                     continue
-                if notification_id == NO_NOTIFICATIONS_ID and notif_id in prefs:
-                    choice_selected = "none"
+                if notification_id == NO_NOTIFICATIONS_ID:
+                    if notif_id in prefs:
+                        choice_selected = "none"
                     continue
                 notification_rows.append([notif_id, options['label'], bool(notif_id in prefs)])
             group_rows.append( (group, notification_rows, choice_selected) )
