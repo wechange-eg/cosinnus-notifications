@@ -5,7 +5,7 @@ from django.conf.urls import patterns, url
 
 
 cosinnus_root_patterns = patterns('',
-                                   
+    url(r'^profile/notifications/$', 'cosinnus_notifications.views.notification_preference_view', name='notifications'),           
 )
 
 

@@ -1,0 +1,53 @@
+{% extends "cosinnus_notifications/base.html" %}
+{% load i18n static cosinnus_tags widget_tweaks %}
+
+{% block page_title %}
+    {% trans "Notification Preferences" %}
+{% endblock page_title %}
+
+{% block breadcrumb %}
+    {{ block.super }}
+    <li class="active">{% trans "Edit" %}</li>
+{% endblock %}
+
+{% block leftnav %}
+    {% include 'cosinnus/user/leftnav.html' with view="edit_notifications" %}
+{% endblock leftnav %}
+
+{% block content %}
+
+    <!-- a box with semi transparent background -->
+    <div class="content-box">
+        <form method="POST" action="">{% csrf_token %}
+            <div>
+                <button type="submit">And go and submit!</button>
+            </div>
+            
+            {% for group, notifications, choice in grouped_notifications %}
+                <div class="col-lg-12 col-md-12"><!-- right column -->
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4">
+                            <div class="row">
+                            <p>{{ group.name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-8">
+                            <div class="row">
+                            <select name="notif_choice__{{group.pk}}" class="form-control">
+                                <option {% if choice == "all" %}selected{% endif %} value="all">{% trans "All notifications" %}</option>
+                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
+                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
+                            </select>
+                            </div>
+                        </div>
+                                    
+                
+                    </div>
+                </div>
+            {% endfor %}
+            
+        </form>
+        
+    </div><!-- content-box -->
+    
+{% endblock content %}
