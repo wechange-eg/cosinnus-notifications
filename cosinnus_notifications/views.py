@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.edit import UpdateView
 
 from cosinnus.core.decorators.views import require_logged_in
-from cosinnus.models.group import CosinnusGroup
 from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
@@ -101,7 +100,11 @@ class NotificationPreferenceView(UpdateView):
             prefs['%s:%s' % (pref.group.pk, pref.notification_id)] = pref.is_active
         
         group_rows = [] # [(group, notification_rows, choice_selected), ...]
-        for group in CosinnusGroup.objects.get_for_user(self.user):
+        # get groups, grouped by their 
+        groups = CosinnusGroup.objects.get_for_user(self.user)
+        groups = sorted(groups, key=lambda group: ((group.parent.name +'_' if group.parent else '') + group.name).lower())
+        
+        for group in groups:
             choice_selected = "custom"
             notification_rows = [] # [[id, label, value], ...]
             for notification_id, options in notifications.items():

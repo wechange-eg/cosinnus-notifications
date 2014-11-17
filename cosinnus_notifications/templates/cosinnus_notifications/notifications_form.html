@@ -28,7 +28,12 @@
                     <div class="row">
                         <div class="col-lg-4 col-md-4">
                             <div class="row">
-                            <p>{{ group.name }}</p>
+	                            <p>
+		                            {% if group.parent %}
+		                                &nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;
+		                            {% endif %}
+	                                <a href="{% group_url 'cosinnus:group-dashboard' group=group.slug %}" target="_blank"> {{ group.name }}</a>
+                                </p>
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-8">
