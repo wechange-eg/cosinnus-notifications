@@ -12,6 +12,7 @@ from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
     set_user_group_notifications_special
+from cosinnus.models.group import CosinnusGroup
 
 
 class NotificationPreferenceView(UpdateView):
