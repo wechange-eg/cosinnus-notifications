@@ -40,6 +40,12 @@ class NotificationPreferenceView(UpdateView):
         POST variables and then checked for validity.
         """
         for name, value in request.POST.items():
+            # we go through all values POSTed to us. some of these are the settings from the dropdown
+            # box (all / none / custom), some of them are the individual custom preference choices
+            # for a group.
+            # depending of the dropdown setting we set the global all/none setting and ignore the custom
+            # values, or if set to custom, delete any global all/none preference entries for that group
+            # and save the individual preference settings for that group
             if not name.startswith('notif_'):
                 continue
             if name.startswith('notif_choice:'):
@@ -58,18 +64,17 @@ class NotificationPreferenceView(UpdateView):
                     # save / erase setting
                     try:
                         pref = UserNotificationPreference.objects.get(user=request.user, group=group, notification_id=notification_id)
-                        if value == 1:
-                            if not pref.is_active:
-                                pref.is_active = True
-                                pref.save()
-                                print ">>> saved"
-                        else:
-                            pref.delete()
-                            print ">>> deleted", pref
+                        if value == 1 and not pref.is_active:
+                            pref.is_active = True
+                            pref.save()
+                            print ">>> saved to yes"
+                        elif value == 0 and pref.is_active:
+                            pref.is_active = False
+                            pref.save()
+                            print ">>> saved to no"
                     except:
-                        if value == 1:
-                            pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=True)
-                            print ">>> created", pref
+                        pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=value)
+                        print ">>> created", pref, value
                     
                 else:
                     print ">> ignoring non-custom field ", name
@@ -81,7 +86,7 @@ class NotificationPreferenceView(UpdateView):
         """
             Get the queryset of notifications
         """
-        self.queryset = self.model._default_manager.filter(user=self.request.user, is_active=True)
+        self.queryset = self.model._default_manager.filter(user=self.request.user)
         return self.queryset
     
     def get_context_data(self, **kwargs):
@@ -91,9 +96,9 @@ class NotificationPreferenceView(UpdateView):
         context = super(UpdateView, self).get_context_data(**kwargs)
         
         # build lookup dict for all active existing preferences vs groups
-        prefs = [] # 'groupid:notification_id' 
+        prefs = {} # 'groupid:notification_id' 
         for pref in self.get_queryset():
-            prefs.append('%s:%s' % (pref.group.pk, pref.notification_id))
+            prefs['%s:%s' % (pref.group.pk, pref.notification_id)] = pref.is_active
         
         group_rows = [] # [(group, notification_rows, choice_selected), ...]
         for group in CosinnusGroup.objects.get_for_user(self.user):
@@ -109,7 +114,12 @@ class NotificationPreferenceView(UpdateView):
                     if notif_id in prefs:
                         choice_selected = "none"
                     continue
-                notification_rows.append([notif_id, options['label'], bool(notif_id in prefs)])
+                if notif_id in prefs:
+                    active = bool(prefs[notif_id])
+                else:
+                    active = options.get('default', False)
+                # check for default if false, 
+                notification_rows.append([notif_id, options['label'], active])
             group_rows.append( (group, notification_rows, choice_selected) )
         
         context.update({

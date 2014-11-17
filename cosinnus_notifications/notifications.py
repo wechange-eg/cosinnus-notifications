@@ -46,11 +46,17 @@ def is_notification_active(notification_id, user, group):
     try:
         preference = UserNotificationPreference.objects.get(user=user, group=group, notification_id=notification_id)
     except UserNotificationPreference.DoesNotExist:
+        print ">> checked notification preference", notification_id, " for", user, group, " and it is >>> false (noexist)"
+        # if not set in DB, check if preference is default on 
+        if notification_id in notifications and notifications[notification_id].get('default', False):
+            print ">> checked notification preference", notification_id, " for", user, group, " and it is >>> true (default)"
+            return True
         return False
+    print ">> checked notification preference", notification_id, " for", user, group, " and it is >>> ", preference.is_active
     return preference.is_active
 
 def set_user_group_notifications_special(user, group, all_or_none_or_custom):
-    """ Sets the user preference settings for a group to all or none or custom (deleting the special settings) """
+    """ Sets the user preference settings for a group to all or none or custom (deleting the special setting flag) """
     if not (all_or_none_or_custom == "all" or all_or_none_or_custom == "none" or all_or_none_or_custom == "custom"):
         print ">> Imporperly sent all/none setting to DB"
         return
