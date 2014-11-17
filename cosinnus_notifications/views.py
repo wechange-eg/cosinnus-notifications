@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.views.generic.edit import UpdateView
-from cosinnus.core.decorators.views import require_logged_in
+
+from django.core.urlresolvers import reverse_lazy
+from django.contrib import messages
 from django.http.response import HttpResponseRedirect
+from django.utils.translation import ugettext_lazy as _
+from django.views.generic.edit import UpdateView
+
+from cosinnus.core.decorators.views import require_logged_in
+from cosinnus.models.group import CosinnusGroup
 from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
     set_user_group_notifications_special
-from cosinnus.models.group import CosinnusGroup
-from django.core.urlresolvers import reverse_lazy
 
 
 class NotificationPreferenceView(UpdateView):
@@ -17,6 +21,7 @@ class NotificationPreferenceView(UpdateView):
     model = UserNotificationPreference
     template_name = 'cosinnus_notifications/notifications_form.html'
     success_url = reverse_lazy('cosinnus:notifications')
+    message_success = _('Your notification preferences were updated successfully.')
     
     @require_logged_in()
     def dispatch(self, request, *args, **kwargs):
@@ -48,6 +53,8 @@ class NotificationPreferenceView(UpdateView):
                 value = int(value)
                 _, group_id, notification_id = name.split(':')
                 if request.POST.get('notif_choice:%s' % group_id, None) == 'custom':
+                    # save custom settings if the main switch for custom is enabled:
+                    group = CosinnusGroup.objects.get_cached(pks=int(group_id))
                     # save / erase setting
                     try:
                         pref = UserNotificationPreference.objects.get(user=request.user, group=group, notification_id=notification_id)
@@ -58,15 +65,16 @@ class NotificationPreferenceView(UpdateView):
                                 print ">>> saved"
                         else:
                             pref.delete()
-                            print ">>> deleted"
+                            print ">>> deleted", pref
                     except:
                         if value == 1:
-                            UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=True)
-                            print ">>> created"
+                            pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=True)
+                            print ">>> created", pref
                     
                 else:
                     print ">> ignoring non-custom field ", name
         
+        messages.success(request, self.message_success)
         return HttpResponseRedirect(self.success_url)
     
     def get_queryset(self):
