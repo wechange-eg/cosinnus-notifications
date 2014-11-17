@@ -33,30 +33,28 @@
                         </div>
                         <div class="col-lg-8 col-md-8">
                             <div class="row">
-                            <select name="notif_choice:{{group.pk}}" class="form-control">
-                                <option {% if choice == "all" %}selected{% endif %} value="all">{% trans "All notifications" %}</option>
-                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
-                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
-                            </select>
+	                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});">
+	                                <option {% if choice == "all" %}selected{% endif %} value="all">{% trans "All notifications" %}</option>
+	                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
+	                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
+	                            </select>
                             </div>
                         </div>
                     </div>
-                    {% if choice == "custom" %}
-                        <div class="row">
-	                        <div class="col-lg-4 col-md-4">
+                    <div id="div_notif_choices_{{group.pk}}" class="row" choice != "custom" {% if not choice = "custom" %}style="display:none;"{% endif %}>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="row">
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-8">
+                            {% for id, label, value in notifications %}
 	                            <div class="row">
-	                            </div>
-	                        </div>
-	                        <div class="col-lg-8 col-md-8">
-                                {% for id, label, value in notifications %}
-		                            <div class="row">
-		                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
-		                                <input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> {{label}}
-	                                </div>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-                    {% endif %}
+	                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
+	                                <input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> <label>{{label}}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
             
@@ -65,3 +63,19 @@
     </div><!-- content-box -->
     
 {% endblock content %}
+
+
+{% block extrafooter %}
+    {{ block.super }}
+    <script type="text/javascript">
+        var toggleCustomNotificationPreferences = function(id) {
+            var pref_box = $('#notif_choice_' + id);
+            var pref_area = $('#div_notif_choices_' + id);
+            if (pref_box.val() == 'custom') {
+                pref_area.show();
+            } else {
+                pref_area.hide();
+            }
+        };
+    </script>
+{% endblock extrafooter %}
