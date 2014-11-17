@@ -147,8 +147,9 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
 def init_notifications():
     global notifications 
     
-    print ">> init notifications"
-    for app, app_name, app_label in app_registry.items():
+    all_items = [item for item in app_registry.items()]
+    all_items.append( ('cosinnus', 'cosinnus', 'Cosinnus') )
+    for app, app_name, app_label in all_items:
         print "initing notifics for ", app, app_name, app_label
         try:
             notification_module = import_module('%s.cosinnus_notifications' % app)
