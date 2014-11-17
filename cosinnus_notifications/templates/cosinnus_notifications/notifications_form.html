@@ -16,57 +16,68 @@
 
 {% block content %}
 
-    <!-- a box with semi transparent background -->
-    <div class="content-box">
-        <form method="POST" action="">{% csrf_token %}
-            <div>
-                <button type="submit">And go and submit!</button>
-            </div>
-            
+    <form method="POST" action="">{% csrf_token %}
+		<!-- a box with semi transparent background -->
+	    <div class="content-box">
             {% for group, notifications, choice in grouped_notifications %}
-                <div class="col-lg-12 col-md-12"><!-- right column -->
-                    <div class="row">
-                        <div class="col-lg-4 col-md-4">
-                            <div class="row">
-	                            <p>
-		                            {% if group.parent %}
-		                                &nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;
-		                            {% endif %}
-	                                <a href="{% group_url 'cosinnus:group-dashboard' group=group.slug %}" target="_blank"> {{ group.name }}</a>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-lg-8 col-md-8">
-                            <div class="row">
-	                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});">
-	                                <option {% if choice == "all" %}selected{% endif %} value="all">{% trans "All notifications" %}</option>
-	                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
-	                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
-	                            </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="div_notif_choices_{{group.pk}}" class="row" choice != "custom" {% if not choice = "custom" %}style="display:none;"{% endif %}>
-                        <div class="col-lg-4 col-md-4">
-                            <div class="row">
-                            </div>
-                        </div>
-                        <div class="col-lg-8 col-md-8">
-                            {% for id, label, value in notifications %}
-	                            <div class="row">
-	                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
-	                                <input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> <label>{{label}}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                <div class="row large-space">
+	                <div class="col-md-12"><!-- right column -->
+	                    {% if not notifications and not choice %}
+	                        <a href="{% group_url 'cosinnus:group-dashboard' group=group.slug %}" target="_blank"> 
+                                <legend>{{ group.name }}</legend>
+                            </a>
+	                    {% else %}
+		                    <div class="row">
+		                        {% if group.parent %}
+		                        <div class="col-md-1">
+		                            <legend>&gt;</legend>
+		                        </div>
+		                        {% endif %}
+		                        <div class="{% if group.parent %}col-md-3{% else %}col-md-4{% endif %}">
+		                            <a href="{% group_url 'cosinnus:group-dashboard' group=group.slug %}" target="_blank"> 
+		                                <legend>{{ group.name }}</legend>
+		                            </a>
+		                        </div>
+		                        <div class="col-md-8">
+		                            <p class="no-horizontal-padding no-vertical-padding">
+		                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});">
+		                                <option {% if choice == "all" %}selected{% endif %} value="all">{% trans "All notifications" %}</option>
+		                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
+		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
+		                            </select>
+		                            </p>
+		                        </div>
+		                    </div>
+		                    <div id="div_notif_choices_{{group.pk}}" class="row" choice != "custom" {% if not choice = "custom" %}style="display:none;"{% endif %}>
+		                        <div class="col-md-8 col-md-offset-4">
+		                            {% for id, label, value in notifications %}
+		                                <div>
+			                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
+			                                <input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> <label>{{label}}</label>
+		                                </div>
+		                            {% endfor %}
+		                        </div>
+		                    </div>
+		                {% endif %}
+	                </div>
                 </div>
             {% endfor %}
-            
-        </form>
+        </div><!-- content-box -->
         
-    </div><!-- content-box -->
+        <button type="submit" class="btn btn-emphasized">
+            <ul class="media-list">
+                <li class="media">
+                    <a class="pull-left" href="#">
+                        <i class="fa fa-check"></i>
+                    </a>
+                    <div class="media-body">
+                        {% trans "Save" %}
+                    </div>
+                </li>
+            </ul>
+        </button>
     
+    </form>
 {% endblock content %}
 
 

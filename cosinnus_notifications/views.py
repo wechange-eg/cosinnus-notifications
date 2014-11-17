@@ -124,6 +124,10 @@ class NotificationPreferenceView(UpdateView):
                     active = options.get('default', False)
                 # check for default if false, 
                 notification_rows.append([notif_id, options['label'], active])
+            # add a "fake" project's group header row to add a missing group,
+            # if the user was not member of the group, but member in a child project
+            if group.parent and group_rows and not group_rows[-1][0].parent and not group_rows[-1][0] == group.parent:
+                group_rows.append( (group.parent, False, False) )
             group_rows.append( (group, notification_rows, choice_selected) )
         
         context.update({
