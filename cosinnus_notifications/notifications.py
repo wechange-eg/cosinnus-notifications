@@ -15,6 +15,7 @@ from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus.utils.functions import ensure_dict_keys
 from cosinnus.templatetags.cosinnus_tags import full_name
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ImproperlyConfigured
 
 ALL_NOTIFICATIONS_ID = 'notifications__all'
 NO_NOTIFICATIONS_ID = 'notifications__none'
@@ -90,15 +91,19 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
 def check_user_wants_notification(user, notification_id, obj):
     """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
         notification event. """
-    user_in_group = None
     group = None
+    
     if type(obj) is CosinnusGroup or issubclass(obj.__class__, CosinnusGroup):
         group = obj
-        user_in_group = group.is_member(user)
     elif issubclass(obj.__class__, BaseTaggableObjectModel):
         group = obj.group
-        user_in_group = group.is_member(user)
-        
+    elif hasattr(obj, 'group'):
+        group = obj.group
+    else:
+        raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
+            If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
+    user_in_group = group.is_member(user)
+    
     print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
     if not user_in_group:
         print ">>> user didn't want notification or there was no group"
@@ -159,6 +164,7 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
                 })
             except:
                 pass
+            
                 
             subject = render_to_string(subj_template, context)
             send_mail_or_fail(receiver.email, subject, template, context)
