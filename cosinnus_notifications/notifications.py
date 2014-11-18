@@ -119,6 +119,7 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
         user: the user that modified the object and caused the event
         audience: a list of users that are potential targets for the event 
     """
+    from cosinnus.utils.context_processors import cosinnus as cosinnus_context
     signal = kwargs['signal']
     # find out configured signal id for the signal we received
     notification_id = _find_notification(signal)
@@ -133,6 +134,7 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
             subj_template = options['subject_template']
             if sender.request:
                 context = get_common_mail_context(sender.request)
+                context.update(cosinnus_context(sender.request))
             else:
                 print ">>> warn: no request in sender"
                 context = {}
