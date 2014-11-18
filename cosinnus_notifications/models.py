@@ -26,8 +26,8 @@ class UserNotificationPreference(models.Model):
     class Meta:
         app_label = 'cosinnus_notifications'
         unique_together = (('user', 'notification_id', 'group'),)
-        verbose_name = _('Notification preference')
-        verbose_name_plural = _('Notification preferences')
+        verbose_name = _('Notification Preference')
+        verbose_name_plural = _('Notification Preferences')
 
     def __str__(self):
         return "<User notification preference: %(user)s, group: %(group)s, notification_id: %(notification_id)s, is_active: %(is_active)d>" % {
