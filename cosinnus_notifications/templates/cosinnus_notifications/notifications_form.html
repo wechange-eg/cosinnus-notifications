@@ -50,10 +50,10 @@
 		                    </div>
 		                    <div id="div_notif_choices_{{group.pk}}" class="row" choice != "custom" {% if not choice = "custom" %}style="display:none;"{% endif %}>
 		                        <div class="col-md-8 col-md-offset-4">
-		                            {% for id, label, value in notifications %}
-		                                <div>
+		                            {% for id, label, value, app in notifications %}
+		                                <div {% ifchanged app %}style="border-top: solid 1px gray;"{% endifchanged %}>
 			                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
-			                                <input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> <label>{{label}}</label>
+			                                <label><input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> {{label}}</label>
 		                                </div>
 		                            {% endfor %}
 		                        </div>
