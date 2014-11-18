@@ -18,10 +18,7 @@ def register():
     # makemessages replacement protection
     name = pgettext_lazy("the_app", "notifications")
     
-import django.dispatch as dispatch
     
 @receiver(all_cosinnus_apps_loaded)
 def cosinnus_ready(sender, **kwargs):
-    print ">> loadsdaed"
-    print ">> ?", bool(kwargs['signal'] == all_cosinnus_apps_loaded), bool(kwargs['signal'] == dispatch.Signal())
     init_notifications()

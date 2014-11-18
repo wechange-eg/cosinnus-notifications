@@ -55,7 +55,6 @@ class NotificationPreferenceView(UpdateView):
             elif name.startswith('notif_option:'):
                 # if we are looking at a group item, check if the choice field is set to custom,
                 # otherwise ignore it
-                print ">>> splitting", name, value
                 value = int(value)
                 _, group_id, notification_id = name.split(':')
                 if request.POST.get('notif_choice:%s' % group_id, None) == 'custom':
@@ -67,18 +66,12 @@ class NotificationPreferenceView(UpdateView):
                         if value == 1 and not pref.is_active:
                             pref.is_active = True
                             pref.save()
-                            print ">>> saved to yes"
                         elif value == 0 and pref.is_active:
                             pref.is_active = False
                             pref.save()
-                            print ">>> saved to no"
                     except:
                         pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=value)
-                        print ">>> created", pref, value
                     
-                else:
-                    print ">> ignoring non-custom field ", name
-        
         messages.success(request, self.message_success)
         return HttpResponseRedirect(self.success_url)
     

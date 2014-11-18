@@ -49,19 +49,15 @@ def is_notification_active(notification_id, user, group):
     try:
         preference = UserNotificationPreference.objects.get(user=user, group=group, notification_id=notification_id)
     except UserNotificationPreference.DoesNotExist:
-        print ">> checked notification preference", notification_id, " for", user, group, " and it is >>> false (noexist)"
         # if not set in DB, check if preference is default on 
         if notification_id in notifications and notifications[notification_id].get('default', False):
-            print ">> checked notification preference", notification_id, " for", user, group, " and it is >>> true (default)"
             return True
         return False
-    print ">> checked notification preference", notification_id, " for", user, group, " and it is >>> ", preference.is_active
     return preference.is_active
 
 def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     """ Sets the user preference settings for a group to all or none or custom (deleting the special setting flag) """
     if not (all_or_none_or_custom == "all" or all_or_none_or_custom == "none" or all_or_none_or_custom == "custom"):
-        print ">> Imporperly sent all/none setting to DB"
         return
     
     try:
@@ -104,18 +100,18 @@ def check_user_wants_notification(user, notification_id, obj):
             If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
     user_in_group = group.is_member(user)
     
-    print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
+    # print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
     if not user_in_group:
-        print ">>> user didn't want notification or there was no group"
+        # >>> user didn't want notification or there was no group
         return False
     if is_notification_active(NO_NOTIFICATIONS_ID, user, group):
-        print ">>> user didn't want notification because he wants none ever!"
+        # >>> user didn't want notification because he wants none ever!
         return False
     if is_notification_active(ALL_NOTIFICATIONS_ID, user, group):
-        print ">>> user wants notification because he wants all!"
+        # >>> user wants notification because he wants all!
         return True
     ret = is_notification_active(notification_id, user, group)
-    print ">> checked his settings, and user wants this notification is", ret
+    # >> checked his settings, and user wants this notification is", ret
     return ret
 
 def notification_receiver(sender, user, obj, audience, **kwargs):
@@ -132,7 +128,6 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
         return
     options = notifications[notification_id]
     
-    print ">>> notify caught a signal with id", notification_id, "and audience", audience
     for receiver in audience:
         if check_user_wants_notification(receiver, notification_id, obj):
             template = options['mail_template']
@@ -141,7 +136,7 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
                 context = get_common_mail_context(sender.request)
                 context.update(cosinnus_context(sender.request))
             else:
-                print ">>> warn: no request in sender"
+                #print ">>> warn: no request in sender"
                 context = {}
             
             context.update({
@@ -182,7 +177,6 @@ def init_notifications():
         except ImportError:
             continue
         if hasattr(notification_module, 'notifications'):
-            print ">> sigs:", notification_module.notifications
             for signal_id, options in notification_module.notifications.items():
                 #label, template, signals
                 signal_id = "%s__%s" % (app_name, signal_id)
