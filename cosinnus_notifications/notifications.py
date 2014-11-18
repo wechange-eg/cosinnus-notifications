@@ -13,6 +13,8 @@ from cosinnus.models.group import CosinnusGroup
 from cosinnus.models.tagged import BaseTaggableObjectModel
 from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus.utils.functions import ensure_dict_keys
+from cosinnus.templatetags.cosinnus_tags import full_name
+from django.core.urlresolvers import reverse
 
 ALL_NOTIFICATIONS_ID = 'notifications__all'
 NO_NOTIFICATIONS_ID = 'notifications__none'
@@ -137,9 +139,25 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
             
             context.update({
                 'receiver': receiver,
-                'source_user': user,
+                'receiver_name': full_name(receiver),
+                'sender': user,
+                'sender_name': full_name(user),
                 'object': obj,
+                'notification_settings_url': '%s%s' % (context['domain_url'], reverse('cosinnus:notifications')),
             })
+            # additional context for BaseTaggableObjectModels
+            if issubclass(obj.__class__, BaseTaggableObjectModel):
+                context.update({
+                    'object_name': obj.title,
+                    'group_name': obj.group.name,
+                })
+            try:
+                context.update({
+                    'object_url': '%s%s' % (context['domain_url'], obj.get_absolute_url()),
+                })
+            except:
+                pass
+                
             subject = render_to_string(subj_template, context)
             send_mail_or_fail(receiver.email, subject, template, context)
 
