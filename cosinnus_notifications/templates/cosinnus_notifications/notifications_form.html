@@ -48,15 +48,22 @@
 		                            </p>
 		                        </div>
 		                    </div>
-		                    <div id="div_notif_choices_{{group.pk}}" class="row" choice != "custom" style="display:none;">
-		                        <div class="col-md-8 col-md-offset-4">
-		                            {% for id, label, value, app in notifications %}
-		                                <div {% ifchanged app %}style="border-top: solid 1px gray;"{% endifchanged %}>
-			                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
-			                                <label><input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> {{label}}</label>
+		                    <div id="div_notif_choices_{{group.pk}}" style="display:none;">
+	                            {% for id, label, value, app_name, app_label in notifications %}
+		                            <div class="row"> 
+		                                <div class="col-md-3 col-md-offset-1">
+                                            {% ifchanged app_label %}
+                                                <label>{{ app_label }}</label>
+                                            {% endifchanged %}&nbsp;
+                                        </div>
+		                                <div class="col-md-8">
+			                                <div {% ifchanged app_name %}style="border-top: solid 1px gray;"{% endifchanged %}>
+				                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
+				                                <label><input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> {{label}}</label>
+			                                </div>
 		                                </div>
-		                            {% endfor %}
-		                        </div>
+		                            </div>    
+	                            {% endfor %}
 		                    </div>
 		                {% endif %}
 	                </div>

@@ -174,7 +174,7 @@ def init_notifications():
     global notifications 
     
     all_items = [item for item in app_registry.items()]
-    all_items.append( ('cosinnus', 'cosinnus', 'Cosinnus') )
+    all_items.append( ('cosinnus', 'cosinnus', '') )
     for app, app_name, app_label in all_items:
         print "initing notifics for ", app, app_name, app_label
         try:
@@ -191,6 +191,7 @@ def init_notifications():
                     % (signal_id, app_name))
                 
                 options['app_name'] = app_name
+                options['app_label'] = app_label
                 if not 'default' in options:
                     options['default'] = False
                 print "connecting", signal_id

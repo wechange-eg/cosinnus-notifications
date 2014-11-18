@@ -107,7 +107,7 @@ class NotificationPreferenceView(UpdateView):
         
         for group in groups:
             choice_selected = "custom"
-            notification_rows = [] # [[id, label, value, app], ...]
+            notification_rows = [] # [[id, label, value, app, app_label], ...]
             for notification_id, options in notifications.items():
                 notif_id = '%s:%s' % (group.pk, notification_id)
                 if notification_id == ALL_NOTIFICATIONS_ID:
@@ -123,11 +123,12 @@ class NotificationPreferenceView(UpdateView):
                 else:
                     active = options.get('default', False)
                 # check for default if false, 
-                notification_rows.append([notif_id, options['label'], active, notification_id.split('__', 1)[0]])
+                notification_rows.append([notif_id, options['label'], active, options['app_name'], options['app_label']])
             # add a "fake" project's group header row to add a missing group,
             # if the user was not member of the group, but member in a child project
             if group.parent and group_rows and not group_rows[-1][0].parent and not group_rows[-1][0] == group.parent:
                 group_rows.append( (group.parent, False, False) )
+            notification_rows = sorted(notification_rows, key=lambda row: row[4].lower())
             group_rows.append( (group, notification_rows, choice_selected) )
         
         context.update({
