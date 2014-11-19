@@ -175,7 +175,6 @@ def init_notifications():
     all_items = [item for item in app_registry.items()]
     all_items.append( ('cosinnus', 'cosinnus', '') )
     for app, app_name, app_label in all_items:
-        logger.error("initing notifics for %s, %s, %s" % (app, app_name, app_label))
         try:
             notification_module = import_module('%s.cosinnus_notifications' % app)
         except ImportError:
@@ -197,5 +196,5 @@ def init_notifications():
                 # connect to signals
                 for signal in options['signals']:
                     signal.connect(notification_receiver)
-    logger.info('Cosinnus_notifications: init done. Available notification signals: %s' % notifications.keys())
+    logger.info('Cosinnus_notifications: init complete. Available notification signals: %s' % notifications.keys())
 
