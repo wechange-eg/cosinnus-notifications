@@ -191,7 +191,6 @@ def init_notifications():
                 options['app_label'] = app_label
                 if not 'default' in options:
                     options['default'] = False
-                logger.info("connecting signal:" + signal_id)
                 notifications[signal_id] = options
                 # connect to signals
                 for signal in options['signals']:
