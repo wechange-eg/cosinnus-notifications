@@ -19,7 +19,7 @@ from cosinnus.templatetags.cosinnus_tags import full_name
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ImproperlyConfigured
 
-logger = logging.getLogger('cosinnus_notifications')
+logger = logging.getLogger('cosinnus')
 
 ALL_NOTIFICATIONS_ID = 'notifications__all'
 NO_NOTIFICATIONS_ID = 'notifications__none'
@@ -175,7 +175,7 @@ def init_notifications():
     all_items = [item for item in app_registry.items()]
     all_items.append( ('cosinnus', 'cosinnus', '') )
     for app, app_name, app_label in all_items:
-        logger.info("initing notifics for %s, %s, %s" % (app, app_name, app_label))
+        logger.error("initing notifics for %s, %s, %s" % (app, app_name, app_label))
         try:
             notification_module = import_module('%s.cosinnus_notifications' % app)
         except ImportError:
