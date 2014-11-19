@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import logging
+
 from cosinnus.core.signals import all_cosinnus_apps_loaded
 from django.dispatch.dispatcher import receiver
 from cosinnus_notifications.notifications import init_notifications
 
+logger = logging.getLogger('cosinnus')
 
 def register():
     # Import here to prevent import side effects
@@ -21,4 +24,8 @@ def register():
     
 @receiver(all_cosinnus_apps_loaded)
 def cosinnus_ready(sender, **kwargs):
-    init_notifications()
+    try:
+        logger.info('Calling cosinnus_notifications:init.')
+        init_notifications()
+    except Exception, err:
+        logger.error('Exception during cosinnus_notifications:init: %s' % err)
