@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 from collections import defaultdict
 
 from django.template.loader import render_to_string
@@ -16,6 +18,8 @@ from cosinnus.utils.functions import ensure_dict_keys
 from cosinnus.templatetags.cosinnus_tags import full_name
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ImproperlyConfigured
+
+logger = logging.getLogger('cosinnus_notifications')
 
 ALL_NOTIFICATIONS_ID = 'notifications__all'
 NO_NOTIFICATIONS_ID = 'notifications__none'
@@ -171,7 +175,7 @@ def init_notifications():
     all_items = [item for item in app_registry.items()]
     all_items.append( ('cosinnus', 'cosinnus', '') )
     for app, app_name, app_label in all_items:
-        print "initing notifics for ", app, app_name, app_label
+        logger.info("initing notifics for %s, %s, %s" % (app, app_name, app_label))
         try:
             notification_module = import_module('%s.cosinnus_notifications' % app)
         except ImportError:
@@ -188,10 +192,10 @@ def init_notifications():
                 options['app_label'] = app_label
                 if not 'default' in options:
                     options['default'] = False
-                print "connecting", signal_id
+                logger.info("connecting signal:" + signal_id)
                 notifications[signal_id] = options
                 # connect to signals
                 for signal in options['signals']:
                     signal.connect(notification_receiver)
-                
+    logger.info('Cosinnus_notifications: init done. Available notification signals: %s' % notifications.keys())
 
