@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-18 16:38+0100\n"
+"POT-Creation-Date: 2015-02-17 15:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,21 +16,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\cosinnus_app.py:15
+#: .\cosinnus_app.py:18
 msgid "Notifications"
 msgstr ""
 
-#: .\cosinnus_app.py:19
+#: .\cosinnus_app.py:22
 msgctxt "the_app"
 msgid "notifications"
 msgstr ""
 
-#: .\models.py:15 .\models.py:29
-msgid "Notification Preference"
+#: .\models.py:15
+msgid "Notification Preference for User"
 msgstr ""
 
 #: .\models.py:21
 msgid "Notification ID"
+msgstr ""
+
+#: .\models.py:29
+msgid "Notification Preference"
 msgstr ""
 
 #: .\models.py:30 .\templates\cosinnus_notifications\base.html.py:12
@@ -39,13 +43,13 @@ msgstr ""
 msgid "Notification Preferences"
 msgstr ""
 
-#: .\notifications.py:27
-#: .\templates\cosinnus_notifications\notifications_form.html.py:50
+#: .\notifications.py:31
+#: .\templates\cosinnus_notifications\notifications_form.html.py:53
 msgid "All notifications"
 msgstr ""
 
-#: .\notifications.py:33
-#: .\templates\cosinnus_notifications\notifications_form.html.py:52
+#: .\notifications.py:37
+#: .\templates\cosinnus_notifications\notifications_form.html.py:55
 msgid "No notifications"
 msgstr ""
 
@@ -57,20 +61,20 @@ msgstr ""
 msgid "Your Profile"
 msgstr ""
 
-#: .\templates\cosinnus_notifications\notifications_form.html.py:21
+#: .\templates\cosinnus_notifications\notifications_form.html.py:23
 msgid ""
 "Select which notifications you would like to receive for each group or "
 "project you are involved in."
 msgstr ""
 
-#: .\templates\cosinnus_notifications\notifications_form.html.py:22
+#: .\templates\cosinnus_notifications\notifications_form.html.py:24
 msgid "These notifications will be sent to your configured email address:"
 msgstr ""
 
-#: .\templates\cosinnus_notifications\notifications_form.html.py:51
+#: .\templates\cosinnus_notifications\notifications_form.html.py:54
 msgid "Custom"
 msgstr "Custom settings"
 
-#: .\templates\cosinnus_notifications\notifications_form.html.py:87
+#: .\templates\cosinnus_notifications\notifications_form.html.py:90
 msgid "Save"
 msgstr ""

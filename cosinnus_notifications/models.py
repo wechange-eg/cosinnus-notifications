@@ -12,7 +12,7 @@ from cosinnus.models.group import CosinnusGroup
 @python_2_unicode_compatible
 class UserNotificationPreference(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-        verbose_name=_('Notification Preference'),
+        verbose_name=_('Notification Preference for User'),
         on_delete=models.CASCADE,
         related_name='notifications'
     )
