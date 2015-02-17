@@ -157,6 +157,11 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
                     'object_name': obj.title,
                     'group_name': obj.group.name,
                 })
+            else:
+                group = getattr(obj, 'group', None)
+                context.update({
+                    'group_name': getattr(group, 'name', '<notfound>'),
+                })
             try:
                 context.update({
                     'object_url': '%s%s' % (context['domain_url'], obj.get_absolute_url()),
