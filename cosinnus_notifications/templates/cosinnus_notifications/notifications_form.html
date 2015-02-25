@@ -32,7 +32,7 @@
                 <div class="row large-space">
 	                <div class="col-md-12"><!-- right column -->
 	                    {% if not notifications and not choice %}
-	                        <a href="{% group_url 'cosinnus:group-dashboard' group=group.slug %}" target="_blank"> 
+	                        <a href="{% group_url 'cosinnus:group-dashboard' group=group %}" target="_blank"> 
                                 <legend>{{ group.name }}</legend>
                             </a>
 	                    {% else %}
@@ -43,7 +43,7 @@
 		                        </div>
 		                        {% endif %}
 		                        <div class="{% if group.parent %}col-md-3{% else %}col-md-4{% endif %}">
-		                            <a href="{% group_url 'cosinnus:group-dashboard' group=group.slug %}" target="_blank"> 
+		                            <a href="{% group_url 'cosinnus:group-dashboard' group=group %}" target="_blank"> 
 		                                <legend>{{ group.name }}</legend>
 		                            </a>
 		                        </div>
