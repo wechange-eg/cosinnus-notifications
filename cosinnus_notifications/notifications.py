@@ -164,11 +164,10 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
                 })
             try:
                 context.update({
-                    'object_url': '%s%s' % (context['domain_url'], obj.get_absolute_url()),
+                    'object_url': obj.get_absolute_url(),
                 })
             except:
                 pass
-            
                 
             subject = render_to_string(subj_template, context)
             send_mail_or_fail(receiver.email, subject, template, context)
