@@ -132,6 +132,14 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
         return
     options = notifications[notification_id]
     
+    # update / overwrite options with extra kwargs sent by the signalling code piece individually
+    if 'extra' in kwargs: 
+        # deepcopy does not work here, so create a new dict
+        copy_options = {}
+        copy_options.update(options)
+        copy_options.update(kwargs['extra'])
+        options = copy_options
+    
     for receiver in audience:
         if check_user_wants_notification(receiver, notification_id, obj):
             template = options['mail_template']
