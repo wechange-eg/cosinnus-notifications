@@ -213,6 +213,9 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
         copy_options.update(kwargs['extra'])
         options = copy_options
     
+    # sanity check: only send to active users that have an email set
+    audience = [user for user in audience if user.is_active and user.email]
+    
     notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
     notification_thread.start()
 
