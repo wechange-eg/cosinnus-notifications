@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 
 from django.core.urlresolvers import reverse_lazy
 from django.contrib import messages
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed,\
+    HttpResponseForbidden
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.edit import UpdateView
 
@@ -13,6 +14,7 @@ from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
     set_user_group_notifications_special
 from cosinnus.models.group import CosinnusGroup
+from django.views.decorators.csrf import csrf_protect
 
 
 class NotificationPreferenceView(UpdateView):
@@ -142,4 +144,17 @@ class NotificationPreferenceView(UpdateView):
     
 notification_preference_view = NotificationPreferenceView.as_view()
 
+
+@csrf_protect
+def notification_reset_view(request):
+    if not request.method=='POST':
+        return HttpResponseNotAllowed(['POST'])
+    if not request.user.is_authenticated():
+        return HttpResponseForbidden('You must be logged in to do that!')
+    
+    # deleting all preferences resets the user's notifications to default
+    UserNotificationPreference.objects.filter(user=request.user).delete()
+    
+    messages.success(request, _('Your notifications preferences were reset to default!'))
+    return HttpResponseRedirect(reverse_lazy('cosinnus:notifications'))
     

@@ -80,6 +80,19 @@
             {% endfor %}
         </div><!-- content-box -->
         
+        <button type="button" class="btn btn-default pull-left" data-toggle="modal" data-target="#reset_notifications_modal" style="margin-left: 0px;">
+	        <ul class="media-list">
+	            <li class="media">
+	                <a class="pull-left" href="#">
+	                    <i class="fa fa-times"></i>
+	                </a>
+	                <div class="media-body">
+                        {% trans "Reset to default" %}
+	                </div>
+	            </li>
+	        </ul>
+	    </button>
+        
         <button type="submit" class="btn btn-emphasized">
             <ul class="media-list">
                 <li class="media">
@@ -94,6 +107,14 @@
         </button>
     
     </form>
+    
+    
+    {% captureas label %}{% trans "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?" %}{% endcaptureas %}
+    {% captureas title %}{% trans "Reset to default" %}{% endcaptureas %}
+    {% url 'cosinnus:reset-notifications' as reset_url %}
+    {% include "cosinnus/modal_box.html" with id="reset_notifications_modal" label=label title=title form_action=reset_url %}
+    
+    
 {% endblock content %}
 
 

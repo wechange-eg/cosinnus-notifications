@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-17 15:11+0100\n"
+"POT-Creation-Date: 2015-06-29 15:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,8 +53,12 @@ msgstr ""
 msgid "No notifications"
 msgstr ""
 
-#: .\views.py:24
+#: .\views.py:26
 msgid "Your notification preferences were updated successfully."
+msgstr ""
+
+#: .\views.py:158
+msgid "Your notifications preferences were reset to default!"
 msgstr ""
 
 #: .\templates\cosinnus_notifications\base.html.py:5
@@ -76,5 +80,16 @@ msgid "Custom"
 msgstr "Custom settings"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:90
+#: .\templates\cosinnus_notifications\notifications_form.html.py:113
+msgid "Reset to default"
+msgstr ""
+
+#: .\templates\cosinnus_notifications\notifications_form.html.py:103
 msgid "Save"
+msgstr ""
+
+#: .\templates\cosinnus_notifications\notifications_form.html.py:112
+msgid ""
+"This will reset all of your notification preferences to their default "
+"setting. Are you sure you wish to do that?"
 msgstr ""
