@@ -104,7 +104,7 @@
             var pref_box = $('#notif_choice_' + id);
             var pref_area = $('#div_notif_choices_' + id);
             if (pref_box.val() == 'custom') {
-                pref_area.show();
+                pref_area.slideDown();
             } else {
                 pref_area.hide();
             }
@@ -113,9 +113,11 @@
             var pref_box = $('#notif_choice_' + id);
             var pref_area = $('#div_notif_choices_' + id);
             if (pref_box.val() == 'custom' && !pref_area.is(':visible')) {
-                pref_area.show();
-                e.preventDefault();
-                return false;
+                pref_area.slideDown();
+                // activate this to prevent opening the dropdown menu on a click on "custom"
+                // e.preventDefault();
+                // return false;
+                return true;
             }
             return true;
         };

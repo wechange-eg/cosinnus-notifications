@@ -117,6 +117,12 @@ class NotificationPreferenceView(UpdateView):
                     active = options.get('default', False)
                 # check for default if false, 
                 notification_rows.append([notif_id, options['label'], active, options['app_name'], options['app_label']])
+            
+            # monkey-patch: if a group's notification mode is custom, but all options are checked,
+            # we still show the "All Notifications" option:
+            if all([option[2] for option in notification_rows]):
+                choice_selected = "all"
+            
             # add a "fake" project's group header row to add a missing group,
             # if the user was not member of the group, but member in a child project
             if group.parent and group_rows and not group_rows[-1][0].parent and not group_rows[-1][0] == group.parent:
