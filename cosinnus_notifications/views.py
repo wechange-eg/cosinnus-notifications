@@ -122,7 +122,7 @@ class NotificationPreferenceView(UpdateView):
             
             # monkey-patch: if a group's notification mode is custom, but all options are checked,
             # we still show the "All Notifications" option:
-            if all([option[2] for option in notification_rows]):
+            if choice_selected == "custom" and all([option[2] for option in notification_rows]):
                 choice_selected = "all"
             
             # add a "fake" project's group header row to add a missing group,
