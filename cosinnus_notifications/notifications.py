@@ -135,6 +135,9 @@ class NotificationsThread(Thread):
     def check_user_wants_notification(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
+        if not user.is_active:
+            return False
+        
         group = None
         
         if type(obj) is CosinnusGroup or issubclass(obj.__class__, CosinnusGroup):
