@@ -3,93 +3,102 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-10-22 13:42+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2015-11-11 10:42+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: uk_UA\n"
+"X-Generator: Poedit 1.8.6\n"
 
 #: .\cosinnus_app.py:18
 msgid "Notifications"
-msgstr ""
+msgstr "Сповіщення"
 
 #: .\cosinnus_app.py:22
 msgctxt "the_app"
 msgid "notifications"
-msgstr ""
+msgstr "Сповіщення"
 
 #: .\models.py:15
 msgid "Notification Preference for User"
-msgstr ""
+msgstr "Налаштування сповіщення для користувача/-ки"
 
 #: .\models.py:21
 msgid "Notification ID"
-msgstr ""
+msgstr "ІН сповіщення"
 
 #: .\models.py:29
 msgid "Notification Preference"
-msgstr ""
+msgstr "Налаштування сповіщення"
 
 #: .\models.py:30 .\templates\cosinnus_notifications\base.html.py:12
 #: .\templates\cosinnus_notifications\notifications_form.html.py:5
 #: .\templates\cosinnus_notifications\notifications_form.html.py:10
 msgid "Notification Preferences"
-msgstr ""
+msgstr "Налаштування сповіщення"
 
 #: .\notifications.py:31
 #: .\templates\cosinnus_notifications\notifications_form.html.py:53
 msgid "All notifications"
-msgstr ""
+msgstr "Усі сповіщення"
 
 #: .\notifications.py:37
 #: .\templates\cosinnus_notifications\notifications_form.html.py:55
 msgid "No notifications"
-msgstr ""
+msgstr "Жодних сповіщень"
 
 #: .\views.py:26
 msgid "Your notification preferences were updated successfully."
-msgstr ""
+msgstr "Ваші нові налаштування сповіщення були успішно збережені."
 
 #: .\views.py:158
 msgid "Your notifications preferences were reset to default!"
-msgstr ""
+msgstr "Ваші налаштування сповіщення було змінено на стандартні!"
 
 #: .\templates\cosinnus_notifications\base.html.py:5
 msgid "Your Profile"
-msgstr ""
+msgstr "Ваш профіль"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:23
 msgid ""
 "Select which notifications you would like to receive for each group or "
 "project you are involved in."
 msgstr ""
+"Виберіть, які сповіщення ви бажаєте отримувати для кожної спільноти або "
+"проекту, у яких ви залучені."
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:24
 msgid "These notifications will be sent to your configured email address:"
 msgstr ""
+"Ці сповіщення будуть надсилатися на вказану вами адресу електронної "
+"скриньки:"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:54
 msgid "Custom"
-msgstr ""
+msgstr "Індивідуальні налаштування"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:90
 #: .\templates\cosinnus_notifications\notifications_form.html.py:113
 msgid "Reset to default"
-msgstr ""
+msgstr "Змінити на стандартні налаштування"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:103
 msgid "Save"
-msgstr ""
+msgstr "Зберегти"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:112
 msgid ""
 "This will reset all of your notification preferences to their default "
 "setting. Are you sure you wish to do that?"
 msgstr ""
+"Це змінить усі ваші налаштування сповіщення на стандартні налаштування. "
+"Ви впевнені, що хочете зробити це?"
