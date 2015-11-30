@@ -54,7 +54,7 @@ msgstr "Все уведомления"
 #: .\notifications.py:37
 #: .\templates\cosinnus_notifications\notifications_form.html.py:55
 msgid "No notifications"
-msgstr "Нет уведомлений"
+msgstr "Не показывать уведомления"
 
 #: .\views.py:26
 msgid "Your notification preferences were updated successfully."
@@ -84,12 +84,12 @@ msgstr ""
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:54
 msgid "Custom"
-msgstr "Настроить"
+msgstr "Индивидуальные настройки"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:90
 #: .\templates\cosinnus_notifications\notifications_form.html.py:113
 msgid "Reset to default"
-msgstr "Вернуться к стартовым настройкам"
+msgstr "Сброс настроек"
 
 #: .\templates\cosinnus_notifications\notifications_form.html.py:103
 msgid "Save"
