@@ -2,7 +2,9 @@
 {% load i18n static %}
 
 {% block breadcrumb %}
-    <li><a href="{% url 'cosinnus:profile-detail' %}">{% trans "Your Profile" %}</a></li>
+	{% if not SETTINGS.COSINNUS_IS_INTEGRATED_PORTAL %}
+    	<li><a href="{% url 'cosinnus:profile-detail' %}">{% trans "Your Profile" %}</a></li>
+    {% endif %}
 {% endblock breadcrumb %}
 
 {% block extrahead %}
