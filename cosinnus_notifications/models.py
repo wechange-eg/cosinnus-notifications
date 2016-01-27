@@ -7,7 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from cosinnus.conf import settings
-from cosinnus.models.group import CosinnusGroup
 
 @python_2_unicode_compatible
 class UserNotificationPreference(models.Model):
@@ -16,7 +15,7 @@ class UserNotificationPreference(models.Model):
         on_delete=models.CASCADE,
         related_name='notifications'
     )
-    group = models.ForeignKey(CosinnusGroup, related_name='user_notification_preferences',
+    group = models.ForeignKey(settings.COSINNUS_GROUP_OBJECT_MODEL, related_name='user_notification_preferences',
         on_delete=models.CASCADE)
     notification_id = models.CharField(_('Notification ID'), max_length=100)
     is_active = models.BooleanField(default=0)
