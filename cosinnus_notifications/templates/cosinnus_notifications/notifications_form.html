@@ -80,31 +80,35 @@
             {% endfor %}
         </div><!-- content-box -->
         
-        <button type="button" class="btn btn-default pull-left" data-toggle="modal" data-target="#reset_notifications_modal" style="margin-left: 0px;">
-	        <ul class="media-list">
-	            <li class="media">
-	                <a class="pull-left" href="#">
-	                    <i class="fa fa-times"></i>
-	                </a>
-	                <div class="media-body">
-                        {% trans "Reset to default" %}
-	                </div>
-	            </li>
-	        </ul>
-	    </button>
-        
-        <button type="submit" class="btn btn-emphasized">
-            <ul class="media-list">
-                <li class="media">
-                    <a class="pull-left" href="#">
-                        <i class="fa fa-check"></i>
-                    </a>
-                    <div class="media-body">
-                        {% trans "Save" %}
-                    </div>
-                </li>
-            </ul>
-        </button>
+        <div class="snap-to-bottom">
+	        <button type="button" class="btn btn-default pull-left" data-toggle="modal" data-target="#reset_notifications_modal" style="margin-left: 0px;">
+		        <ul class="media-list">
+		            <li class="media">
+		                <a class="pull-left" href="#">
+		                    <i class="fa fa-times"></i>
+		                </a>
+		                <div class="media-body">
+	                        {% trans "Reset to default" %}
+		                </div>
+		            </li>
+		        </ul>
+		    </button>
+	        
+	        <button type="submit" class="btn btn-emphasized">
+	            <ul class="media-list">
+	                <li class="media">
+	                    <a class="pull-left" href="#">
+	                        <i class="fa fa-check"></i>
+	                    </a>
+	                    <div class="media-body">
+	                        {% trans "Save" %}
+	                    </div>
+	                </li>
+	            </ul>
+	        </button>
+	        
+        	<div class="clearfix"></div>
+        </div>
     
     </form>
     
