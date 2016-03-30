@@ -14,7 +14,7 @@ from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup
 from cosinnus.models.tagged import BaseTaggableObjectModel
 from cosinnus_notifications.models import UserNotificationPreference
-from cosinnus.templatetags.cosinnus_tags import full_name
+from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.utils.functions import ensure_dict_keys
 from threading import Thread
 
@@ -135,7 +135,13 @@ class NotificationsThread(Thread):
     def check_user_wants_notification(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
+            
+        # only active users that have logged in before accepted the TOS get notifications
         if not user.is_active:
+            return False
+        if not user.last_login:
+            return False
+        if not cosinnus_setting(user, 'tos_accepted'):
             return False
         
         group = None
