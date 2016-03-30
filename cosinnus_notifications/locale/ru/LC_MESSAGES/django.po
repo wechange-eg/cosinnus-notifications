@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wechange RU\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-03 13:40+0200\n"
+"POT-Creation-Date: 2016-03-30 11:52+0200\n"
 "PO-Revision-Date: 2015-11-14 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Language: ru\n"
 "X-Generator: Poedit 1.8.5\n"
 
@@ -28,33 +28,72 @@ msgctxt "the_app"
 msgid "notifications"
 msgstr "Уведомления"
 
-#: .\models.py:15
+#: .\models.py:14
 msgid "Notification Preference for User"
 msgstr "Пользовательские настройки уведомлений"
 
-#: .\models.py:21
+#: .\models.py:20
 msgid "Notification ID"
 msgstr "ID уведомления"
 
-#: .\models.py:29
+#: .\models.py:28
 msgid "Notification Preference"
 msgstr "Настройки уведомлений"
 
-#: .\models.py:30 .\templates\cosinnus_notifications\base.html.py:12
-#: .\templates\cosinnus_notifications\notifications_form.html.py:5
-#: .\templates\cosinnus_notifications\notifications_form.html.py:10
+#: .\models.py:29 .\templates\cosinnus_notifications\base.html:14
+#: .\templates\cosinnus_notifications\notifications_form.html:5
+#: .\templates\cosinnus_notifications\notifications_form.html:10
 msgid "Notification Preferences"
 msgstr "Настройки уведомлений"
 
 #: .\notifications.py:31
-#: .\templates\cosinnus_notifications\notifications_form.html.py:53
+#: .\templates\cosinnus_notifications\notifications_form.html:53
 msgid "All notifications"
 msgstr "Все уведомления"
 
 #: .\notifications.py:37
-#: .\templates\cosinnus_notifications\notifications_form.html.py:55
+#: .\templates\cosinnus_notifications\notifications_form.html:55
 msgid "No notifications"
 msgstr "Не показывать уведомления"
+
+#: .\templates\cosinnus_notifications\base.html:6
+msgid "Your Profile"
+msgstr "Ваш профиль"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:23
+msgid ""
+"Select which notifications you would like to receive for each group or "
+"project you are involved in."
+msgstr ""
+"Выберите, какие уведомления вы хотели бы получать для каждой группы или "
+"проекта, которым вы занимаетесь"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:24
+msgid "These notifications will be sent to your configured email address:"
+msgstr ""
+"Эти уведомления будут отправляться по указанному вами адресу электронной "
+"почты:"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:54
+msgid "Custom"
+msgstr "Индивидуальные настройки"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:91
+#: .\templates\cosinnus_notifications\notifications_form.html:117
+msgid "Reset to default"
+msgstr "Сброс настроек"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:104
+msgid "Save"
+msgstr "Сохранить"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:116
+msgid ""
+"This will reset all of your notification preferences to their default "
+"setting. Are you sure you wish to do that?"
+msgstr ""
+"Вы действительно хотите сбросить ваши текущие настройки уведомлений и "
+"вернуться к стартовым настройкам?"
 
 #: .\views.py:26
 msgid "Your notification preferences were updated successfully."
@@ -63,42 +102,3 @@ msgstr "Ваши настройки уведомлений обновлены"
 #: .\views.py:158
 msgid "Your notifications preferences were reset to default!"
 msgstr "Настройки уведомлений возвращены к стартовым!"
-
-#: .\templates\cosinnus_notifications\base.html.py:5
-msgid "Your Profile"
-msgstr "Ваш профиль"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:23
-msgid ""
-"Select which notifications you would like to receive for each group or "
-"project you are involved in."
-msgstr ""
-"Выберите, какие уведомления вы хотели бы получать для каждой группы или "
-"проекта, которым вы занимаетесь"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:24
-msgid "These notifications will be sent to your configured email address:"
-msgstr ""
-"Эти уведомления будут отправляться по указанному вами адресу электронной "
-"почты:"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:54
-msgid "Custom"
-msgstr "Индивидуальные настройки"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:90
-#: .\templates\cosinnus_notifications\notifications_form.html.py:113
-msgid "Reset to default"
-msgstr "Сброс настроек"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:103
-msgid "Save"
-msgstr "Сохранить"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:112
-msgid ""
-"This will reset all of your notification preferences to their default "
-"setting. Are you sure you wish to do that?"
-msgstr ""
-"Вы действительно хотите сбросить ваши текущие настройки уведомлений и "
-"вернуться к стартовым настройкам?"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-03 13:40+0200\n"
+"POT-Creation-Date: 2016-03-30 11:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,33 +26,73 @@ msgctxt "the_app"
 msgid "notifications"
 msgstr ""
 
-#: .\models.py:15
+#: .\models.py:14
 msgid "Notification Preference for User"
 msgstr "Benachrichtigungseinstellung für Benutzer"
 
-#: .\models.py:21
+#: .\models.py:20
 msgid "Notification ID"
 msgstr "Benachrichtiguns-ID"
 
-#: .\models.py:29
+#: .\models.py:28
 msgid "Notification Preference"
 msgstr "Benachrichtigungseinstellung"
 
-#: .\models.py:30 .\templates\cosinnus_notifications\base.html.py:12
-#: .\templates\cosinnus_notifications\notifications_form.html.py:5
-#: .\templates\cosinnus_notifications\notifications_form.html.py:10
+#: .\models.py:29 .\templates\cosinnus_notifications\base.html:14
+#: .\templates\cosinnus_notifications\notifications_form.html:5
+#: .\templates\cosinnus_notifications\notifications_form.html:10
 msgid "Notification Preferences"
 msgstr "Benachrichtigungseinstellungen"
 
 #: .\notifications.py:31
-#: .\templates\cosinnus_notifications\notifications_form.html.py:53
+#: .\templates\cosinnus_notifications\notifications_form.html:53
 msgid "All notifications"
 msgstr "Alle Benachrichtigungen"
 
 #: .\notifications.py:37
-#: .\templates\cosinnus_notifications\notifications_form.html.py:55
+#: .\templates\cosinnus_notifications\notifications_form.html:55
 msgid "No notifications"
 msgstr "Keine Benachrichtigungen"
+
+#: .\templates\cosinnus_notifications\base.html:6
+msgid "Your Profile"
+msgstr ""
+
+#: .\templates\cosinnus_notifications\notifications_form.html:23
+msgid ""
+"Select which notifications you would like to receive for each group or "
+"project you are involved in."
+msgstr ""
+"Hier kannst du auswählen, welche Benachrichtigungen du von den Gruppen und "
+"Projekten erhalten möchtest, in denen du involviert bist."
+
+#: .\templates\cosinnus_notifications\notifications_form.html:24
+msgid "These notifications will be sent to your configured email address:"
+msgstr ""
+"Diese Benachrichtigungen werden dir an deine eingestellte E-Mail-Adresse "
+"geschickt:"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:54
+msgid "Custom"
+msgstr "Individuelle Einstellungen"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:91
+#: .\templates\cosinnus_notifications\notifications_form.html:117
+msgid "Reset to default"
+msgstr "Zurücksetzen"
+
+#: .\templates\cosinnus_notifications\notifications_form.html:104
+msgid "Save"
+msgstr ""
+
+#: .\templates\cosinnus_notifications\notifications_form.html:116
+msgid ""
+"This will reset all of your notification preferences to their default "
+"setting. Are you sure you wish to do that?"
+msgstr ""
+"Hiermit werden sämtliche Benachrichtigungseinstellungen auf ihren "
+"empfohlenen Standardwert zurückgesetzt. Bist du sicher dass du das tun "
+"willst?"
 
 #: .\views.py:26
 msgid "Your notification preferences were updated successfully."
@@ -61,43 +101,3 @@ msgstr "Deine Benachrichtigungseinstellungen wurden erfolgreich geändert."
 #: .\views.py:158
 msgid "Your notifications preferences were reset to default!"
 msgstr "Deine Benachrichtigungseinstellungen wurden erfolgreich zurückgesetzt!"
-
-#: .\templates\cosinnus_notifications\base.html.py:5
-msgid "Your Profile"
-msgstr ""
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:23
-msgid ""
-"Select which notifications you would like to receive for each group or "
-"project you are involved in."
-msgstr ""
-"Hier kannst du auswählen, welche Benachrichtigungen du von den Gruppen und "
-"Projekten erhalten möchtest, in denen du involviert bist."
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:24
-msgid "These notifications will be sent to your configured email address:"
-msgstr ""
-"Diese Benachrichtigungen werden dir an deine eingestellte E-Mail-Adresse "
-"geschickt:"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:54
-msgid "Custom"
-msgstr "Individuelle Einstellungen"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:90
-#: .\templates\cosinnus_notifications\notifications_form.html.py:113
-msgid "Reset to default"
-msgstr "Zurücksetzen"
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:103
-msgid "Save"
-msgstr ""
-
-#: .\templates\cosinnus_notifications\notifications_form.html.py:112
-msgid ""
-"This will reset all of your notification preferences to their default "
-"setting. Are you sure you wish to do that?"
-msgstr ""
-"Hiermit werden sämtliche Benachrichtigungseinstellungen auf ihren "
-"empfohlenen Standardwert zurückgesetzt. Bist du sicher dass du das tun "
-"willst?"
