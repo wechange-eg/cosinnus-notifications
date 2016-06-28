@@ -17,6 +17,8 @@ from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.utils.functions import ensure_dict_keys
 from threading import Thread
+from django.utils.safestring import mark_safe
+from django.utils.html import strip_tags
 
 
 logger = logging.getLogger('cosinnus')
@@ -184,13 +186,13 @@ class NotificationsThread(Thread):
                     context.update(cosinnus_context(self.sender.request))
                 else:
                     context = {} #print ">>> warn: no request in sender"
-                context.update({'receiver':receiver, 'receiver_name':full_name(receiver), 'sender':self.user, 'sender_name':full_name(self.user), 'object':self.obj, 'notification_settings_url':'%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))})
+                context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':'%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))})
                 # additional context for BaseTaggableObjectModels
                 if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                    context.update({'object_name':self.obj.title, 'team_name':self.obj.group.name})
+                    context.update({'object_name': mark_safe(strip_tags(self.obj.title)), 'team_name': mark_safe(strip_tags(self.obj.group.name))})
                 else:
                     group = getattr(self.obj, 'group', None)
-                    context.update({'team_name':getattr(group, 'name', '<notfound>')})
+                    context.update({'team_name': mark_safe(strip_tags(getattr(group, 'name', '<notfound>')))})
                 try:
                     context.update({'object_url':self.obj.get_absolute_url()})
                 except:
