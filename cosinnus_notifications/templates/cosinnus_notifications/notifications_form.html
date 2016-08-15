@@ -26,6 +26,30 @@
     {% endif %}
 
     <form method="POST" action="">{% csrf_token %}
+    
+        <div class="content-box large-space">
+            <div class="row">
+                <div class="col-md-12"><!-- right column -->
+                    <div class="row"> 
+                    
+                        <div class="col-md-4">
+                            <legend style="margin: 0;">{% trans "Receive notification emails in this language:" %}</legend>
+                        </div>
+                        <div class="col-md-8">
+                            <p class="no-horizontal-padding no-vertical-padding">
+                                <select id="id-language" name="language" class="form-control">
+                                    {% for choice, label in language_choices %}
+                                        <option {% if language_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+    
 		<!-- a box with semi transparent background -->
 	    <div class="content-box">
             {% for group, notifications, choice in grouped_notifications %}

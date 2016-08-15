@@ -8,6 +8,7 @@ from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed,\
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.edit import UpdateView
 
+from cosinnus.conf import settings
 from cosinnus.core.decorators.views import require_logged_in
 from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
@@ -15,6 +16,7 @@ from cosinnus_notifications.notifications import notifications,\
     set_user_group_notifications_special
 from cosinnus.models.group import CosinnusGroup
 from django.views.decorators.csrf import csrf_protect
+
 
 
 class NotificationPreferenceView(UpdateView):
@@ -73,7 +75,13 @@ class NotificationPreferenceView(UpdateView):
                             pref.save()
                     except:
                         pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=value)
-                    
+        
+        # save language preference:
+        language = request.POST.get('language', None)
+        if language and language in (lang for lang, label in settings.LANGUAGES):
+            request.user.cosinnus_profile.language = language
+            request.user.cosinnus_profile.save(update_fields=['language'])
+        
         messages.success(request, self.message_success)
         return HttpResponseRedirect(self.success_url)
     
@@ -138,6 +146,8 @@ class NotificationPreferenceView(UpdateView):
             'user': self.request.user,
             'all_notifications_id': ALL_NOTIFICATIONS_ID,
             'no_notifications_id': NO_NOTIFICATIONS_ID,
+            'language_choices': settings.LANGUAGES,
+            'language_selected': self.request.user.cosinnus_profile.language,
         })
         return context
     
