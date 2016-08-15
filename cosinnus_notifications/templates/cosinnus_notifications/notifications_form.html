@@ -19,7 +19,6 @@
     {% if not request.user|cosinnus_setting:"notifications_help_text" %}
 	    <div class="alert alert-success alert-dismissable">
 	        <i class="fa fa-info-circle fa-3x"></i>
-	        <button id="close_button" type="button" class="close" data-dismiss="alert" aria-hidden="true" {% djajax_connect request.user.cosinnus_profile.settings trigger_on="click" fixed_value="notifications_help_text:true" %}>&#215;</button>
 	        <p>{% trans "Select which notifications you would like to receive for each group or project you are involved in." %}</p>
 	        <p>{% trans "These notifications will be sent to your configured email address:" %} <em>{{ request.user.email }}</em></p>
 	    </div>
