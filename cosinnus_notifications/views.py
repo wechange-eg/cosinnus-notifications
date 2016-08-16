@@ -67,14 +67,11 @@ class NotificationPreferenceView(UpdateView):
                     # save / erase setting
                     try:
                         pref = UserNotificationPreference.objects.get(user=request.user, group=group, notification_id=notification_id)
-                        if value == 1 and not pref.is_active:
-                            pref.is_active = True
+                        if value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and value != pref.setting:
+                            pref.setting = value
                             pref.save()
-                        elif value == 0 and pref.is_active:
-                            pref.is_active = False
-                            pref.save()
-                    except:
-                        pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=value)
+                    except UserNotificationPreference.DoesNotExist:
+                        pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, setting=value)
         
         # save language preference:
         language = request.POST.get('language', None)
@@ -101,7 +98,7 @@ class NotificationPreferenceView(UpdateView):
         # build lookup dict for all active existing preferences vs groups
         prefs = {} # 'groupid:notification_id' 
         for pref in self.get_queryset():
-            prefs['%s:%s' % (pref.group.pk, pref.notification_id)] = pref.is_active
+            prefs['%s:%s' % (pref.group.pk, pref.notification_id)] = pref.setting
         
         group_rows = [] # [(group, notification_rows, choice_selected), ...]
         # get groups, grouped by their 

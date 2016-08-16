@@ -63,25 +63,25 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     try:
         al = UserNotificationPreference.objects.get(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
         if all_or_none_or_custom == "all":
-            if not al.is_active:
-                al.is_active = True
+            if not al.setting == UserNotificationPreference.SETTING_NOW:
+                al.setting = UserNotificationPreference.SETTING_NOW
                 al.save()
         else:
             al.delete()
     except:
         if all_or_none_or_custom == "all":
-            UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, is_active=True)
+            UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW)
     try:
         non = UserNotificationPreference.objects.get(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
         if all_or_none_or_custom == "none":
-            if not non.is_active:
-                non.is_active = True
+            if not non.setting == UserNotificationPreference.SETTING_NOW:
+                non.setting = UserNotificationPreference.SETTING_NOW
                 non.save()
         else:
             non.delete()
     except:
         if all_or_none_or_custom == "none":
-            UserNotificationPreference.objects.create(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID, is_active=True)
+            UserNotificationPreference.objects.create(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW)
         
 
 
@@ -129,12 +129,13 @@ class NotificationsThread(Thread):
         """ Checks against the DB if a user notifcation preference exists, and if so, if it is set to active """
         try:
             preference = UserNotificationPreference.objects.get(user=user, group=group, notification_id=notification_id)
+            return preference.setting == UserNotificationPreference.SETTING_NOW
         except UserNotificationPreference.DoesNotExist:
             # if not set in DB, check if preference is default on 
             if notification_id in notifications and notifications[notification_id].get('default', False):
                 return True
-            return False
-        return preference.is_active
+        return False
+        
     
     def check_user_wants_notification(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
