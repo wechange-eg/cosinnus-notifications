@@ -82,7 +82,7 @@
 		                            </p>
 		                        </div>
 		                    </div>
-		                    <div id="div_notif_choices_{{group.pk}}" style="display:none;">
+		                    <div id="div_notif_choices_{{group.pk}}" >{# FIXME remove style="display:none;">#}
 	                            {% for id, label, value, app_name, app_label in notifications %}
 		                            <div class="row"> 
 		                                <div class="col-md-3 col-md-offset-1">
@@ -91,11 +91,13 @@
                                             {% endifchanged %}&nbsp;
                                         </div>
 		                                <div class="col-md-8">
-			                                <div {% ifchanged app_name %}style="border-top: solid 1px gray;"{% endifchanged %}>
-				                                {% for choice_value, choice_label in notification_choices %}
-				                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" title="{{ choice_label }}" {% if value == choice_value %}checked="true"{% endif %}>
-				                                {% endfor %}
-				                                <label>{{label}}</label>
+			                                <div class="notification-options clearfix {% ifchanged app_name %}notification-options-seperated{% endifchanged %}">
+				                                <div class="notification-option-buttons pull-right" >
+					                                {% for choice_value, choice_label in notification_choices %}
+					                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" title="{{ choice_label }}" {% if value == choice_value %}checked="true"{% endif %}>
+					                                {% endfor %}
+				                                </div>
+			                                	<label>{{label}}</label>
 			                                </div>
 		                                </div>
 		                            </div>    

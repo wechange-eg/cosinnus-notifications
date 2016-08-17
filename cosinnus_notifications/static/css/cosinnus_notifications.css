@@ -1,0 +1,16 @@
+.notification-options {
+}
+.notification-options.notification-options-seperated {
+    border-top: solid 1px gray;
+}
+.notification-options .notification-options-buttons {
+    style="margin-left: 10px;"
+}
+
+.notification-options label {
+    display: block;
+    font-size: 90%;
+}
+.notification-options input[type="radio"] {
+    margin-left: 2px;
+}
