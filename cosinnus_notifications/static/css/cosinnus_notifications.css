@@ -4,7 +4,10 @@
     border-top: solid 1px gray;
 }
 .notification-options .notification-options-buttons {
-    style="margin-left: 10px;"
+    margin-left: 10px;
+}
+.notification-options.highlighted,  .notification-choice-highlighted {
+    background-color: #efa02d;
 }
 
 .notification-options label {

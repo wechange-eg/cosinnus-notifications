@@ -128,11 +128,15 @@ class NotificationsThread(Thread):
         self.audience = audience
         self.notification_id = notification_id
         self.options = options
+        # this will be set if a notification is sent out to a user, 
+        # so we know which preference was responsible and can link to it
+        self.notification_preference_triggered = None
     
     def is_notification_active(self, notification_id, user, group, alternate_settings_compare=[]):
         """ Checks against the DB if a user notifcation preference exists, and if so, if it is set to active """
         try:
             preference = UserNotificationPreference.objects.get(user=user, group=group, notification_id=notification_id)
+            self.notification_preference_triggered = preference
             if len(alternate_settings_compare) == 0:
                 return preference.setting == UserNotificationPreference.SETTING_NOW
             else:
@@ -212,7 +216,19 @@ class NotificationsThread(Thread):
                         context.update(cosinnus_context(self.sender.request))
                     else:
                         context = {} #print ">>> warn: no request in sender"
-                    context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':'%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))})
+                    
+                    # if we know the triggering preference, we can link to it directly via ULR anchors
+                    url_suffix = ''
+                    if self.notification_preference_triggered:
+                        group_pk = self.notification_preference_triggered.group_id
+                        pref_arg = ''
+                        if self.notification_preference_triggered.notification_id not in (NO_NOTIFICATIONS_ID, ALL_NOTIFICATIONS_ID):
+                            pref_arg = 'highlight_pref=%d:%s&' % (group_pk, self.notification_preference_triggered.notification_id)
+                        url_suffix = '?%shighlight_choice=%d#notif_choice_%d' % (pref_arg, group_pk, group_pk)
+                    preference_url = '%s%s%s' % (context['domain_url'], reverse('cosinnus:notifications'), url_suffix)
+                    
+                    context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':mark_safe(preference_url)})
+                    
                     # additional context for BaseTaggableObjectModels
                     if issubclass(self.obj.__class__, BaseTaggableObjectModel):
                         context.update({'object_name': mark_safe(strip_tags(self.obj.title)), 'team_name': mark_safe(strip_tags(self.obj.group.name))})

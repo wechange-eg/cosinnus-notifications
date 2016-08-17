@@ -65,7 +65,7 @@
 		                            <legend>&nbsp;</legend>
 		                        </div>
 		                        {% endif %}
-		                        <div class="{% if group.parent %}col-md-3{% else %}col-md-4{% endif %}">
+		                        <div class="{% if group.parent %}col-md-3{% else %}col-md-4{% endif %} {% if request.GET.highlight_choice|intify == group.pk %}notification-choice-highlighted{% endif %}">
 		                            <a href="{% group_url 'cosinnus:group-dashboard' group=group %}" target="_blank"> 
 		                                <legend>{{ group.name }}</legend>
 		                            </a>
@@ -82,7 +82,7 @@
 		                            </p>
 		                        </div>
 		                    </div>
-		                    <div id="div_notif_choices_{{group.pk}}" style="display:none;">
+		                    <div id="div_notif_choices_{{group.pk}}" {% if not request.GET.highlight_pref or not request.GET.highlight_choice|intify == group.pk %}style="display:none;"{% endif %}>
 	                            {% for id, label, value, app_name, app_label in notifications %}
 		                            <div class="row"> 
 		                                <div class="col-md-3 col-md-offset-1">
@@ -91,7 +91,7 @@
                                             {% endifchanged %}&nbsp;
                                         </div>
 		                                <div class="col-md-8">
-			                                <div class="notification-options clearfix {% ifchanged app_name %}notification-options-seperated{% endifchanged %}">
+			                                <div class="notification-options clearfix {% if id == request.GET.highlight_pref %}highlighted{% endif %} {% ifchanged app_name %}notification-options-seperated{% endifchanged %}">
 				                                <div class="notification-option-buttons pull-right" >
 					                                {% for choice_value, choice_label in notification_choices %}
 					                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" title="{{ choice_label }}" {% if value == choice_value %}checked="true"{% endif %}>
