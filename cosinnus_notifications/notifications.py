@@ -57,20 +57,24 @@ def _find_notification(signal):
 
 def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     """ Sets the user preference settings for a group to all or none or custom (deleting the special setting flag) """
-    if not (all_or_none_or_custom == "all" or all_or_none_or_custom == "none" or all_or_none_or_custom == "custom"):
+    if not (all_or_none_or_custom.startswith("all_") or all_or_none_or_custom in ("none", "custom")):
         return
     
     try:
         al = UserNotificationPreference.objects.get(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
-        if all_or_none_or_custom == "all":
-            if not al.setting == UserNotificationPreference.SETTING_NOW:
-                al.setting = UserNotificationPreference.SETTING_NOW
+        if all_or_none_or_custom.startswith("all_"):
+            setting_value = int(all_or_none_or_custom.split("_")[1])
+            if setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and al.setting != setting_value:
+                al.setting = setting_value
                 al.save()
         else:
             al.delete()
     except:
-        if all_or_none_or_custom == "all":
-            UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW)
+        if all_or_none_or_custom.startswith("all_"):
+            setting_value = int(all_or_none_or_custom.split("_")[1])
+            if not setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys():
+                setting_value = UserNotificationPreference.SETTING_NOW
+            UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=setting_value)
     try:
         non = UserNotificationPreference.objects.get(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
         if all_or_none_or_custom == "none":
