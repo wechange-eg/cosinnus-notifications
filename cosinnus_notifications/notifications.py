@@ -129,11 +129,14 @@ class NotificationsThread(Thread):
         self.notification_id = notification_id
         self.options = options
     
-    def is_notification_active(self, notification_id, user, group):
+    def is_notification_active(self, notification_id, user, group, alternate_settings_compare=[]):
         """ Checks against the DB if a user notifcation preference exists, and if so, if it is set to active """
         try:
             preference = UserNotificationPreference.objects.get(user=user, group=group, notification_id=notification_id)
-            return preference.setting == UserNotificationPreference.SETTING_NOW
+            if len(alternate_settings_compare) == 0:
+                return preference.setting == UserNotificationPreference.SETTING_NOW
+            else:
+                return preference.setting in alternate_settings_compare
         except UserNotificationPreference.DoesNotExist:
             # if not set in DB, check if preference is default on 
             if notification_id in notifications and notifications[notification_id].get('default', False):
@@ -168,15 +171,25 @@ class NotificationsThread(Thread):
         
         # print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
         if not user_in_group:
-            # >>> user didn't want notification or there was no group
+            # user didn't want notification or there was no group
             return False
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, group):
-            # >>> user didn't want notification because he wants none ever!
+            # user didn't want notification because he wants none ever!
             return False
-        if self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group):
-            # >>> user wants notification because he wants all!
+        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group):
+            # user wants notification because he wants all!
             return True
-        ret = self.is_notification_active(notification_id, user, group)
+        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group, 
+                     alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
+            # user wants all notifications, but daily/weekly!
+            """ TODO: stub for daily/weekly trigger (all notifications) """
+            return False
+        elif self.is_notification_active(notification_id, user, group, 
+                     alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
+            """ TODO: stub for daily/weekly trigger (single notification) """
+            return False
+        else:
+            ret = self.is_notification_active(notification_id, user, group)
         # >> checked his settings, and user wants this notification is", ret
         return ret
 
