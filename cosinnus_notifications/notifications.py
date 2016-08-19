@@ -131,6 +131,8 @@ class NotificationsThread(Thread):
         # this will be set if a notification is sent out to a user, 
         # so we know which preference was responsible and can link to it
         self.notification_preference_triggered = None
+        # will be set at runtime
+        self.group = None
     
     def is_notification_active(self, notification_id, user, group, alternate_settings_compare=[]):
         """ Checks against the DB if a user notifcation preference exists, and if so, if it is set to active """
@@ -160,46 +162,46 @@ class NotificationsThread(Thread):
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
         
-        group = None
-        
-        if type(obj) is CosinnusGroup or issubclass(obj.__class__, CosinnusGroup):
-            group = obj
-        elif issubclass(obj.__class__, BaseTaggableObjectModel):
-            group = obj.group
-        elif hasattr(obj, 'group'):
-            group = obj.group
-        else:
-            raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
-                If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
-        user_in_group = group.is_member(user)
+        user_in_group = self.group.is_member(user)
         
         # print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
         if not user_in_group:
             # user didn't want notification or there was no group
             return False
-        if self.is_notification_active(NO_NOTIFICATIONS_ID, user, group):
+        if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
             # user didn't want notification because he wants none ever!
             return False
-        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group):
+        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group):
             # user wants notification because he wants all!
             return True
-        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group, 
+        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group, 
                      alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
             # user wants all notifications, but daily/weekly!
             """ TODO: stub for daily/weekly trigger (all notifications) """
             return False
-        elif self.is_notification_active(notification_id, user, group, 
+        elif self.is_notification_active(notification_id, user, self.group, 
                      alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
             """ TODO: stub for daily/weekly trigger (single notification) """
             return False
         else:
-            ret = self.is_notification_active(notification_id, user, group)
-        # >> checked his settings, and user wants this notification is", ret
+            ret = self.is_notification_active(notification_id, user, self.group)
+        # checked his settings, and user wants this notification is", ret
         return ret
 
 
     def run(self):
         from cosinnus.utils.context_processors import cosinnus as cosinnus_context
+        
+        # set group, inferred from object
+        if type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
+            self.group = self.obj
+        elif issubclass(self.obj.__class__, BaseTaggableObjectModel):
+            self.group = self.obj.group
+        elif hasattr(self.obj, 'group'):
+            self.group = self.obj.group
+        else:
+            raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
+                If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
         
         for receiver in self.audience:
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
@@ -215,7 +217,7 @@ class NotificationsThread(Thread):
                         context = get_common_mail_context(self.sender.request)
                         context.update(cosinnus_context(self.sender.request))
                     else:
-                        context = {} #print ">>> warn: no request in sender"
+                        context = {} # no request in sender
                     
                     # if we know the triggering preference, we can link to it directly via ULR anchors
                     url_suffix = ''
@@ -230,15 +232,14 @@ class NotificationsThread(Thread):
                     context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':mark_safe(preference_url)})
                     
                     # additional context for BaseTaggableObjectModels
+                    context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
                     if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                        context.update({'object_name': mark_safe(strip_tags(self.obj.title)), 'team_name': mark_safe(strip_tags(self.obj.group.name))})
-                    else:
-                        group = getattr(self.obj, 'group', None)
-                        context.update({'team_name': mark_safe(strip_tags(getattr(group, 'name', '<notfound>')))})
+                        context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
                     try:
                         context.update({'object_url':self.obj.get_absolute_url()})
                     except:
-                        print "pass"
+                        pass
+                    
                     subject = render_to_string(subj_template, context)
                     send_mail_or_fail(receiver.email, subject, template, context)
                     
