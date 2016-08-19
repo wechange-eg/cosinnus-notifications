@@ -7,6 +7,8 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy as p_
 from django.utils.encoding import python_2_unicode_compatible
 
 from cosinnus.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 @python_2_unicode_compatible
 class UserNotificationPreference(models.Model):
@@ -26,6 +28,13 @@ class UserNotificationPreference(models.Model):
         (SETTING_DAILY, p_('notification frequency', 'Daily')),
         (SETTING_WEEKLY, p_('notification frequency', 'Weekly')),
     )
+    
+    SETTINGS_DAYS_DURATIONS = {
+        SETTING_NEVER: 0,
+        SETTING_NOW: 0,
+        SETTING_DAILY: 1,
+        SETTING_WEEKLY: 7,        
+    }
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
         verbose_name=_('Notification Preference for User'),
@@ -56,6 +65,37 @@ class UserNotificationPreference(models.Model):
             'group': self.group,
         }
 
+
+@python_2_unicode_compatible
+class NotificationEvent(models.Model):
+    
+    class Meta:
+        ordering = ('date',)
+        
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    target_object = generic.GenericForeignKey('content_type', 'object_id')
+    
+    group = models.ForeignKey(settings.COSINNUS_GROUP_OBJECT_MODEL, related_name='notifcation_events',
+        on_delete=models.CASCADE, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+        verbose_name=_('User who caused this notification event'),
+        on_delete=models.CASCADE,
+        related_name='+'
+    )
+    notification_id = models.CharField(_('Notification ID'), max_length=100)
+    audience = models.TextField(verbose_name=_('Audience'), blank=False,
+        help_text='This is a pseudo comma-seperated integer field, which always starts and ends with a comma for faster queries')
+    
+    date = models.DateTimeField(auto_now_add=True, editable=False)
+    
+    def __str__(self):
+        return "<NotificationEvent: %(user)s, group: %(group)s, notification_id: %(notification_id)s, date: %(date)s>" % {
+            'user': self.user,
+            'notification_id': self.notification_id,
+            'date': str(self.date),
+            'group': self.group,
+        }
 
 import django
 if django.VERSION[:2] < (1, 7):

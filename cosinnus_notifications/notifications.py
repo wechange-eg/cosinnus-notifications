@@ -15,12 +15,14 @@ from cosinnus.core.mail import get_common_mail_context, send_mail_or_fail
 from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup
 from cosinnus.models.tagged import BaseTaggableObjectModel
-from cosinnus_notifications.models import UserNotificationPreference
+from cosinnus_notifications.models import UserNotificationPreference,\
+    NotificationEvent
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.utils.functions import ensure_dict_keys
 from threading import Thread
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
+from django.contrib.contenttypes.models import ContentType
 
 
 logger = logging.getLogger('cosinnus')
@@ -245,7 +247,20 @@ class NotificationsThread(Thread):
                     
                 finally:
                     translation.activate(cur_language)
-                    
+        
+        if self.audience:
+            # create a new NotificationEvent that saves this event for digest re-generation
+            content_type = ContentType.objects.get_for_model(self.obj.__class__)
+            notifevent = NotificationEvent.objects.create(
+                content_type=content_type,
+                object_id=self.obj.id,
+                group=self.group,
+                user=self.user,
+                notification_id=self.notification_id,
+                audience=',%s,' % ','.join([str(receiver.id) for receiver in self.audience]),
+            )
+            print ">> created notif event", notifevent
+          
         return
     
 
