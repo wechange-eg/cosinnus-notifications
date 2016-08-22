@@ -17,7 +17,7 @@ from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
     ALL_NOTIFICATIONS_ID
 from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
-from cosinnus.templatetags.cosinnus_tags import full_name
+from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from django.contrib.auth import get_user_model
 from cosinnus.utils.permissions import check_object_read_access
@@ -50,7 +50,13 @@ def send_digest_for_current_portal(digest_setting):
     # the main Notification Events QS. anything not in here did not happen in the digest's time span
     timescope_notification_events = NotificationEvent.objects.filter(date__gte=TIME_DIGEST_START, date__lt=TIME_DIGEST_END)
     
-    for user in get_user_model().objects.all().filter(id__in=portal.members):
+    users = get_user_model().objects.all().filter(id__in=portal.members)
+    emailed = 0
+    for user in users:
+        # only active users that have logged in before accepted the TOS get notifications
+        if not user.is_active or not user.last_login or not cosinnus_setting(user, 'tos_accepted'):
+            continue
+        
         # find out any notification preferences the user has for groups in this portal with the daily/weekly setting
         # if he doesn't have any, we will not send a mail for them
         prefs = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids, setting=digest_setting)
@@ -92,7 +98,7 @@ def send_digest_for_current_portal(digest_setting):
                     continue  # must have an actual subscription to that event type
                 if event.target_object is None:
                     continue  # referenced object has been deleted by now
-                if not check_object_read_access(user, event.target_object):
+                if not check_object_read_access(event.target_object, user):
                     continue  # user must be able to even see referenced object 
                 wanted_group_events.append(event)
                 
@@ -108,7 +114,20 @@ def send_digest_for_current_portal(digest_setting):
         
         # send actual email with full frame template
         _send_digest_email(user, mark_safe(body_html), TIME_DIGEST_END, digest_setting)
-            
+        emailed += 1
+    
+    deleted = cleanup_stale_notifications()
+    
+    extra_log = {
+        'users_emailed': emailed,
+        'total_users': len(users),
+        'delted_stale_notifications': deleted,
+        'fresh_notifications_alive': NotificationEvent.objects.all().count(),
+    }
+    logger.info('Finished sending out digests of SETTING=%s. Data in extra.' % UserNotificationPreference.SETTING_CHOICES[digest_setting][1], extra=extra_log)
+    if settings.DEBUG:
+        print extra_log
+    
 
 def render_digest_item_for_notification_event(notification_event, receiver):
     """ Renders the HTML of a single notification event for a receiving user """
@@ -159,3 +178,22 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         
     finally:
         translation.activate(cur_language)
+
+
+def cleanup_stale_notifications():
+    """ Deletes all notification events that will never be used again to compose a digest. 
+    
+        This deletes all notification events that have been created more than 3x the length 
+        of the longest digest period ago. I.e. if our longest digest is 1 week, this will delete
+        all items older than 21 days. This is a naive safety measure to prevent multiple digests
+        running at the same time to delete each other's notification events from under them.
+        
+        @return the count of the items deleted """
+        
+    max_days = max(dict(UserNotificationPreference.SETTINGS_DAYS_DURATIONS).values())
+    time_digest_stale = now() - timedelta(days=max_days*3)
+    stale_notification_events = NotificationEvent.objects.filter(date__lt=time_digest_stale)
+    
+    deleted = stale_notification_events.count()
+    stale_notification_events.delete()
+    return deleted
