@@ -20,6 +20,7 @@ from django.utils.html import strip_tags
 from cosinnus.templatetags.cosinnus_tags import full_name
 from cosinnus.core.mail import send_mail_or_fail
 from django.contrib.auth import get_user_model
+from cosinnus.utils.permissions import check_object_read_access
 
 logger = logging.getLogger('cosinnus')
 
@@ -80,12 +81,21 @@ def send_digest_for_current_portal(digest_setting):
             group_events = events.filter(group=group).order_by('notification_id')
             
             
-            # filter only those events that the user actually has in his prefs, for this group
+            # filter only those events that the user actually has in his prefs, for this group and also
+            # check for target object existing, being visible to user, and other sanity checks if the user should see this object
             wanted_group_events = []
             for event in group_events:
-                if not user == event.user and (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
+                if user == event.user:
+                    continue  # users don't receive infos about events they caused
+                if not (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
                         ('%d__%s' % (event.group_id, event.notification_id) in wanted_group_notifications)):
-                    wanted_group_events.append(event)
+                    continue  # must have an actual subscription to that event type
+                if event.target_object is None:
+                    continue  # referenced object has been deleted by now
+                if not check_object_read_access(user, event.target_object):
+                    continue  # user must be able to even see referenced object 
+                wanted_group_events.append(event)
+                
             
             group_html = '\n'.join([render_digest_item_for_notification_event(event, user) for event in wanted_group_events])
             group_template_context = {
