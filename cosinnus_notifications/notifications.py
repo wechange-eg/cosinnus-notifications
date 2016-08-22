@@ -23,6 +23,7 @@ from threading import Thread
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
 from django.contrib.contenttypes.models import ContentType
+from cosinnus.utils.permissions import check_object_read_access
 
 
 logger = logging.getLogger('cosinnus')
@@ -163,16 +164,12 @@ class NotificationsThread(Thread):
             return False
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
-        
-        user_in_group = self.group.is_member(user)
-        
-        # print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
-        if not user_in_group:
-            # user didn't want notification or there was no group
+        # user cannot be object's creator and must be able to read it
+        if hasattr(obj, 'creator') and obj.creator == user:
             return False
-        if self.obj.media_tag.visibility == BaseTagObject.VISIBILITY_USER:
-            # only-user visible objects never cause notifications to anyone
+        if not check_object_read_access(obj, user):
             return False
+
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
             # user didn't want notification because he wants none ever!
             return False
