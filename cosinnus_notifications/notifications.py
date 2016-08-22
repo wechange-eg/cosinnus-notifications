@@ -14,7 +14,7 @@ from cosinnus.conf import settings
 from cosinnus.core.mail import get_common_mail_context, send_mail_or_fail
 from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup
-from cosinnus.models.tagged import BaseTaggableObjectModel
+from cosinnus.models.tagged import BaseTaggableObjectModel, BaseTagObject
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
@@ -169,6 +169,9 @@ class NotificationsThread(Thread):
         # print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
         if not user_in_group:
             # user didn't want notification or there was no group
+            return False
+        if self.obj.media_tag.visibility == BaseTagObject.VISIBILITY_USER:
+            # only-user visible objects never cause notifications to anyone
             return False
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
             # user didn't want notification because he wants none ever!
