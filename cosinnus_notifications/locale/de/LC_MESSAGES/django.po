@@ -101,3 +101,6 @@ msgstr "Deine Benachrichtigungseinstellungen wurden erfolgreich geändert."
 #: .\views.py:158
 msgid "Your notifications preferences were reset to default!"
 msgstr "Deine Benachrichtigungseinstellungen wurden erfolgreich zurückgesetzt!"
+
+msgid "Receive notification emails in this language"
+msgstr "Benachrichtigungs-Emails in dieser Sprache empfangen"
