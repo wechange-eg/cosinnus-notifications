@@ -5,10 +5,12 @@ import logging
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 from django.utils.importlib import import_module
 from django.template.loader import render_to_string
 
+from cosinnus.conf import settings
 from cosinnus.core.mail import get_common_mail_context, send_mail_or_fail
 from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup
@@ -179,27 +181,36 @@ class NotificationsThread(Thread):
         
         for receiver in self.audience:
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
-                template = self.options['mail_template']
-                subj_template = self.options['subject_template']
-                if self.sender.request:
-                    context = get_common_mail_context(self.sender.request)
-                    context.update(cosinnus_context(self.sender.request))
-                else:
-                    context = {} #print ">>> warn: no request in sender"
-                context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':'%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))})
-                # additional context for BaseTaggableObjectModels
-                if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                    context.update({'object_name': mark_safe(strip_tags(self.obj.title)), 'team_name': mark_safe(strip_tags(self.obj.group.name))})
-                else:
-                    group = getattr(self.obj, 'group', None)
-                    context.update({'team_name': mark_safe(strip_tags(getattr(group, 'name', '<notfound>')))})
-                try:
-                    context.update({'object_url':self.obj.get_absolute_url()})
-                except:
-                    print "pass"
-                subject = render_to_string(subj_template, context)
-                send_mail_or_fail(receiver.email, subject, template, context)
                 
+                # switch language to user's preference language
+                cur_language = translation.get_language()
+                try:
+                    translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+                    
+                    template = self.options['mail_template']
+                    subj_template = self.options['subject_template']
+                    if self.sender.request:
+                        context = get_common_mail_context(self.sender.request)
+                        context.update(cosinnus_context(self.sender.request))
+                    else:
+                        context = {} #print ">>> warn: no request in sender"
+                    context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':'%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))})
+                    # additional context for BaseTaggableObjectModels
+                    if issubclass(self.obj.__class__, BaseTaggableObjectModel):
+                        context.update({'object_name': mark_safe(strip_tags(self.obj.title)), 'team_name': mark_safe(strip_tags(self.obj.group.name))})
+                    else:
+                        group = getattr(self.obj, 'group', None)
+                        context.update({'team_name': mark_safe(strip_tags(getattr(group, 'name', '<notfound>')))})
+                    try:
+                        context.update({'object_url':self.obj.get_absolute_url()})
+                    except:
+                        print "pass"
+                    subject = render_to_string(subj_template, context)
+                    send_mail_or_fail(receiver.email, subject, template, context)
+                    
+                finally:
+                    translation.activate(cur_language)
+                    
         return
     
 
