@@ -67,10 +67,16 @@ def send_digest_for_current_portal(digest_setting):
             if not user.is_active or not user.last_login or not cosinnus_setting(user, 'tos_accepted'):
                 continue
             
+            # these groups will never get digest notifications because they have a blanketing ALL (now) or NONE setting
+            # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
+            exclude_digest_groups = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids) 
+            exclude_digest_groups = exclude_digest_groups.filter(Q(notification_id=ALL_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW) | Q(notification_id=NO_NOTIFICATIONS_ID))
+            exclude_digest_groups = exclude_digest_groups.values_list('group_id', flat=True)  
+            
             # find out any notification preferences the user has for groups in this portal with the daily/weekly setting
             # if he doesn't have any, we will not send a mail for them
             prefs = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids, setting=digest_setting)
-            prefs = prefs.exclude(notification_id=NO_NOTIFICATIONS_ID)
+            prefs = prefs.exclude(notification_id=NO_NOTIFICATIONS_ID).exclude(group_id__in=exclude_digest_groups)
             
             if len(prefs) == 0:
                 continue
