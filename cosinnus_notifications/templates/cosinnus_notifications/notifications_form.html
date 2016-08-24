@@ -82,7 +82,7 @@
 		                            </p>
 		                        </div>
 		                    </div>
-		                    <div id="div_notif_choices_{{group.pk}}" {% if not request.GET.highlight_pref or not request.GET.highlight_choice|intify == group.pk %}style="display:none;"{% endif %}>
+		                    <div id="div_notif_choices_{{group.pk}}" {% if not request.GET.highlight_pref or not request.GET.highlight_choice|intify == group.pk %}style="display: none;"{% endif %}>
 	                            {% for id, label, value, app_name, app_label in notifications %}
 		                            <div class="row"> 
 		                                <div class="col-md-3 col-md-offset-1">
@@ -91,13 +91,21 @@
                                             {% endifchanged %}&nbsp;
                                         </div>
 		                                <div class="col-md-8">
-			                                <div class="notification-options clearfix {% if id == request.GET.highlight_pref %}highlighted{% endif %} {% ifchanged app_name %}notification-options-seperated{% endifchanged %}">
-				                                <div class="notification-option-buttons pull-right" >
-					                                {% for choice_value, choice_label in notification_choices %}
-					                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" title="{{ choice_label }}" {% if value == choice_value %}checked="true"{% endif %}>
-					                                {% endfor %}
-				                                </div>
-			                                	<label>{{label}}</label>
+			                                <div class="notification-options {% if id == request.GET.highlight_pref %}highlighted{% endif %} {% ifchanged app_name %}notification-options-seperated{% endifchanged %}">
+			                                		<div class="">
+					                                	<label>{{ label }}:</label>
+			                                		</div>
+			                                		<div class="pull-right">
+			                                			<div class="condensed-radio-input">
+							                                {% for choice_value, choice_label in notification_choices %}
+							                                	{% if not forloop.first %}-->{% endif %}<label class="notification-options-label">
+								                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" {% if value == choice_value %}checked="checked"{% endif %}>
+																	<span class="noselect">{{ choice_label }}</span>
+																</label>{% if not forloop.last %}<!--{# this is in to not confuse highlighters --> #}{% endif %}
+							                                {% endfor %}
+						                                </div>
+			                                		</div>
+			                                		<div class="clearfix"></div>
 			                                </div>
 		                                </div>
 		                            </div>    

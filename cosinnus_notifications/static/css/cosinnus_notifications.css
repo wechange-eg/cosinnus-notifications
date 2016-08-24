@@ -3,17 +3,15 @@
 .notification-options.notification-options-seperated {
     border-top: solid 1px gray;
 }
-.notification-options .notification-options-buttons {
-    margin-left: 10px;
-}
 .notification-options.highlighted,  .notification-choice-highlighted {
     background-color: #efa02d;
 }
-
 .notification-options label {
-    display: block;
-    font-size: 90%;
+    font-size: 12px;
 }
-.notification-options input[type="radio"] {
-    margin-left: 2px;
+.notification-options .notification-options-label {
+    font-size: 11px;
+}
+.notification-options .condensed-radio-input {
+    margin-bottom: 10px;
 }
