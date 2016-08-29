@@ -48,6 +48,52 @@ notifications = {
     },  
 }
 
+NOTIFICATION_REASONS = {
+    'default': _('You are getting this notification because you are subscribed to these kinds of events in your project or group.'),
+    'admin': _('You are getting this notification because you are an administrator of this project or group.'),
+    'portal_admin': _('You are getting this notification because you are an administrator of this portal.'),
+}
+
+REQUIRED_NOTIFICATION_ATTRIBUTE = object()
+REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML = object()
+
+
+# this is a lookup for all defaults of a notification definition
+NOTIFICATIONS_DEFAULTS = {
+    # Label for the notification option in user's preference
+    'label': REQUIRED_NOTIFICATION_ATTRIBUTE, 
+    # text-only mail body template. ignored for HTML mails
+    'mail_template': REQUIRED_NOTIFICATION_ATTRIBUTE,
+    # text-only mail subject template. ignored for HTML mails
+    'subject_template': REQUIRED_NOTIFICATION_ATTRIBUTE,
+    # a django signal on which to listen for
+    'signals': [REQUIRED_NOTIFICATION_ATTRIBUTE],
+    # should this notification preference be on by default (if the user has never changed the setting?)
+    'default': False,
+    
+    # does this notification support HTML emails and digest chunking?
+    'is_html': False,
+    # the snippet template for this notification's event (only used in digest emails, not instant ones)
+    'snippet_template': 'cosinnus/html_mail/summary_item.html',
+    # CSS class of the snippet template that customizes this notification by its type. usually the cosinnus app's name
+    'snippet_type': 'news',
+    # the HTML email's subject. use a gettext_lazy translatable string.
+    # available variables: %(sender_name)s, %(team_name)s
+    'subject_text': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML,
+    # little explanatory text of what happened here. (e.g. "new document", "upcoming event") 
+    'event_text': _('New item'),
+    # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
+    # see notifications.NOTIFICATION_REASONS
+    'notification_reason': 'default', 
+    # object attributes to fille the snippet template with. 
+    # these will be looked up on the object as attribute or functions with no params
+    'data_attributes': {
+        'object_name': 'title', # Main title and label of the notification object
+        'object_url': 'get_absolute_url', # URL of the object
+        'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
+        'image_url': None, # image URL for the item. if None, uses avatar of the notification causing user
+    },
+}
 
 
 def _find_notification(signal):
@@ -112,8 +158,17 @@ def init_notifications():
                 
                 options['app_name'] = app_name
                 options['app_label'] = app_label
-                if not 'default' in options:
-                    options['default'] = False
+                # add missing notification settings
+                for key, default in NOTIFICATIONS_DEFAULTS.items():
+                    if options.get(key, None) is None:
+                        if default == REQUIRED_NOTIFICATION_ATTRIBUTE or \
+                                (options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML):
+                            raise ImproperlyConfigured('Notification options key "%s" in notification signal "%s" is required!' % (key, signal_id))
+                        options[key] = default
+                for datakey, datadefault in NOTIFICATIONS_DEFAULTS['data_attributes'].items():
+                    if options['data_attributes'].get(datakey, None) is None:
+                        options['data_attributes'][datakey] = datadefault
+                    
                 notifications[signal_id] = options
                 # connect to signals
                 for signal in options['signals']:
@@ -242,8 +297,9 @@ class NotificationsThread(Thread):
                     except:
                         pass
                     
+                    is_html = self.options.get('is_html', False)
                     subject = render_to_string(subj_template, context)
-                    send_mail_or_fail(receiver.email, subject, template, context)
+                    send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
                     
                 finally:
                     translation.activate(cur_language)
@@ -259,7 +315,6 @@ class NotificationsThread(Thread):
                 notification_id=self.notification_id,
                 audience=',%s,' % ','.join([str(receiver.id) for receiver in self.audience]),
             )
-            print ">> created notif event", notifevent
           
         return
     

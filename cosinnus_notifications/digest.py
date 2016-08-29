@@ -19,7 +19,7 @@ from cosinnus.models.group import CosinnusPortal
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
 from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
-    ALL_NOTIFICATIONS_ID
+    ALL_NOTIFICATIONS_ID, notifications
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access
@@ -27,6 +27,8 @@ import traceback
 
 logger = logging.getLogger('cosinnus')
 
+
+DIGEST_ITEM_TITLE_MAX_LENGTH = 50
 
 
 def send_digest_for_current_portal(digest_setting):
@@ -54,11 +56,14 @@ def send_digest_for_current_portal(digest_setting):
     timescope_notification_events = NotificationEvent.objects.filter(date__gte=TIME_DIGEST_START, date__lt=TIME_DIGEST_END)
     users = get_user_model().objects.all().filter(id__in=portal.members)
     
-    logger.info('Now starting to sending out digests of SETTING=%s in Portal "%s". Data in extra.' % \
-                (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra={
+    extra_info = {
         'notification_event_count': timescope_notification_events.count(),
         'potential_user_count': users.count(), 
-    })
+    }
+    logger.info('Now starting to sending out digests of SETTING=%s in Portal "%s". Data in extra.' % \
+                (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_info)
+    if settings.DEBUG:
+        print ">> ", extra_info
     
     emailed = 0
     for user in users:
@@ -152,21 +157,61 @@ def send_digest_for_current_portal(digest_setting):
     logger.info('Finished sending out digests of SETTING=%s in Portal "%s". Data in extra.' % (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_log)
     if settings.DEBUG:
         print extra_log
-    
+
+def _get_attr_or_function(obj, attr_or_function, default=None):    
+    """ Returns the given attribute of an object, or its return value if it's a function.
+        If None given, or the object had no such attribute or function, try to find
+        the given default attribute. If no default given, return None. """
+    if not attr_or_function or not getattr(obj, attr_or_function, None):
+        return _get_attr_or_function(obj, default) if (default and default != attr_or_function) else default
+    attr = getattr(obj, attr_or_function, None)
+    if hasattr(attr, '__call__'):
+        return attr()
+    return attr
 
 def render_digest_item_for_notification_event(notification_event, receiver):
     """ Renders the HTML of a single notification event for a receiving user """
     
-    # TODO: stub for rendering the notification based on the registered notifications 
-    # and their templates defined in cosinnus_notifications.py
-    obj = notification_event.target_object
+    try:
+        obj = notification_event.target_object
+        options = notifications[notification_event.notification_id]
+        
+        # stub for missing notification for this digest
+        if not options.get('is_html', False):
+            logger.exception('Missing HTML snippet for digest encountered for notification setting "%s". Skipping this notification type in this digest!' % notification_event.notification_id)
+            return ''
+            """
+            return '<div>stub: event "%s" with object "%s" from user "%s"</div>' % (
+                notification_event.notification_id,
+                getattr(obj, 'text', getattr(obj, 'title', getattr(obj, 'name', 'NOARGS'))),
+                notification_event.user.get_full_name(),
+            )
+            """
+        data_attributes = options['data_attributes']
+        
+        data = {
+            'type': options['snippet_type'],
+            'event_text': options['event_text'],
+            'object_name': _get_attr_or_function(obj, data_attributes['object_name'], 'title'),
+            'object_url': _get_attr_or_function(obj, data_attributes['object_url'], 'get_absolute_url'),
+            'object_text': _get_attr_or_function(obj, data_attributes['object_text']),
+            'image_url': _get_attr_or_function(obj, data_attributes['image_url']),
+        }
+        # clean some attributes
+        if not data['object_name']:
+            data['object_name'] = _('Untitled')
+        if len(data['object_name']) > DIGEST_ITEM_TITLE_MAX_LENGTH:
+            data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
+        if not data['image_url']:
+            # default for image_url is the notifcation event's causer
+            data['image_url'] = CosinnusPortal.get_current().get_domain() + notification_event.user.cosinnus_profile.get_avatar_thumbnail_url()
+            
+        item_html = render_to_string(options['snippet_template'], context=data)
+        return item_html
     
-    return '<div>stub: event "%s" with object "%s" from user "%s"</div>' % (
-        notification_event.notification_id,
-        getattr(obj, 'text', getattr(obj, 'title', getattr(obj, 'name', 'NOARGS'))),
-        notification_event.user.get_full_name(),
-    )
-
+    except Exception, e:
+        logger.exception('Error while rendering a digest item for a digest email. Exception in extra.', extra={'exception': force_text(e)})
+    return ''
 
 def _send_digest_email(receiver, body_html, digest_generation_time, digest_setting):
     
@@ -213,6 +258,10 @@ def cleanup_stale_notifications():
         running at the same time to delete each other's notification events from under them.
         
         @return the count of the items deleted """
+        
+    if settings.DEBUG:
+        print ">> now NOT!!!! deleting notifications (DEBUG MODE)"
+        return 0
         
     max_days = max(dict(UserNotificationPreference.SETTINGS_DAYS_DURATIONS).values())
     time_digest_stale = now() - timedelta(days=max_days*3)
