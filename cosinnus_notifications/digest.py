@@ -232,13 +232,17 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         return
         
         
-        template = '/path/to/digest/mail/template' # TODO
-        subj_template = '/path/to/digest/mail/template' # TODO
+        template = '/cosinnus/html_mail/digest.html' # TODO
+        if digest_setting == UserNotificationPreference.SETTING_DAILY:
+            subject = _('Your daily digest for %(portal_name)s') % _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
+        else:
+            subject = _('Your weekly digest for %(portal_name)s') % _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
         site = CosinnusPortal.get_current().site
         context = {
             'site': site,
             'site_name': site.name,
             'domain_url': CosinnusPortal.get_current().get_domain,
+            # TODO: add variables from context for digest.html in /html_mail/!
         }
         preference_url = '%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))
         context.update({
@@ -249,7 +253,6 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
             'digest_time': digest_generation_time, # TODO: humanize
             'digest_setting': digest_setting,
         })
-        subject = render_to_string(subj_template, context)
         send_mail_or_fail(receiver.email, subject, template, context)
         
     finally:
