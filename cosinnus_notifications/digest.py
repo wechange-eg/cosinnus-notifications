@@ -24,6 +24,7 @@ from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access
 import traceback
+from django.templatetags.static import static
 
 logger = logging.getLogger('cosinnus')
 
@@ -123,13 +124,16 @@ def send_digest_for_current_portal(digest_setting):
                     wanted_group_events.append(event)
                     
                 if wanted_group_events:
-                    group_html = '\n'.join([render_digest_item_for_notification_event(event, user) for event in wanted_group_events])
+                    group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
+                    group_body_html = '\n'.join([render_digest_item_for_notification_event(event, user) for event in wanted_group_events])
                     group_template_context = {
-                        'group_html': mark_safe(group_html),
-                        'group': group,
+                        'group_body_html': mark_safe(group_body_html),
+                        'image_url': CosinnusPortal.get_current().get_domain() + \
+                            (group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
+                        'group_url': group.get_absolute_url(),
+                        'group_name': group['name'],
                     }
-                    # TODO: create a group-layout template with group header and a fill-in for the single 
-                    #body_html += render_to_string('cosinnus/path/to/body/template', context=group_template_context) + '\n'
+                    group_html = render_to_string('cosinnus/html_mail/summary_group.html', context=group_template_context)
                     body_html += group_html + '\n'
             
             # send actual email with full frame template
@@ -141,6 +145,8 @@ def send_digest_for_current_portal(digest_setting):
             # the same items do not get into digests twice
             logger.error('An error occured while doing a digest for a user! Exception was: %s' % force_text(e), 
                          extra={'exception': e, 'trace': traceback.format_exc(), 'user_mail': user.email, 'digest_setting': digest_setting})
+            if settings.DEBUG:
+                raise
             
     # save the end time of the digest period as last digest time for this type
     portal.saved_infos[CosinnusPortal.SAVED_INFO_LAST_DIGEST_SENT % digest_setting] = TIME_DIGEST_END
@@ -204,7 +210,8 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
         if not data['image_url']:
             # default for image_url is the notifcation event's causer
-            data['image_url'] = CosinnusPortal.get_current().get_domain() + notification_event.user.cosinnus_profile.get_avatar_thumbnail_url()
+            data['image_url'] = CosinnusPortal.get_current().get_domain() + \
+                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe.png'))
             
         item_html = render_to_string(options['snippet_template'], context=data)
         return item_html
@@ -258,10 +265,6 @@ def cleanup_stale_notifications():
         running at the same time to delete each other's notification events from under them.
         
         @return the count of the items deleted """
-        
-    if settings.DEBUG:
-        print ">> now NOT!!!! deleting notifications (DEBUG MODE)"
-        return 0
         
     max_days = max(dict(UserNotificationPreference.SETTINGS_DAYS_DURATIONS).values())
     time_digest_stale = now() - timedelta(days=max_days*3)
