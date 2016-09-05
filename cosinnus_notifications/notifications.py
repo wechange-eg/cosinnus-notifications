@@ -83,6 +83,7 @@ NOTIFICATIONS_DEFAULTS = {
     # available variables: %(sender_name)s, %(team_name)s
     'subject_text': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML,
     # little explanatory text of what happened here. (e.g. "new document", "upcoming event") 
+    # this can some string substitution arguments, e.g. ``new post by %(sender_name)s``
     'event_text': _('New item'),
     # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
     # see notifications.NOTIFICATION_REASONS
@@ -95,10 +96,10 @@ NOTIFICATIONS_DEFAULTS = {
         'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
         'image_url': None, # image URL for the item. if None, uses avatar of the notification causing user
         'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
-        'sub_event_text': None,
-        'sub_event_meta': None,
-        'sub_image_url': None,
-        'sub_object_text': None,
+        'sub_event_text': None, # property of a sub-divided item below the main one, see doc above
+        'sub_event_meta': None, # property of a sub-divided item below the main one, see doc above
+        'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
+        'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
     },
 }
 
