@@ -168,7 +168,7 @@ class NotificationsThread(Thread):
         if self.obj.media_tag.visibility == BaseTagObject.VISIBILITY_USER:
             # only-user visible objects never cause notifications to anyone
             return False
-        if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
+        if self.is_notification_active(NO_NOTIFICATIONS_ID, user, group):
             # user didn't want notification because he wants none ever!
             return False
         if self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group):
