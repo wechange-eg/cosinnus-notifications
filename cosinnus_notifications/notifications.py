@@ -52,6 +52,8 @@ NOTIFICATION_REASONS = {
     'default': _('You are getting this notification because you are subscribed to these kinds of events in your project or group.'),
     'admin': _('You are getting this notification because you are an administrator of this project or group.'),
     'portal_admin': _('You are getting this notification because you are an administrator of this portal.'),
+    'daily_digest': _('You are getting this email because you are subscribed to one or more daily notifications.'),
+    'weekly_digest': _('You are getting this email because you are subscribed to one or more weekly notifications.'),
 }
 
 REQUIRED_NOTIFICATION_ATTRIBUTE = object()
@@ -92,6 +94,11 @@ NOTIFICATIONS_DEFAULTS = {
         'object_url': 'get_absolute_url', # URL of the object
         'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
         'image_url': None, # image URL for the item. if None, uses avatar of the notification causing user
+        'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
+        'sub_event_text': None,
+        'sub_event_meta': None,
+        'sub_image_url': None,
+        'sub_object_text': None,
     },
 }
 

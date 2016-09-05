@@ -13,13 +13,14 @@ from django.utils.encoding import force_text
 from django.utils import translation
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
 from cosinnus.conf import settings
 from cosinnus.models.group import CosinnusPortal
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
 from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
-    ALL_NOTIFICATIONS_ID, notifications
+    ALL_NOTIFICATIONS_ID, notifications, NOTIFICATION_REASONS
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access
@@ -198,10 +199,18 @@ def render_digest_item_for_notification_event(notification_event, receiver):
         data = {
             'type': options['snippet_type'],
             'event_text': options['event_text'],
+            'snippet_template': options['snippet_template'],
+            
+            'event_meta': _get_attr_or_function(obj, data_attributes['event_meta']),
             'object_name': _get_attr_or_function(obj, data_attributes['object_name'], 'title'),
             'object_url': _get_attr_or_function(obj, data_attributes['object_url'], 'get_absolute_url'),
             'object_text': _get_attr_or_function(obj, data_attributes['object_text']),
             'image_url': _get_attr_or_function(obj, data_attributes['image_url']),
+            
+            'sub_event_text': _get_attr_or_function(obj, data_attributes['sub_event_text']),
+            'sub_event_meta': _get_attr_or_function(obj, data_attributes['sub_image_url']),
+            'sub_image_url': _get_attr_or_function(obj, data_attributes['sub_image_url']),
+            'sub_object_text': _get_attr_or_function(obj, data_attributes['sub_object_text']),
         }
         # clean some attributes
         if not data['object_name']:
@@ -227,32 +236,38 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
     try:
         translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
         
-        print ">> now sending HTML to user", receiver.get_full_name()
-        print body_html
-        return
-        
-        
         template = '/cosinnus/html_mail/digest.html' # TODO
+        portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
         if digest_setting == UserNotificationPreference.SETTING_DAILY:
-            subject = _('Your daily digest for %(portal_name)s') % _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
+            subject = _('Your daily digest for %(portal_name)s') % {'portal_name': portal_name}
+            topic = _('This is what happened during the last day!')
+            reason = NOTIFICATION_REASONS['daily_digest']
         else:
-            subject = _('Your weekly digest for %(portal_name)s') % _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
-        site = CosinnusPortal.get_current().site
+            subject = _('Your weekly digest for %(portal_name)s') % {'portal_name': portal_name}
+            topic = _('This is what happened during the last week!')
+            reason = NOTIFICATION_REASONS['weekly_digest']
+        portal = CosinnusPortal.get_current()
+        site = portal.site
+        domain = portal.get_domain()
+        preference_url = '%s%s' % (domain, reverse('cosinnus:notifications'))
+        portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+        
         context = {
             'site': site,
             'site_name': site.name,
-            'domain_url': CosinnusPortal.get_current().get_domain,
-            # TODO: add variables from context for digest.html in /html_mail/!
-        }
-        preference_url = '%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))
-        context.update({
+            'domain_url': domain,
+            'portal_url': domain,
+            'portal_image_url': portal_image_url,
+            'portal_name': portal_name,
             'receiver': receiver, 
-            'receiver_name': mark_safe(strip_tags(full_name(receiver))), 
-            'notification_settings_url': mark_safe(preference_url),
-            'body_html': mark_safe(body_html),
-            'digest_time': digest_generation_time, # TODO: humanize
+            'addressee': mark_safe(strip_tags(full_name(receiver))), 
+            'topic': topic,
+            'digest_body_html': mark_safe(body_html),
+            'prefs_url': mark_safe(preference_url),
+            'notification_reason': reason,
             'digest_setting': digest_setting,
-        })
+            #'digest_time': digest_generation_time, # TODO: humanize
+        }
         send_mail_or_fail(receiver.email, subject, template, context)
         
     finally:
