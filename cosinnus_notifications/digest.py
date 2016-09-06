@@ -26,6 +26,7 @@ from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access
 import traceback
 from django.templatetags.static import static
+from cosinnus.utils.functions import resolve_attributes
 
 logger = logging.getLogger('cosinnus')
 
@@ -164,17 +165,7 @@ def send_digest_for_current_portal(digest_setting):
     logger.info('Finished sending out digests of SETTING=%s in Portal "%s". Data in extra.' % (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_log)
     if settings.DEBUG:
         print extra_log
-
-def _get_attr_or_function(obj, attr_or_function, default=None):    
-    """ Returns the given attribute of an object, or its return value if it's a function.
-        If None given, or the object had no such attribute or function, try to find
-        the given default attribute. If no default given, return None. """
-    if not attr_or_function or not getattr(obj, attr_or_function, None):
-        return _get_attr_or_function(obj, default) if (default and default != attr_or_function) else default
-    attr = getattr(obj, attr_or_function, None)
-    if hasattr(attr, '__call__'):
-        return attr()
-    return attr
+    
 
 def render_digest_item_for_notification_event(notification_event, receiver):
     """ Renders the HTML of a single notification event for a receiving user """
@@ -200,7 +191,7 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             'sender_name': mark_safe(strip_tags(full_name(receiver))),
         }
         event_text = options['event_text']
-        sub_event_text = _get_attr_or_function(obj, data_attributes['sub_event_text'])
+        sub_event_text = resolve_attributes(obj, data_attributes['sub_event_text'])
         event_text = (event_text % string_variables) if event_text else None
         sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
         
@@ -209,16 +200,16 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             'event_text': event_text,
             'snippet_template': options['snippet_template'],
             
-            'event_meta': _get_attr_or_function(obj, data_attributes['event_meta']),
-            'object_name': _get_attr_or_function(obj, data_attributes['object_name'], 'title'),
-            'object_url': _get_attr_or_function(obj, data_attributes['object_url'], 'get_absolute_url'),
-            'object_text': _get_attr_or_function(obj, data_attributes['object_text']),
-            'image_url': _get_attr_or_function(obj, data_attributes['image_url']),
+            'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
+            'object_name': resolve_attributes(obj, data_attributes['object_name'], 'title'),
+            'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
+            'object_text': resolve_attributes(obj, data_attributes['object_text']),
+            'image_url': resolve_attributes(obj, data_attributes['image_url']),
             
             'sub_event_text': sub_event_text,
-            'sub_event_meta': _get_attr_or_function(obj, data_attributes['sub_image_url']),
-            'sub_image_url': _get_attr_or_function(obj, data_attributes['sub_image_url']),
-            'sub_object_text': _get_attr_or_function(obj, data_attributes['sub_object_text']),
+            'sub_event_meta': resolve_attributes(obj, data_attributes['sub_image_url']),
+            'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
+            'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
         }
         # clean some attributes
         if not data['object_name']:
