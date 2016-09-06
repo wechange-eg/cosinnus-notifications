@@ -196,8 +196,10 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             """
         data_attributes = options['data_attributes']
         
+        object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
         string_variables = {
             'sender_name': mark_safe(strip_tags(full_name(notification_event.user))),
+            'object_name': object_name,
         }
         event_text = options['event_text']
         sub_event_text = options['sub_event_text']
@@ -210,7 +212,7 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             'snippet_template': options['snippet_template'],
             
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
-            'object_name': resolve_attributes(obj, data_attributes['object_name'], 'title'),
+            'object_name': object_name,
             'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
             'object_text': resolve_attributes(obj, data_attributes['object_text']),
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
