@@ -12,7 +12,7 @@ from django.utils import translation, formats
 from django.utils.html import strip_tags
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from django.utils.translation import ugettext_lazy as _
 
 from cosinnus.conf import settings
@@ -220,7 +220,6 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
             'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
         }
-        if data['sub_object_text']: print ">><< what img 1", data['sub_image_url'], obj.creator.get_full_name(), data_attributes['sub_image_url'], resolve_attributes(obj, data_attributes['sub_image_url'])
         # clean some attributes
         if not data['object_name']:
             data['object_name'] = _('Untitled')
@@ -236,11 +235,10 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             if url and not url.startswith('http'):
                 data[url_field] = CosinnusPortal.get_current().get_domain() + data[url_field]
                 
-        if data['sub_object_text']: print ">><< what img 2", data['sub_image_url']
         # humanize all datetime objects
         for key, val in data.items():
             if isinstance(val, datetime.datetime):
-                data[key] = formats.date_format(val, 'SHORT_DATETIME_FORMAT')
+                data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
         
         item_html = render_to_string(options['snippet_template'], context=data)
         return item_html
