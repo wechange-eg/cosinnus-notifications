@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import timedelta
+import datetime
 import logging
 
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils import translation, formats
 from django.utils.html import strip_tags
 from django.utils.encoding import force_text
-from django.utils import translation
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -52,7 +52,7 @@ def send_digest_for_current_portal(digest_setting):
     # (its saved as a string, but django QS will auto-box it when filtering on datetime fields)
     TIME_DIGEST_START = portal.saved_infos.get(CosinnusPortal.SAVED_INFO_LAST_DIGEST_SENT % digest_setting, None)
     if not TIME_DIGEST_START:
-        TIME_DIGEST_START = now() - timedelta(days=UserNotificationPreference.SETTINGS_DAYS_DURATIONS[digest_setting])
+        TIME_DIGEST_START = now() - datetime.timedelta(days=UserNotificationPreference.SETTINGS_DAYS_DURATIONS[digest_setting])
     TIME_DIGEST_END = now()
     
     # the main Notification Events QS. anything not in here did not happen in the digest's time span
@@ -70,10 +70,15 @@ def send_digest_for_current_portal(digest_setting):
     
     emailed = 0
     for user in users:
+        
+        cur_language = translation.get_language()
         try:
             # only active users that have logged in before accepted the TOS get notifications
             if not user.is_active or not user.last_login or not cosinnus_setting(user, 'tos_accepted'):
                 continue
+            
+            # switch language to user's preference language so all i18n and date formats are in their language
+            translation.activate(getattr(user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
             
             # these groups will never get digest notifications because they have a blanketing ALL (now) or NONE setting
             # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
@@ -149,6 +154,10 @@ def send_digest_for_current_portal(digest_setting):
                          extra={'exception': e, 'trace': traceback.format_exc(), 'user_mail': user.email, 'digest_setting': digest_setting})
             if settings.DEBUG:
                 raise
+        finally:
+            # switch language back
+            translation.activate(cur_language)
+        
             
     # save the end time of the digest period as last digest time for this type
     portal.saved_infos[CosinnusPortal.SAVED_INFO_LAST_DIGEST_SENT % digest_setting] = TIME_DIGEST_END
@@ -188,10 +197,10 @@ def render_digest_item_for_notification_event(notification_event, receiver):
         data_attributes = options['data_attributes']
         
         string_variables = {
-            'sender_name': mark_safe(strip_tags(full_name(receiver))),
+            'sender_name': mark_safe(strip_tags(full_name(notification_event.user))),
         }
         event_text = options['event_text']
-        sub_event_text = resolve_attributes(obj, data_attributes['sub_event_text'])
+        sub_event_text = options['sub_event_text']
         event_text = (event_text % string_variables) if event_text else None
         sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
         
@@ -211,16 +220,28 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
             'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
         }
+        if data['sub_object_text']: print ">><< what img 1", data['sub_image_url'], obj.creator.get_full_name(), data_attributes['sub_image_url'], resolve_attributes(obj, data_attributes['sub_image_url'])
         # clean some attributes
         if not data['object_name']:
             data['object_name'] = _('Untitled')
         if len(data['object_name']) > DIGEST_ITEM_TITLE_MAX_LENGTH:
             data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
+        # default for image_url is the notifcation event's causer
         if not data['image_url']:
-            # default for image_url is the notifcation event's causer
             data['image_url'] = CosinnusPortal.get_current().get_domain() + \
                  (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe.png'))
-            
+        # ensure URLs are absolute
+        for url_field in ['image_url', 'object_url', 'sub_image_url']:
+            url = data[url_field]
+            if url and not url.startswith('http'):
+                data[url_field] = CosinnusPortal.get_current().get_domain() + data[url_field]
+                
+        if data['sub_object_text']: print ">><< what img 2", data['sub_image_url']
+        # humanize all datetime objects
+        for key, val in data.items():
+            if isinstance(val, datetime.datetime):
+                data[key] = formats.date_format(val, 'SHORT_DATETIME_FORMAT')
+        
         item_html = render_to_string(options['snippet_template'], context=data)
         return item_html
     
@@ -228,49 +249,43 @@ def render_digest_item_for_notification_event(notification_event, receiver):
         logger.exception('Error while rendering a digest item for a digest email. Exception in extra.', extra={'exception': force_text(e)})
     return ''
 
+
 def _send_digest_email(receiver, body_html, digest_generation_time, digest_setting):
+    """ Prepares the actual digest mail and sends it """
     
-    # switch language to user's preference language
-    cur_language = translation.get_language()
-    try:
-        translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
-        
-        template = '/cosinnus/html_mail/digest.html' # TODO
-        portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
-        if digest_setting == UserNotificationPreference.SETTING_DAILY:
-            subject = _('Your daily digest for %(portal_name)s') % {'portal_name': portal_name}
-            topic = _('This is what happened during the last day!')
-            reason = NOTIFICATION_REASONS['daily_digest']
-        else:
-            subject = _('Your weekly digest for %(portal_name)s') % {'portal_name': portal_name}
-            topic = _('This is what happened during the last week!')
-            reason = NOTIFICATION_REASONS['weekly_digest']
-        portal = CosinnusPortal.get_current()
-        site = portal.site
-        domain = portal.get_domain()
-        preference_url = '%s%s' % (domain, reverse('cosinnus:notifications'))
-        portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
-        
-        context = {
-            'site': site,
-            'site_name': site.name,
-            'domain_url': domain,
-            'portal_url': domain,
-            'portal_image_url': portal_image_url,
-            'portal_name': portal_name,
-            'receiver': receiver, 
-            'addressee': mark_safe(strip_tags(full_name(receiver))), 
-            'topic': topic,
-            'digest_body_html': mark_safe(body_html),
-            'prefs_url': mark_safe(preference_url),
-            'notification_reason': reason,
-            'digest_setting': digest_setting,
-            #'digest_time': digest_generation_time, # TODO: humanize
-        }
-        send_mail_or_fail(receiver.email, subject, template, context)
-        
-    finally:
-        translation.activate(cur_language)
+    template = '/cosinnus/html_mail/digest.html' # TODO
+    portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
+    if digest_setting == UserNotificationPreference.SETTING_DAILY:
+        subject = _('Your daily digest for %(portal_name)s') % {'portal_name': portal_name}
+        topic = _('This is what happened during the last day!')
+        reason = NOTIFICATION_REASONS['daily_digest']
+    else:
+        subject = _('Your weekly digest for %(portal_name)s') % {'portal_name': portal_name}
+        topic = _('This is what happened during the last week!')
+        reason = NOTIFICATION_REASONS['weekly_digest']
+    portal = CosinnusPortal.get_current()
+    site = portal.site
+    domain = portal.get_domain()
+    preference_url = '%s%s' % (domain, reverse('cosinnus:notifications'))
+    portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+    
+    context = {
+        'site': site,
+        'site_name': site.name,
+        'domain_url': domain,
+        'portal_url': domain,
+        'portal_image_url': portal_image_url,
+        'portal_name': portal_name,
+        'receiver': receiver, 
+        'addressee': mark_safe(strip_tags(full_name(receiver))), 
+        'topic': topic,
+        'digest_body_html': mark_safe(body_html),
+        'prefs_url': mark_safe(preference_url),
+        'notification_reason': reason,
+        'digest_setting': digest_setting,
+        #'digest_time': digest_generation_time, # TODO: humanize
+    }
+    send_mail_or_fail(receiver.email, subject, template, context)
 
 
 def cleanup_stale_notifications():
