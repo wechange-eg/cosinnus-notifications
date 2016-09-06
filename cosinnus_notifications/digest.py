@@ -216,7 +216,7 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
             
             'sub_event_text': sub_event_text,
-            'sub_event_meta': resolve_attributes(obj, data_attributes['sub_image_url']),
+            'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
             'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
             'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
         }
