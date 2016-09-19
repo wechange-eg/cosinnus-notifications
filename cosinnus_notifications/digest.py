@@ -113,7 +113,8 @@ def send_digest_for_current_portal(digest_setting):
             # cluster event messages by group. from here on, the user will definitely get an email.
             body_html = ''
             for group in list(set(events.values_list('group', flat=True))): 
-                group_events = events.filter(group=group).order_by('notification_id')
+                group_events = events.filter(group=group).order_by('-id') # id faster than ordering by created date 
+                
                 
                 # filter only those events that the user actually has in his prefs, for this group and also
                 # check for target object existing, being visible to user, and other sanity checks if the user should see this object
