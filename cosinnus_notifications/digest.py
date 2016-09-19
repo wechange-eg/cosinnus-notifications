@@ -144,8 +144,9 @@ def send_digest_for_current_portal(digest_setting):
                     body_html += group_html + '\n'
             
             # send actual email with full frame template
-            _send_digest_email(user, mark_safe(body_html), TIME_DIGEST_END, digest_setting)
-            emailed += 1
+            if body_html:
+                _send_digest_email(user, mark_safe(body_html), TIME_DIGEST_END, digest_setting)
+                emailed += 1
             
         except Exception, e:
             # we never want this subroutine to just die, we need the final saves at the end to ensure
@@ -185,7 +186,7 @@ def render_digest_item_for_notification_event(notification_event, receiver):
         
         # stub for missing notification for this digest
         if not options.get('is_html', False):
-            logger.exception('Missing HTML snippet for digest encountered for notification setting "%s". Skipping this notification type in this digest!' % notification_event.notification_id)
+            logger.exception('Missing HTML snippet configuration for digest encountered for notification setting "%s". Skipping this notification type in this digest!' % notification_event.notification_id)
             return ''
             """
             return '<div>stub: event "%s" with object "%s" from user "%s"</div>' % (
