@@ -197,9 +197,14 @@ def render_digest_item_for_notification_event(notification_event, receiver):
             """
         data_attributes = options['data_attributes']
         
+        sender_name = mark_safe(strip_tags(full_name(notification_event.user)))
+        # add special attributes to object
+        obj._sender_name = sender_name
+        obj._sender = notification_event.user
+        
         object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
         string_variables = {
-            'sender_name': mark_safe(strip_tags(full_name(notification_event.user))),
+            'sender_name': sender_name,
             'object_name': object_name,
         }
         event_text = options['event_text']

@@ -92,6 +92,9 @@ NOTIFICATIONS_DEFAULTS = {
     'notification_reason': 'default', 
     # object attributes to fille the snippet template with. 
     # these will be looked up on the object as attribute or functions with no params
+    # additionally, special attributes will be added to the object for the object during lookup-time:
+    #     _sender: the User model object that caused the event
+    #     _sender_name: the cleaned name of that User
     'data_attributes': {
         'object_name': 'title', # Main title and label of the notification object
         'object_url': 'get_absolute_url', # URL of the object
