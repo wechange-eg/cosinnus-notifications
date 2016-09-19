@@ -299,7 +299,7 @@ def cleanup_stale_notifications():
         @return the count of the items deleted """
         
     max_days = max(dict(UserNotificationPreference.SETTINGS_DAYS_DURATIONS).values())
-    time_digest_stale = now() - timedelta(days=max_days*3)
+    time_digest_stale = now() - datetime.timedelta(days=max_days*3)
     stale_notification_events = NotificationEvent.objects.filter(date__lt=time_digest_stale)
     
     deleted = stale_notification_events.count()
