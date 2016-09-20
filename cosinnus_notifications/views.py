@@ -67,14 +67,11 @@ class NotificationPreferenceView(UpdateView):
                     # save / erase setting
                     try:
                         pref = UserNotificationPreference.objects.get(user=request.user, group=group, notification_id=notification_id)
-                        if value == 1 and not pref.is_active:
-                            pref.is_active = True
+                        if value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and value != pref.setting:
+                            pref.setting = value
                             pref.save()
-                        elif value == 0 and pref.is_active:
-                            pref.is_active = False
-                            pref.save()
-                    except:
-                        pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, is_active=value)
+                    except UserNotificationPreference.DoesNotExist:
+                        pref = UserNotificationPreference.objects.create(user=request.user, group=group, notification_id=notification_id, setting=value)
         
         # save language preference:
         language = request.POST.get('language', None)
@@ -101,7 +98,7 @@ class NotificationPreferenceView(UpdateView):
         # build lookup dict for all active existing preferences vs groups
         prefs = {} # 'groupid:notification_id' 
         for pref in self.get_queryset():
-            prefs['%s:%s' % (pref.group.pk, pref.notification_id)] = pref.is_active
+            prefs['%s:%s' % (pref.group.pk, pref.notification_id)] = pref.setting
         
         group_rows = [] # [(group, notification_rows, choice_selected), ...]
         # get groups, grouped by their 
@@ -115,23 +112,18 @@ class NotificationPreferenceView(UpdateView):
                 notif_id = '%s:%s' % (group.pk, notification_id)
                 if notification_id == ALL_NOTIFICATIONS_ID:
                     if notif_id in prefs:
-                        choice_selected = "all"
+                        choice_selected = "all_%d" % prefs[notif_id]
                     continue
                 if notification_id == NO_NOTIFICATIONS_ID:
                     if notif_id in prefs:
                         choice_selected = "none"
                     continue
                 if notif_id in prefs:
-                    active = bool(prefs[notif_id])
+                    value = prefs[notif_id]
                 else:
-                    active = options.get('default', False)
+                    value = int(options.get('default', False))
                 # check for default if false, 
-                notification_rows.append([notif_id, options['label'], active, options['app_name'], options['app_label']])
-            
-            # monkey-patch: if a group's notification mode is custom, but all options are checked,
-            # we still show the "All Notifications" option:
-            if choice_selected == "custom" and all([option[2] for option in notification_rows]):
-                choice_selected = "all"
+                notification_rows.append([notif_id, options['label'], value, options['app_name'], options['app_label']])
             
             # add a "fake" project's group header row to add a missing group,
             # if the user was not member of the group, but member in a child project
@@ -148,6 +140,7 @@ class NotificationPreferenceView(UpdateView):
             'no_notifications_id': NO_NOTIFICATIONS_ID,
             'language_choices': settings.LANGUAGES,
             'language_selected': self.request.user.cosinnus_profile.language,
+            'notification_choices': UserNotificationPreference.SETTING_CHOICES,
         })
         return context
     

@@ -65,7 +65,7 @@
 		                            <legend>&nbsp;</legend>
 		                        </div>
 		                        {% endif %}
-		                        <div class="{% if group.parent %}col-md-3{% else %}col-md-4{% endif %}">
+		                        <div class="{% if group.parent %}col-md-3{% else %}col-md-4{% endif %} {% if request.GET.highlight_choice|intify == group.pk %}notification-choice-highlighted{% endif %}">
 		                            <a href="{% group_url 'cosinnus:group-dashboard' group=group %}" target="_blank"> 
 		                                <legend>{{ group.name }}</legend>
 		                            </a>
@@ -73,14 +73,18 @@
 		                        <div class="col-md-8">
 		                            <p class="no-horizontal-padding no-vertical-padding">
 		                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});" onmousedown="return toggleCustomNotificationHeader(event, {{group.pk}});">
-		                                <option {% if choice == "all" %}selected{% endif %} value="all">{% trans "All notifications" %}</option>
+		                                <option {% if choice == "all_1" %}selected{% endif %} value="all_1">{% trans "All notifications" %}</option>
+		                                {% if not SETTINGS.COSINNUS_DIGEST_ONLY_FOR_ADMINS or user.is_superuser %}
+		                                <option {% if choice == "all_2" %}selected{% endif %} value="all_2">{% trans "All notifications" %} ({% trans "Daily" %})</option>
+		                                <option {% if choice == "all_3" %}selected{% endif %} value="all_3">{% trans "All notifications" %} ({% trans "Weekly" %})</option>
+		                                {% endif %}
 		                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
 		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
 		                            </select>
 		                            </p>
 		                        </div>
 		                    </div>
-		                    <div id="div_notif_choices_{{group.pk}}" style="display:none;">
+		                    <div id="div_notif_choices_{{group.pk}}" {% if not request.GET.highlight_pref or not request.GET.highlight_choice|intify == group.pk %}style="display: none;"{% endif %}>
 	                            {% for id, label, value, app_name, app_label in notifications %}
 		                            <div class="row"> 
 		                                <div class="col-md-3 col-md-offset-1">
@@ -89,9 +93,20 @@
                                             {% endifchanged %}&nbsp;
                                         </div>
 		                                <div class="col-md-8">
-			                                <div {% ifchanged app_name %}style="border-top: solid 1px gray;"{% endifchanged %}>
-				                                <input type="hidden" value="0" name="notif_option:{{id}}" /> <!-- will send unchecked data on POST -->
-				                                <label><input type="checkbox" name="notif_option:{{id}}" value="1" {% if value %}checked="true"{% endif %} /> {{label}}</label>
+			                                <div class="notification-options {% if id == request.GET.highlight_pref %}highlighted{% endif %} {% ifchanged app_name %}notification-options-seperated{% endifchanged %}">
+			                                		<div class="">
+					                                	<label>{{ label }}:</label>
+			                                		</div>
+			                                		<div class="pull-right">
+			                                			<div class="condensed-radio-input">
+			                                				{# please keep this linebreak formatting so that no spaces exit between the <label> elements! #}
+							                                {% for choice_value, choice_label in notification_choices %}{% if not SETTINGS.COSINNUS_DIGEST_ONLY_FOR_ADMINS or user.is_superuser or choice_value <= 1 %}<label class="notification-options-label">
+								                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" {% if value == choice_value %}checked="checked"{% endif %}>
+																	<span class="noselect">{{ choice_label }}</span>
+																</label>{% endif %}{% endfor %}
+						                                </div>
+			                                		</div>
+			                                		<div class="clearfix"></div>
 			                                </div>
 		                                </div>
 		                            </div>    

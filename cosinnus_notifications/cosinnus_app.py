@@ -5,6 +5,7 @@ import logging
 from cosinnus.core.signals import all_cosinnus_apps_loaded
 from django.dispatch.dispatcher import receiver
 from cosinnus_notifications.notifications import init_notifications
+from cosinnus.conf import settings
 
 logger = logging.getLogger('cosinnus')
 
@@ -29,3 +30,5 @@ def cosinnus_ready(sender, **kwargs):
         init_notifications()
     except Exception, err:
         logger.error('Exception during cosinnus_notifications:init: %s' % err)
+        if settings.DEBUG: 
+            raise

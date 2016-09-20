@@ -15,12 +15,15 @@ from cosinnus.core.mail import get_common_mail_context, send_mail_or_fail
 from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup
 from cosinnus.models.tagged import BaseTaggableObjectModel, BaseTagObject
-from cosinnus_notifications.models import UserNotificationPreference
+from cosinnus_notifications.models import UserNotificationPreference,\
+    NotificationEvent
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.utils.functions import ensure_dict_keys
 from threading import Thread
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
+from django.contrib.contenttypes.models import ContentType
+from cosinnus.utils.permissions import check_object_read_access
 
 
 logger = logging.getLogger('cosinnus')
@@ -45,6 +48,64 @@ notifications = {
     },  
 }
 
+NOTIFICATION_REASONS = {
+    'default': _('You are getting this notification because you are subscribed to these kinds of events in your project or group.'),
+    'admin': _('You are getting this notification because you are an administrator of this project or group.'),
+    'portal_admin': _('You are getting this notification because you are an administrator of this portal.'),
+    'daily_digest': _('You are getting this email because you are subscribed to one or more daily notifications.'),
+    'weekly_digest': _('You are getting this email because you are subscribed to one or more weekly notifications.'),
+}
+
+REQUIRED_NOTIFICATION_ATTRIBUTE = object()
+REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML = object()
+
+
+# this is a lookup for all defaults of a notification definition
+NOTIFICATIONS_DEFAULTS = {
+    # Label for the notification option in user's preference
+    'label': REQUIRED_NOTIFICATION_ATTRIBUTE, 
+    # text-only mail body template. ignored for HTML mails
+    'mail_template': REQUIRED_NOTIFICATION_ATTRIBUTE,
+    # text-only mail subject template. ignored for HTML mails
+    'subject_template': REQUIRED_NOTIFICATION_ATTRIBUTE,
+    # a django signal on which to listen for
+    'signals': [REQUIRED_NOTIFICATION_ATTRIBUTE],
+    # should this notification preference be on by default (if the user has never changed the setting?)
+    'default': False,
+    
+    # does this notification support HTML emails and digest chunking?
+    'is_html': False,
+    # the snippet template for this notification's event (only used in digest emails, not instant ones)
+    'snippet_template': 'cosinnus/html_mail/summary_item.html',
+    # CSS class of the snippet template that customizes this notification by its type. usually the cosinnus app's name
+    'snippet_type': 'news',
+    # the HTML email's subject. use a gettext_lazy translatable string.
+    # available variables: %(sender_name)s, %(team_name)s
+    'subject_text': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML,
+    # little explanatory text of what happened here. (e.g. "new document", "upcoming event") 
+    # this can some string substitution arguments, e.g. ``new post by %(sender_name)s``
+    'event_text': _('New item'),
+    # event text for a subdivided item under the main one, if required
+    'sub_event_text': None, 
+    # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
+    # see notifications.NOTIFICATION_REASONS
+    'notification_reason': 'default', 
+    # object attributes to fille the snippet template with. 
+    # these will be looked up on the object as attribute or functions with no params
+    # additionally, special attributes will be added to the object for the object during lookup-time:
+    #     _sender: the User model object that caused the event
+    #     _sender_name: the cleaned name of that User
+    'data_attributes': {
+        'object_name': 'title', # Main title and label of the notification object
+        'object_url': 'get_absolute_url', # URL of the object
+        'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
+        'image_url': None, # image URL for the item. default if omitted is the event creator's user avatar
+        'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
+        'sub_event_meta': None, # property of a sub-divided item below the main one, see doc above
+        'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
+        'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
+    },
+}
 
 
 def _find_notification(signal):
@@ -57,31 +118,35 @@ def _find_notification(signal):
 
 def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     """ Sets the user preference settings for a group to all or none or custom (deleting the special setting flag) """
-    if not (all_or_none_or_custom == "all" or all_or_none_or_custom == "none" or all_or_none_or_custom == "custom"):
+    if not (all_or_none_or_custom.startswith("all_") or all_or_none_or_custom in ("none", "custom")):
         return
     
     try:
         al = UserNotificationPreference.objects.get(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
-        if all_or_none_or_custom == "all":
-            if not al.is_active:
-                al.is_active = True
+        if all_or_none_or_custom.startswith("all_"):
+            setting_value = int(all_or_none_or_custom.split("_")[1])
+            if setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and al.setting != setting_value:
+                al.setting = setting_value
                 al.save()
         else:
             al.delete()
     except:
-        if all_or_none_or_custom == "all":
-            UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, is_active=True)
+        if all_or_none_or_custom.startswith("all_"):
+            setting_value = int(all_or_none_or_custom.split("_")[1])
+            if not setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys():
+                setting_value = UserNotificationPreference.SETTING_NOW
+            UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=setting_value)
     try:
         non = UserNotificationPreference.objects.get(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
         if all_or_none_or_custom == "none":
-            if not non.is_active:
-                non.is_active = True
+            if not non.setting == UserNotificationPreference.SETTING_NOW:
+                non.setting = UserNotificationPreference.SETTING_NOW
                 non.save()
         else:
             non.delete()
     except:
         if all_or_none_or_custom == "none":
-            UserNotificationPreference.objects.create(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID, is_active=True)
+            UserNotificationPreference.objects.create(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW)
         
 
 
@@ -105,8 +170,17 @@ def init_notifications():
                 
                 options['app_name'] = app_name
                 options['app_label'] = app_label
-                if not 'default' in options:
-                    options['default'] = False
+                # add missing notification settings
+                for key, default in NOTIFICATIONS_DEFAULTS.items():
+                    if options.get(key, None) is None:
+                        if default == REQUIRED_NOTIFICATION_ATTRIBUTE or \
+                                (options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML):
+                            raise ImproperlyConfigured('Notification options key "%s" in notification signal "%s" is required!' % (key, signal_id))
+                        options[key] = default
+                for datakey, datadefault in NOTIFICATIONS_DEFAULTS['data_attributes'].items():
+                    if options['data_attributes'].get(datakey, None) is None:
+                        options['data_attributes'][datakey] = datadefault
+                    
                 notifications[signal_id] = options
                 # connect to signals
                 for signal in options['signals']:
@@ -124,17 +198,27 @@ class NotificationsThread(Thread):
         self.audience = audience
         self.notification_id = notification_id
         self.options = options
+        # this will be set if a notification is sent out to a user, 
+        # so we know which preference was responsible and can link to it
+        self.notification_preference_triggered = None
+        # will be set at runtime
+        self.group = None
     
-    def is_notification_active(self, notification_id, user, group):
+    def is_notification_active(self, notification_id, user, group, alternate_settings_compare=[]):
         """ Checks against the DB if a user notifcation preference exists, and if so, if it is set to active """
         try:
             preference = UserNotificationPreference.objects.get(user=user, group=group, notification_id=notification_id)
+            self.notification_preference_triggered = preference
+            if len(alternate_settings_compare) == 0:
+                return preference.setting == UserNotificationPreference.SETTING_NOW
+            else:
+                return preference.setting in alternate_settings_compare
         except UserNotificationPreference.DoesNotExist:
             # if not set in DB, check if preference is default on 
             if notification_id in notifications and notifications[notification_id].get('default', False):
                 return True
-            return False
-        return preference.is_active
+        return False
+        
     
     def check_user_wants_notification(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
@@ -147,40 +231,46 @@ class NotificationsThread(Thread):
             return False
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
-        
-        group = None
-        
-        if type(obj) is CosinnusGroup or issubclass(obj.__class__, CosinnusGroup):
-            group = obj
-        elif issubclass(obj.__class__, BaseTaggableObjectModel):
-            group = obj.group
-        elif hasattr(obj, 'group'):
-            group = obj.group
-        else:
-            raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
-                If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
-        user_in_group = group.is_member(user)
-        
-        # print ">> checking if user wants notification ", notification_id, "(is he in the group/object's group?)", user_in_group
-        if not user_in_group:
-            # >>> user didn't want notification or there was no group
+        # user cannot be object's creator and must be able to read it
+        if hasattr(obj, 'creator') and obj.creator == user:
             return False
-        if self.obj.media_tag.visibility == BaseTagObject.VISIBILITY_USER:
-            # only-user visible objects never cause notifications to anyone
+        if not check_object_read_access(obj, user):
             return False
-        if self.is_notification_active(NO_NOTIFICATIONS_ID, user, group):
+
+        if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
             # user didn't want notification because he wants none ever!
             return False
-        if self.is_notification_active(ALL_NOTIFICATIONS_ID, user, group):
-            # >>> user wants notification because he wants all!
+        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group):
+            # user wants notification because he wants all!
             return True
-        ret = self.is_notification_active(notification_id, user, group)
-        # >> checked his settings, and user wants this notification is", ret
+        elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group, 
+                     alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
+            # user wants all notifications, but daily/weekly!
+            """ TODO: stub for daily/weekly trigger (all notifications) """
+            return False
+        elif self.is_notification_active(notification_id, user, self.group, 
+                     alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
+            """ TODO: stub for daily/weekly trigger (single notification) """
+            return False
+        else:
+            ret = self.is_notification_active(notification_id, user, self.group)
+        # checked his settings, and user wants this notification is", ret
         return ret
 
 
     def run(self):
         from cosinnus.utils.context_processors import cosinnus as cosinnus_context
+        
+        # set group, inferred from object
+        if type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
+            self.group = self.obj
+        elif issubclass(self.obj.__class__, BaseTaggableObjectModel):
+            self.group = self.obj.group
+        elif hasattr(self.obj, 'group'):
+            self.group = self.obj.group
+        else:
+            raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
+                If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
         
         for receiver in self.audience:
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
@@ -196,24 +286,48 @@ class NotificationsThread(Thread):
                         context = get_common_mail_context(self.sender.request)
                         context.update(cosinnus_context(self.sender.request))
                     else:
-                        context = {} #print ">>> warn: no request in sender"
-                    context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':'%s%s' % (context['domain_url'], reverse('cosinnus:notifications'))})
+                        context = {} # no request in sender
+                    
+                    # if we know the triggering preference, we can link to it directly via ULR anchors
+                    url_suffix = ''
+                    if self.notification_preference_triggered:
+                        group_pk = self.notification_preference_triggered.group_id
+                        pref_arg = ''
+                        if self.notification_preference_triggered.notification_id not in (NO_NOTIFICATIONS_ID, ALL_NOTIFICATIONS_ID):
+                            pref_arg = 'highlight_pref=%d:%s&' % (group_pk, self.notification_preference_triggered.notification_id)
+                        url_suffix = '?%shighlight_choice=%d#notif_choice_%d' % (pref_arg, group_pk, group_pk)
+                    preference_url = '%s%s%s' % (context['domain_url'], reverse('cosinnus:notifications'), url_suffix)
+                    
+                    context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':mark_safe(preference_url)})
+                    
                     # additional context for BaseTaggableObjectModels
+                    context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
                     if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                        context.update({'object_name': mark_safe(strip_tags(self.obj.title)), 'team_name': mark_safe(strip_tags(self.obj.group.name))})
-                    else:
-                        group = getattr(self.obj, 'group', None)
-                        context.update({'team_name': mark_safe(strip_tags(getattr(group, 'name', '<notfound>')))})
+                        context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
                     try:
                         context.update({'object_url':self.obj.get_absolute_url()})
                     except:
-                        print "pass"
+                        pass
+                    
+                    is_html = self.options.get('is_html', False)
                     subject = render_to_string(subj_template, context)
-                    send_mail_or_fail(receiver.email, subject, template, context)
+                    send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
                     
                 finally:
                     translation.activate(cur_language)
-                    
+        
+        if self.audience:
+            # create a new NotificationEvent that saves this event for digest re-generation
+            content_type = ContentType.objects.get_for_model(self.obj.__class__)
+            notifevent = NotificationEvent.objects.create(
+                content_type=content_type,
+                object_id=self.obj.id,
+                group=self.group,
+                user=self.user,
+                notification_id=self.notification_id,
+                audience=',%s,' % ','.join([str(receiver.id) for receiver in self.audience]),
+            )
+          
         return
     
 
