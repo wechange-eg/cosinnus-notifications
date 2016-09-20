@@ -296,7 +296,7 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         'digest_setting': digest_setting,
         #'digest_time': digest_generation_time, # TODO: humanize
     }
-    send_mail_or_fail(receiver.email, subject, template, context)
+    send_mail_or_fail(receiver.email, subject, template, context, is_html=True)
 
 
 def cleanup_stale_notifications():
