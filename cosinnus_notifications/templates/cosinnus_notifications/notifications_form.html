@@ -74,8 +74,10 @@
 		                            <p class="no-horizontal-padding no-vertical-padding">
 		                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});" onmousedown="return toggleCustomNotificationHeader(event, {{group.pk}});">
 		                                <option {% if choice == "all_1" %}selected{% endif %} value="all_1">{% trans "All notifications" %}</option>
+		                                {% if not SETTINGS.COSINNUS_DIGEST_ONLY_FOR_ADMINS or user.is_superuser %}
 		                                <option {% if choice == "all_2" %}selected{% endif %} value="all_2">{% trans "All notifications" %} ({% trans "Daily" %})</option>
 		                                <option {% if choice == "all_3" %}selected{% endif %} value="all_3">{% trans "All notifications" %} ({% trans "Weekly" %})</option>
+		                                {% endif %}
 		                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
 		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
 		                            </select>
@@ -97,12 +99,11 @@
 			                                		</div>
 			                                		<div class="pull-right">
 			                                			<div class="condensed-radio-input">
-							                                {% for choice_value, choice_label in notification_choices %}
-							                                	{% if not forloop.first %}-->{% endif %}<label class="notification-options-label">
+			                                				{# please keep this linebreak formatting so that no spaces exit between the <label> elements! #}
+							                                {% for choice_value, choice_label in notification_choices %}{% if not SETTINGS.COSINNUS_DIGEST_ONLY_FOR_ADMINS or user.is_superuser or choice_value <= 1 %}<label class="notification-options-label">
 								                                	<input type="radio" name="notif_option:{{id}}" value="{{ choice_value }}" {% if value == choice_value %}checked="checked"{% endif %}>
 																	<span class="noselect">{{ choice_label }}</span>
-																</label>{% if not forloop.last %}<!--{# this is in to not confuse highlighters --> #}{% endif %}
-							                                {% endfor %}
+																</label>{% endif %}{% endfor %}
 						                                </div>
 			                                		</div>
 			                                		<div class="clearfix"></div>

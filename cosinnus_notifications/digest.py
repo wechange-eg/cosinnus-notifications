@@ -70,6 +70,8 @@ def send_digest_for_current_portal(digest_setting):
     
     emailed = 0
     for user in users:
+        if getattr(settings, 'COSINNUS_DIGEST_ONLY_FOR_ADMINS', False) and not user.is_superuser:
+            continue
         
         cur_language = translation.get_language()
         try:
