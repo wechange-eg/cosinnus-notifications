@@ -82,10 +82,12 @@ def send_digest_for_current_portal(digest_setting):
             # switch language to user's preference language so all i18n and date formats are in their language
             translation.activate(getattr(user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
             
-            # these groups will never get digest notifications because they have a blanketing ALL (now) or NONE setting
+            # these groups will never get digest notifications because they have a blanketing NONE setting or 
+            # ALL setting (of anything but this ``digest_setting``)
             # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
+            unwanted_digest_settings = [key for key in dict(UserNotificationPreference.SETTING_CHOICES).keys() if key != digest_setting]
             exclude_digest_groups = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids) 
-            exclude_digest_groups = exclude_digest_groups.filter(Q(notification_id=ALL_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW) | Q(notification_id=NO_NOTIFICATIONS_ID))
+            exclude_digest_groups = exclude_digest_groups.filter(Q(notification_id=ALL_NOTIFICATIONS_ID, setting__in=unwanted_digest_settings) | Q(notification_id=NO_NOTIFICATIONS_ID))
             exclude_digest_groups = exclude_digest_groups.values_list('group_id', flat=True)  
             
             # find out any notification preferences the user has for groups in this portal with the daily/weekly setting
