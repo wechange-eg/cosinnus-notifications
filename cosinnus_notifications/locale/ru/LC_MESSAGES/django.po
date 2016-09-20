@@ -1,4 +1,4 @@
-# SOME DESCRIPTIVE TITLE.
+﻿# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -54,7 +54,7 @@ msgstr "Все уведомления"
 #: .\notifications.py:37
 #: .\templates\cosinnus_notifications\notifications_form.html:55
 msgid "No notifications"
-msgstr "Не показывать уведомления"
+msgstr "Нет уведомлений"
 
 #: .\templates\cosinnus_notifications\base.html:6
 msgid "Your Profile"
