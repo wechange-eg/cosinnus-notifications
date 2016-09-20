@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _, pgettext_lazy as p_
+from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.utils.encoding import python_2_unicode_compatible
 
 from cosinnus.conf import settings
@@ -23,10 +23,10 @@ class UserNotificationPreference(models.Model):
     SETTING_WEEKLY = 3
     
     SETTING_CHOICES = (
-        (SETTING_NEVER, p_('notification frequency', 'Never')),
-        (SETTING_NOW, p_('notification frequency', 'Immediately')),
-        (SETTING_DAILY, p_('notification frequency', 'Daily')),
-        (SETTING_WEEKLY, p_('notification frequency', 'Weekly')),
+        (SETTING_NEVER, pgettext_lazy('notification frequency', 'Never')),
+        (SETTING_NOW, pgettext_lazy('notification frequency', 'Immediately')),
+        (SETTING_DAILY, pgettext_lazy('notification frequency', 'Daily')),
+        (SETTING_WEEKLY, pgettext_lazy('notification frequency', 'Weekly')),
     )
     
     SETTINGS_DAYS_DURATIONS = {
