@@ -310,6 +310,8 @@ class NotificationsThread(Thread):
                         pass
                     
                     is_html = self.options.get('is_html', False)
+                    is_html = False # TODO: FIXME: remove once single-notifications are HTML too!
+                     
                     subject = render_to_string(subj_template, context)
                     send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
                     
