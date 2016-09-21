@@ -19,11 +19,12 @@ from cosinnus.models.group import CosinnusGroup, CosinnusPortal
 from cosinnus.models.tagged import BaseTaggableObjectModel, BaseTagObject
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
-from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
+from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting,\
+    textfield
 from cosinnus.utils.functions import ensure_dict_keys, resolve_attributes
 from threading import Thread
 from django.utils.safestring import mark_safe
-from django.utils.html import strip_tags
+from django.utils.html import strip_tags, urlize
 from django.contrib.contenttypes.models import ContentType
 from cosinnus.utils.permissions import check_object_read_access
 from django.templatetags.static import static
@@ -468,6 +469,10 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         for key, val in data.items():
             if isinstance(val, datetime.datetime):
                 data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
+                
+        # urlize and linebreak item excerpt texts
+        for key in ['object_text', 'sub_object_text']:
+            data[key] = mark_safe(textfield(data[key]))
         
         item_html = render_to_string(options['snippet_template'], context=data)
         if return_data:
