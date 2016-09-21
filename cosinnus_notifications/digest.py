@@ -20,7 +20,8 @@ from cosinnus.models.group import CosinnusPortal
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
 from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
-    ALL_NOTIFICATIONS_ID, NOTIFICATION_REASONS
+    ALL_NOTIFICATIONS_ID, NOTIFICATION_REASONS,\
+    render_digest_item_for_notification_event
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access
