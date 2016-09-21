@@ -341,7 +341,7 @@ class NotificationsThread(Thread):
                             'origin_url': self.group.get_absolute_url(),
                             'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
                             
-                            'notification_body': 'XXXX', # TODO: group.description or maybe empty?
+                            'notification_body': None, # this is a body text that can be used for group description or similar
                             
                             'notification_item_html': mark_safe(notification_item_html),
                         }
