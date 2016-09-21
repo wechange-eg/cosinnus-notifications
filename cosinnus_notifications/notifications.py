@@ -2,28 +2,33 @@
 from __future__ import unicode_literals
 
 import logging
+import datetime
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
-from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
+from django.utils import translation, formats
 from django.utils.importlib import import_module
+from django.utils.timezone import localtime
+from django.utils.translation import ugettext_lazy as _
 from django.template.loader import render_to_string
 
 from cosinnus.conf import settings
 from cosinnus.core.mail import get_common_mail_context, send_mail_or_fail
 from cosinnus.core.registries.apps import app_registry
-from cosinnus.models.group import CosinnusGroup
+from cosinnus.models.group import CosinnusGroup, CosinnusPortal
 from cosinnus.models.tagged import BaseTaggableObjectModel, BaseTagObject
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
-from cosinnus.utils.functions import ensure_dict_keys
+from cosinnus.utils.functions import ensure_dict_keys, resolve_attributes
 from threading import Thread
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
 from django.contrib.contenttypes.models import ContentType
 from cosinnus.utils.permissions import check_object_read_access
+from django.templatetags.static import static
+from django.utils.encoding import force_text
+
 
 
 logger = logging.getLogger('cosinnus')
@@ -106,6 +111,9 @@ NOTIFICATIONS_DEFAULTS = {
         'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
     },
 }
+
+
+DIGEST_ITEM_TITLE_MAX_LENGTH = 50
 
 
 def _find_notification(signal):
@@ -272,6 +280,9 @@ class NotificationsThread(Thread):
             raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
                 If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
         
+        # we wrap the info in a (non-persisted) NotificationEvent to be compatible with the rendering method
+        notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object = self.obj)
+        
         for receiver in self.audience:
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
                 
@@ -280,13 +291,10 @@ class NotificationsThread(Thread):
                 try:
                     translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
                     
-                    template = self.options['mail_template']
-                    subj_template = self.options['subject_template']
-                    if self.sender.request:
-                        context = get_common_mail_context(self.sender.request)
-                        context.update(cosinnus_context(self.sender.request))
-                    else:
-                        context = {} # no request in sender
+                    
+                    portal = CosinnusPortal.get_current()
+                    site = portal.site
+                    domain = portal.get_domain()
                     
                     # if we know the triggering preference, we can link to it directly via ULR anchors
                     url_suffix = ''
@@ -296,23 +304,77 @@ class NotificationsThread(Thread):
                         if self.notification_preference_triggered.notification_id not in (NO_NOTIFICATIONS_ID, ALL_NOTIFICATIONS_ID):
                             pref_arg = 'highlight_pref=%d:%s&' % (group_pk, self.notification_preference_triggered.notification_id)
                         url_suffix = '?%shighlight_choice=%d#notif_choice_%d' % (pref_arg, group_pk, group_pk)
-                    preference_url = '%s%s%s' % (context['domain_url'], reverse('cosinnus:notifications'), url_suffix)
+                    preference_url = '%s%s%s' % (domain, reverse('cosinnus:notifications'), url_suffix)
                     
-                    context.update({'receiver':receiver, 'receiver_name':mark_safe(strip_tags(full_name(receiver))), 'sender':self.user, 'sender_name':mark_safe(strip_tags(full_name(self.user))), 'object':self.obj, 'notification_settings_url':mark_safe(preference_url)})
                     
-                    # additional context for BaseTaggableObjectModels
-                    context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
-                    if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                        context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
-                    try:
-                        context.update({'object_url':self.obj.get_absolute_url()})
-                    except:
-                        pass
                     
                     is_html = self.options.get('is_html', False)
-                    is_html = False # TODO: FIXME: remove once single-notifications are HTML too!
-                     
-                    subject = render_to_string(subj_template, context)
+                    
+                    if is_html:
+                        template = '/cosinnus/html_mail/notification.html'
+                        portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
+                        
+                        reason = NOTIFICATION_REASONS[self.options.get('notification_reason')] 
+                        portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+                        
+                        # render the notification item (and get back some data from the event)
+                        notification_item_html, data = render_digest_item_for_notification_event(notification_event, return_data=True)
+                        topic = data.get('event_text')
+                        subject = self.options.get('subject_text') % data.get('string_variables')
+                        
+                        context = {
+                            'site': site,
+                            'site_name': site.name,
+                            'domain_url': domain,
+                            'portal_url': domain,
+                            'portal_image_url': portal_image_url,
+                            'portal_name': portal_name,
+                            'receiver': receiver, 
+                            'addressee': mark_safe(strip_tags(full_name(receiver))), 
+                            'topic': topic,
+                            'prefs_url': mark_safe(preference_url),
+                            
+                            'notification_reason': reason,
+                            
+                            'origin_name': self.group['name'],
+                            'origin_url': self.group.get_absolute_url(),
+                            'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
+                            
+                            'notification_body': 'XXXX', # TODO: group.description or maybe empty?
+                            
+                            'notification_item_html': mark_safe(notification_item_html),
+                        }
+                    
+                    else:
+                        
+                        template = self.options['mail_template']
+                        subj_template = self.options['subject_template']
+                        if self.sender.request:
+                            context = get_common_mail_context(self.sender.request)
+                            context.update(cosinnus_context(self.sender.request))
+                        else:
+                            context = {} # no request in sender
+                        
+                        context.update({
+                            'receiver':receiver, 
+                            'receiver_name':mark_safe(strip_tags(full_name(receiver))), 
+                            'sender':self.user, 
+                            'sender_name':mark_safe(strip_tags(full_name(self.user))), 
+                            'object':self.obj, 
+                            'notification_settings_url':mark_safe(preference_url)
+                        })
+                        
+                        # additional context for BaseTaggableObjectModels
+                        context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
+                        if issubclass(self.obj.__class__, BaseTaggableObjectModel):
+                            context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
+                        try:
+                            context.update({'object_url':self.obj.get_absolute_url()})
+                        except:
+                            pass
+                        subject = render_to_string(subj_template, context)
+                    
+                    
                     send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
                     
                 finally:
@@ -331,7 +393,92 @@ class NotificationsThread(Thread):
             )
           
         return
+
+
+def render_digest_item_for_notification_event(notification_event, return_data=False):
+    """ Renders the HTML of a single notification event for a receiving user """
     
+    try:
+        obj = notification_event.target_object
+        options = notifications[notification_event.notification_id]
+        
+        # stub for missing notification for this digest
+        if not options.get('is_html', False):
+            logger.exception('Missing HTML snippet configuration for digest encountered for notification setting "%s". Skipping this notification type in this digest!' % notification_event.notification_id)
+            return ''
+            """
+            return '<div>stub: event "%s" with object "%s" from user "%s"</div>' % (
+                notification_event.notification_id,
+                getattr(obj, 'text', getattr(obj, 'title', getattr(obj, 'name', 'NOARGS'))),
+                notification_event.user.get_full_name(),
+            )
+            """
+        data_attributes = options['data_attributes']
+        
+        sender_name = mark_safe(strip_tags(full_name(notification_event.user)))
+        # add special attributes to object
+        obj._sender_name = sender_name
+        obj._sender = notification_event.user
+        
+        object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
+        string_variables = {
+            'sender_name': sender_name,
+            'object_name': object_name,
+            'team_name': notification_event.group['name'],
+        }
+        event_text = options['event_text']
+        sub_event_text = options['sub_event_text']
+        event_text = (event_text % string_variables) if event_text else None
+        sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
+        
+        data = {
+            'type': options['snippet_type'],
+            'event_text': event_text,
+            'snippet_template': options['snippet_template'],
+            
+            'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
+            'object_name': object_name,
+            'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
+            'object_text': resolve_attributes(obj, data_attributes['object_text']),
+            'image_url': resolve_attributes(obj, data_attributes['image_url']),
+            
+            'sub_event_text': sub_event_text,
+            'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
+            'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
+            'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
+            
+            'string_variables': string_variables,
+        }
+        # clean some attributes
+        if not data['object_name']:
+            data['object_name'] = _('Untitled')
+        if len(data['object_name']) > DIGEST_ITEM_TITLE_MAX_LENGTH:
+            data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
+        # default for image_url is the notifcation event's causer
+        if not data['image_url']:
+            data['image_url'] = CosinnusPortal.get_current().get_domain() + \
+                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe.png'))
+        # ensure URLs are absolute
+        for url_field in ['image_url', 'object_url', 'sub_image_url']:
+            url = data[url_field]
+            if url and not url.startswith('http'):
+                data[url_field] = CosinnusPortal.get_current().get_domain() + data[url_field]
+                
+        # humanize all datetime objects
+        for key, val in data.items():
+            if isinstance(val, datetime.datetime):
+                data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
+        
+        item_html = render_to_string(options['snippet_template'], context=data)
+        if return_data:
+            return item_html, data
+        else:
+            return item_html
+    
+    except Exception, e:
+        logger.exception('Error while rendering a digest item for a digest email. Exception in extra.', extra={'exception': force_text(e)})
+    return ''
+
 
 def notification_receiver(sender, user, obj, audience, **kwargs):
     """ Generic receiver function for all notifications 

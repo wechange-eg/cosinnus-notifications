@@ -8,11 +8,11 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.template.loader import render_to_string
-from django.utils import translation, formats
+from django.utils import translation
 from django.utils.html import strip_tags
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
-from django.utils.timezone import now, localtime
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from cosinnus.conf import settings
@@ -20,18 +20,14 @@ from cosinnus.models.group import CosinnusPortal
 from cosinnus_notifications.models import UserNotificationPreference,\
     NotificationEvent
 from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
-    ALL_NOTIFICATIONS_ID, notifications, NOTIFICATION_REASONS
+    ALL_NOTIFICATIONS_ID, NOTIFICATION_REASONS
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access
 import traceback
 from django.templatetags.static import static
-from cosinnus.utils.functions import resolve_attributes
 
 logger = logging.getLogger('cosinnus')
-
-
-DIGEST_ITEM_TITLE_MAX_LENGTH = 50
 
 
 def send_digest_for_current_portal(digest_setting):
@@ -137,7 +133,7 @@ def send_digest_for_current_portal(digest_setting):
                     
                 if wanted_group_events:
                     group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
-                    group_body_html = '\n'.join([render_digest_item_for_notification_event(event, user) for event in wanted_group_events])
+                    group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
                     group_template_context = {
                         'group_body_html': mark_safe(group_body_html),
                         'image_url': CosinnusPortal.get_current().get_domain() + \
@@ -182,89 +178,10 @@ def send_digest_for_current_portal(digest_setting):
         print extra_log
     
 
-def render_digest_item_for_notification_event(notification_event, receiver):
-    """ Renders the HTML of a single notification event for a receiving user """
-    
-    try:
-        obj = notification_event.target_object
-        options = notifications[notification_event.notification_id]
-        
-        # stub for missing notification for this digest
-        if not options.get('is_html', False):
-            logger.exception('Missing HTML snippet configuration for digest encountered for notification setting "%s". Skipping this notification type in this digest!' % notification_event.notification_id)
-            return ''
-            """
-            return '<div>stub: event "%s" with object "%s" from user "%s"</div>' % (
-                notification_event.notification_id,
-                getattr(obj, 'text', getattr(obj, 'title', getattr(obj, 'name', 'NOARGS'))),
-                notification_event.user.get_full_name(),
-            )
-            """
-        data_attributes = options['data_attributes']
-        
-        sender_name = mark_safe(strip_tags(full_name(notification_event.user)))
-        # add special attributes to object
-        obj._sender_name = sender_name
-        obj._sender = notification_event.user
-        
-        object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
-        string_variables = {
-            'sender_name': sender_name,
-            'object_name': object_name,
-        }
-        event_text = options['event_text']
-        sub_event_text = options['sub_event_text']
-        event_text = (event_text % string_variables) if event_text else None
-        sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
-        
-        data = {
-            'type': options['snippet_type'],
-            'event_text': event_text,
-            'snippet_template': options['snippet_template'],
-            
-            'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
-            'object_name': object_name,
-            'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
-            'object_text': resolve_attributes(obj, data_attributes['object_text']),
-            'image_url': resolve_attributes(obj, data_attributes['image_url']),
-            
-            'sub_event_text': sub_event_text,
-            'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
-            'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
-            'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
-        }
-        # clean some attributes
-        if not data['object_name']:
-            data['object_name'] = _('Untitled')
-        if len(data['object_name']) > DIGEST_ITEM_TITLE_MAX_LENGTH:
-            data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
-        # default for image_url is the notifcation event's causer
-        if not data['image_url']:
-            data['image_url'] = CosinnusPortal.get_current().get_domain() + \
-                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe.png'))
-        # ensure URLs are absolute
-        for url_field in ['image_url', 'object_url', 'sub_image_url']:
-            url = data[url_field]
-            if url and not url.startswith('http'):
-                data[url_field] = CosinnusPortal.get_current().get_domain() + data[url_field]
-                
-        # humanize all datetime objects
-        for key, val in data.items():
-            if isinstance(val, datetime.datetime):
-                data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
-        
-        item_html = render_to_string(options['snippet_template'], context=data)
-        return item_html
-    
-    except Exception, e:
-        logger.exception('Error while rendering a digest item for a digest email. Exception in extra.', extra={'exception': force_text(e)})
-    return ''
-
-
 def _send_digest_email(receiver, body_html, digest_generation_time, digest_setting):
     """ Prepares the actual digest mail and sends it """
     
-    template = '/cosinnus/html_mail/digest.html' # TODO
+    template = '/cosinnus/html_mail/digest.html'
     portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
     if digest_setting == UserNotificationPreference.SETTING_DAILY:
         subject = _('Your daily digest for %(portal_name)s') % {'portal_name': portal_name}
@@ -294,7 +211,6 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         'prefs_url': mark_safe(preference_url),
         'notification_reason': reason,
         'digest_setting': digest_setting,
-        #'digest_time': digest_generation_time, # TODO: humanize
     }
     send_mail_or_fail(receiver.email, subject, template, context, is_html=True)
 
