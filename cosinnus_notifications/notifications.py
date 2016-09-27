@@ -91,6 +91,10 @@ NOTIFICATIONS_DEFAULTS = {
     # little explanatory text of what happened here. (e.g. "new document", "upcoming event") 
     # this can some string substitution arguments, e.g. ``new post by %(sender_name)s``
     'event_text': _('New item'),
+    # the explanatory text on a SINGLE notification of what happened. this should be a little more
+    # elaborate than ``event_text`` and should usually be a full sentence (without the ending full stop).
+    # default: if None or omitted, will use the contents of ``event_text``
+    'notification_text': None,
     # event text for a subdivided item under the main one, if required
     'sub_event_text': None, 
     # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
@@ -320,7 +324,7 @@ class NotificationsThread(Thread):
                         
                         # render the notification item (and get back some data from the event)
                         notification_item_html, data = render_digest_item_for_notification_event(notification_event, return_data=True)
-                        topic = data.get('event_text')
+                        topic = data.get('notification_text', None) or data.get('event_text')
                         subject = self.options.get('subject_text') % data.get('string_variables')
                         
                         context = {
@@ -428,13 +432,16 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'team_name': notification_event.group['name'],
         }
         event_text = options['event_text']
+        notification_text = options['notification_text'] or options['event_text']
         sub_event_text = options['sub_event_text']
         event_text = (event_text % string_variables) if event_text else None
+        notification_text = (notification_text % string_variables) if notification_text else None
         sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
         
         data = {
             'type': options['snippet_type'],
             'event_text': event_text,
+            'notification_text': notification_text,
             'snippet_template': options['snippet_template'],
             
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
