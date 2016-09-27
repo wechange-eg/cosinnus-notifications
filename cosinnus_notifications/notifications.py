@@ -479,7 +479,8 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                 
         # urlize and linebreak item excerpt texts
         for key in ['object_text', 'sub_object_text']:
-            data[key] = mark_safe(textfield(data[key]))
+            if key in data and data[key]:
+                data[key] = mark_safe(textfield(data[key]))
         
         item_html = render_to_string(options['snippet_template'], context=data)
         if return_data:
