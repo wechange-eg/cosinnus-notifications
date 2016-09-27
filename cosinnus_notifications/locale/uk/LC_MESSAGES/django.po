@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-20 18:31+0200\n"
+"POT-Creation-Date: 2016-09-27 17:57+0200\n"
 "PO-Revision-Date: 2015-11-11 10:42+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -24,9 +24,6 @@ msgstr "Сповіщення"
 msgctxt "the_app"
 msgid "notifications"
 msgstr "Сповіщення"
-
-msgid "Untitled"
-msgstr ""
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
@@ -98,6 +95,9 @@ msgid "You are getting this email because you are subscribed to one or more week
 msgstr ""
 
 msgid "New item"
+msgstr ""
+
+msgid "Untitled"
 msgstr ""
 
 msgid "Your Profile"
