@@ -17,11 +17,27 @@
 {% block content %}
     
     {% if not request.user|cosinnus_setting:"notifications_help_text" %}
-	    <div class="alert alert-success alert-dismissable">
-	        <i class="fa fa-info-circle fa-3x"></i>
-	        <p>{% trans "Select which notifications you would like to receive for each group or project you are involved in." %}</p>
-	        <p>{% trans "These notifications will be sent to your configured email address:" %} <em>{{ request.user.email }}</em></p>
-	    </div>
+        <div class="alert alert-success alert-dismissable" style="height: 125px; overflow-y: hidden;">
+            <i class="fa fa-info-circle fa-3x"></i>
+             <div class="multiline-ellipsis" style="line-height: inherit;">
+                <div class="multiline-ellipsis-prop"></div>
+                <div class="multiline-ellipsis-main">
+                <p>{% trans "Select which notifications you would like to receive for each group or project you are involved in." %}</p>
+                <p>{% trans "These notifications will be sent to your configured email address:" %} <em>{{ request.user.email }}</em></p>
+                <p>{% trans 'You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest.' %}</p>
+                <p>{% trans 'The digest will aggregate all notifications with the "Daily" (or "Weekly") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend.' %}</p>
+                <p>{% trans 'Notifications you set to "Immediately" will be e-mailed to you as soon as they happen, with one e-mail per notification.' %}</p>
+                <p>{% trans "Don't forget to save your settings once you are done editing them!" %}</p>
+                </div>
+                <div class="multiline-ellipsis-realend" style="top: -17px;">
+                    <a href="#">
+                        ...{% trans "more" %}
+                        <span class="fa fa-chevron-down"></span>
+                    </a>
+                </div>
+            </div>
+            
+        </div>
     {% endif %}
 
     <form method="POST" action="">{% csrf_token %}

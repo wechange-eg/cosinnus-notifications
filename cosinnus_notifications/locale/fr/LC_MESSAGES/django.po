@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-27 17:57+0200\n"
+"POT-Creation-Date: 2016-09-28 17:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,6 +106,21 @@ msgid "Select which notifications you would like to receive for each group or pr
 msgstr ""
 
 msgid "These notifications will be sent to your configured email address:"
+msgstr ""
+
+msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
+msgstr ""
+
+msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
+msgstr ""
+
+msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
+msgstr ""
+
+msgid "Don't forget to save your settings once you are done editing them!"
+msgstr ""
+
+msgid "more"
 msgstr ""
 
 msgid "Receive notification emails in this language"

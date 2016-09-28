@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-27 17:57+0200\n"
-"PO-Revision-Date: 2016-09-20 18:31+0200\n"
+"POT-Creation-Date: 2016-09-28 17:43+0200\n"
+"PO-Revision-Date: 2016-09-28 17:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -108,6 +108,21 @@ msgstr "Hier kannst du auswählen, welche Benachrichtigungen du von den Gruppen 
 
 msgid "These notifications will be sent to your configured email address:"
 msgstr "Diese Benachrichtigungen werden dir an deine eingestellte E-Mail-Adresse geschickt:"
+
+msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
+msgstr "Du kannst auswählen ob du Benachrichtigungen sobald sie passieren, oder ob du sie in einem täglichen (oder wöchtenlichen) E-Mail Report erhalten möchtest."
+
+msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
+msgstr "Der E-Mail Report fasst Benachrichtigungen mit der Einstellung \"Täglich\" (oder \"Wöchentlich\") von allen Projekten und Gruppen zusammen. So erhältst du nur eine einzige E-Mail pro Tag (oder Woche), in der alles Interessante, was passiert ist, steht."
+
+msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
+msgstr "Benachrichtigungen die du auf \"Sofort\" gestellt hast, werden dir sofort zugeschickt, mit jeweils einer E-Mail pro Benachrichtigung."
+
+msgid "Don't forget to save your settings once you are done editing them!"
+msgstr "Vergiss nicht deine Einstellungen zu speichern wenn du fertig bist!"
+
+msgid "more"
+msgstr "mehr"
 
 msgid "Receive notification emails in this language"
 msgstr "Benachrichtigungs-Emails in dieser Sprache empfangen"
