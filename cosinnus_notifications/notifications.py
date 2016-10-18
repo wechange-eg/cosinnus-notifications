@@ -77,6 +77,7 @@ NOTIFICATIONS_DEFAULTS = {
     # a django signal on which to listen for
     'signals': [REQUIRED_NOTIFICATION_ATTRIBUTE],
     # should this notification preference be on by default (if the user has never changed the setting?)
+    # this may be False or 0 (off), True or 1 (on, immediately), 2 (daily) or 3 (weekly)
     'default': False,
     
     # does this notification support HTML emails and digest chunking?
@@ -227,9 +228,14 @@ class NotificationsThread(Thread):
             else:
                 return preference.setting in alternate_settings_compare
         except UserNotificationPreference.DoesNotExist:
-            # if not set in DB, check if preference is default on 
-            if notification_id in notifications and notifications[notification_id].get('default', False):
-                return True
+            # if not set in DB, check if preference is default on (and matching the setting value we're comparing to)
+            if notification_id in notifications:
+                default_preference_setting = notifications[notification_id].get('default', 0)
+                if default_preference_setting:
+                    if len(alternate_settings_compare) > 0:
+                        return default_preference_setting in alternate_settings_compare
+                    else:
+                        return default_preference_setting == 1
         return False
         
     
