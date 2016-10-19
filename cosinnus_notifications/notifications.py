@@ -79,6 +79,9 @@ NOTIFICATIONS_DEFAULTS = {
     # should this notification preference be on by default (if the user has never changed the setting?)
     # this may be False or 0 (off), True or 1 (on, immediately), 2 (daily) or 3 (weekly)
     'default': False,
+    # can this notification be sent to the objects creator?
+    # default False, because most items aren't wanted to be known by the author creating them
+    'allow_creator_as_audience': False,
     
     # does this notification support HTML emails and digest chunking?
     'is_html': False,
@@ -250,9 +253,14 @@ class NotificationsThread(Thread):
             return False
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
-        # user cannot be object's creator and must be able to read it
-        if hasattr(obj, 'creator') and obj.creator == user:
-            return False
+        # user cannot be object's creator unless explicitly specified
+        if hasattr(obj, 'creator'):
+            allow_creator_as_audience = False
+            if notification_id in notifications:
+                allow_creator_as_audience = notifications[notification_id].get('allow_creator_as_audience', False)
+            if obj.creator == user and not allow_creator_as_audience:
+                return False
+        # user must be able to read object
         if not check_object_read_access(obj, user):
             return False
 
