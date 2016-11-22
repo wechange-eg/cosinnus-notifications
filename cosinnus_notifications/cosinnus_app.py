@@ -10,6 +10,9 @@ from cosinnus.conf import settings
 logger = logging.getLogger('cosinnus')
 
 def register():
+    if 'cosinnus_notifications' in getattr(settings, 'COSINNUS_DISABLED_COSINNUS_APPS', []):
+        return
+    
     # Import here to prevent import side effects
     from django.utils.translation import ugettext_lazy as _
     from django.utils.translation import pgettext_lazy
