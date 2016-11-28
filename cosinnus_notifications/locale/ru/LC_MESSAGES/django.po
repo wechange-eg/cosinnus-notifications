@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wechange RU\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-02 11:31+0100\n"
-"PO-Revision-Date: 2016-11-02 11:15+0100\n"
+"POT-Creation-Date: 2016-11-21 12:26+0100\n"
+"PO-Revision-Date: 2016-11-28 10:58+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,33 +26,33 @@ msgstr "Уведомления"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "Ваш ежедневный отчёт на %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "Всё, что произошло вчера!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "Ваш отчёт за неделю на %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "Всё, что произошло за прошедшую неделю!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Никогда"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Немедленно "
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Ежедневно"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Еженедельно"
 
 msgid "Notification Preference for User"
 msgstr "Пользовательские настройки уведомлений"
@@ -67,10 +67,10 @@ msgid "Notification Preferences"
 msgstr "Настройки уведомлений"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Пользователь, который создал событие"
 
 msgid "Audience"
-msgstr ""
+msgstr "Аудитория"
 
 msgid "All notifications"
 msgstr "Все уведомления"
@@ -79,58 +79,58 @@ msgid "No notifications"
 msgstr "Нет уведомлений"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "Вы получили это уведомление, потому что Вы подписались на эти виды событий в Вашем проекте или группе."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "Вы получили это уведомление, потому что Вы являетесь администратором этого проекта или группы."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "Вы получили это сообщение, потому что  Вы являетесь администратором этого портала."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "Вы получили это уведомление, потому что Вы подписались на одно или несколько ежедневных уведомлений."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "Вы получили это уведомление, потому что Вы подписались на одно или несколько еженедельных уведомлений."
 
 msgid "New item"
-msgstr ""
+msgstr "Новый элемент"
 
 msgid "Untitled"
-msgstr ""
+msgstr "Без названия"
 
 msgid "Your Profile"
 msgstr "Ваш профиль"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr "Выберите, какие уведомления Вы хотели бы получать для каждой группы или проекта, которым Вы занимаетесь"
+msgstr "Выберите, какие уведомления Вы хотели бы получать для каждой группы или проекта, которыми Вы занимаетесь"
 
 msgid "These notifications will be sent to your configured email address:"
 msgstr "Эти уведомления будут отправляться по указанному Вами адресу электронной почты:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "Вы можете выбрать, будете-ли Вы получать уведомления на Вашу электронную почту сразу как только события произошли, или же в ежедневном (еженедельном) отчёте.\r\r"
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "Отчёт на электронную почту содержит все уведомления вместе, со всех проектов и групп, с отметкой «ежедневный» или «еженедельный». Так Вы получите только одно единственное письмо в день или в неделю, которое содержит всё  самое интересное, что произошло."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "Уведомления, которые Вы установили с отметкой «Немедленно», будут Вам отосланы незамедлительно, соответственно: в одном письме – одно уведомление."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "Пожалуйста, сохраните изменения в настройках, когда Вы закончите их редактировать!"
 
 msgid "more"
-msgstr ""
+msgstr "Больше"
 
 msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Электронные письма-уведомления получать на этом языке"
 
 msgid "Daily"
-msgstr ""
+msgstr "Ежедневно"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Еженедельно"
 
 msgid "Custom"
 msgstr "Индивидуальные настройки"
