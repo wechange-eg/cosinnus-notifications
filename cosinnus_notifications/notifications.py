@@ -122,6 +122,8 @@ NOTIFICATIONS_DEFAULTS = {
         'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
         'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
     },
+    # can be used to suffix the origin URL (group url for originating group) with parameters to take different actions when clicked
+    'origin_url_suffix': '',
 }
 
 
@@ -363,7 +365,7 @@ class NotificationsThread(Thread):
                             'notification_reason': reason,
                             
                             'origin_name': self.group['name'],
-                            'origin_url': self.group.get_absolute_url(),
+                            'origin_url': self.group.get_absolute_url() + self.options.get('origin_url_suffix', ''),
                             'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
                             
                             'notification_body': None, # this is a body text that can be used for group description or similar
@@ -450,6 +452,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         string_variables = {
             'sender_name': sender_name,
             'object_name': object_name,
+            'portal_name': _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS),
             'team_name': notification_event.group['name'],
         }
         event_text = options['event_text']
