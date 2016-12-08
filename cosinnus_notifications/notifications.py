@@ -60,6 +60,7 @@ NOTIFICATION_REASONS = {
     'portal_admin': _('You are getting this notification because you are an administrator of this portal.'),
     'daily_digest': _('You are getting this email because you are subscribed to one or more daily notifications.'),
     'weekly_digest': _('You are getting this email because you are subscribed to one or more weekly notifications.'),
+    'none': None, # the entire lower section won't be shown
 }
 
 REQUIRED_NOTIFICATION_ATTRIBUTE = object()
@@ -79,6 +80,8 @@ NOTIFICATIONS_DEFAULTS = {
     # should this notification preference be on by default (if the user has never changed the setting?)
     # this may be False or 0 (off), True or 1 (on, immediately), 2 (daily) or 3 (weekly)
     'default': False,
+    # if True, won't be shown in the notification preference form view
+    'hidden': False,
     # can this notification be sent to the objects creator?
     # default False, because most items aren't wanted to be known by the author creating them
     'allow_creator_as_audience': False,
@@ -246,6 +249,9 @@ class NotificationsThread(Thread):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
             
+        # anonymous users receive notifications (this is to send recruit emails to non-users)
+        if not user.is_authenticated():
+            return True
         # only active users that have logged in before accepted the TOS get notifications
         if not user.is_active:
             return False
@@ -308,7 +314,8 @@ class NotificationsThread(Thread):
                 # switch language to user's preference language
                 cur_language = translation.get_language()
                 try:
-                    translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+                    if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
+                        translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
                     
                     
                     portal = CosinnusPortal.get_current()
@@ -528,8 +535,8 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
         copy_options.update(kwargs['extra'])
         options = copy_options
     
-    # sanity check: only send to active users that have an email set
-    audience = [aud_user for aud_user in audience if aud_user.is_active and aud_user.email]
+    # sanity check: only send to active users that have an email set (or is anonymous, so we can send emails to non-users)
+    audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated()) and aud_user.email)]
     
     notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
     notification_thread.start()
