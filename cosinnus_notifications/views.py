@@ -109,6 +109,9 @@ class NotificationPreferenceView(UpdateView):
             choice_selected = "custom"
             notification_rows = [] # [[id, label, value, app, app_label], ...]
             for notification_id, options in notifications.items():
+                # do not show hidden notifications
+                if options.get('hidden', False):
+                    continue
                 notif_id = '%s:%s' % (group.pk, notification_id)
                 if notification_id == ALL_NOTIFICATIONS_ID:
                     if notif_id in prefs:
