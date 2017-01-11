@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-11-02 11:31+0100\n"
-"PO-Revision-Date: 2016-09-28 17:45+0200\n"
+"PO-Revision-Date: 2017-01-11 13:09+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -80,19 +80,19 @@ msgid "No notifications"
 msgstr "Keine Benachrichtigungen"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr "Du erhältst diese Benachrichtigung weil du angegeben hast, dass du diese Art von Benachrichtigungen erhalten möchtest."
+msgstr "Du erhältst diese Benachrichtigung, weil du angegeben hast, dass du diese Art von Benachrichtigungen erhalten möchtest."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr "Du erhältst diese Benachrichtigung weil du ein Administrator dieses Projektes oder dieser Gruppe bist."
+msgstr "Du erhältst diese Benachrichtigung, weil du ein Administrator dieses Projektes oder dieser Gruppe bist."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr "Du erhältst diese Benachrichtigung weil du ein Administrator dieses Portals bist."
+msgstr "Du erhältst diese Benachrichtigung, weil du ein Administrator dieses Portals bist."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr "Du erhältst diese Benachrichtigung weil du eine oder mehrere tägliche Benachrichtigungen abonniert hast."
+msgstr "Du erhältst diese Benachrichtigung, weil du eine oder mehrere tägliche Benachrichtigungen abonniert hast."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr "Du erhältst diese Benachrichtigung weil du eine oder mehrere wöchentliche Benachrichtigungen abonniert hast."
+msgstr "Du erhältst diese Benachrichtigung, weil du eine oder mehrere wöchentliche Benachrichtigungen abonniert hast."
 
 msgid "New item"
 msgstr "Neues Item"
