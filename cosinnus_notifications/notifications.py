@@ -29,6 +29,7 @@ from django.contrib.contenttypes.models import ContentType
 from cosinnus.utils.permissions import check_object_read_access
 from django.templatetags.static import static
 from django.utils.encoding import force_text
+from cosinnus.utils.group import get_cosinnus_group_model
 
 
 
@@ -250,7 +251,7 @@ class NotificationsThread(Thread):
     def check_user_wants_notification(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
-            
+        
         # anonymous users receive notifications (this is to send recruit emails to non-users)
         if not user.is_authenticated():
             return True
@@ -268,8 +269,8 @@ class NotificationsThread(Thread):
                 allow_creator_as_audience = notifications[notification_id].get('allow_creator_as_audience', False)
             if obj.creator == user and not allow_creator_as_audience:
                 return False
-        # user must be able to read object
-        if not check_object_read_access(obj, user):
+        # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
+        if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
 
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
