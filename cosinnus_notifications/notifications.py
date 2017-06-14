@@ -319,7 +319,8 @@ class NotificationsThread(Thread):
                 try:
                     if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
                         translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
-                    
+                    elif hasattr(self.user, 'cosinnus_profile'): # if receiver is a virtual user, set language to sender's
+                        translation.activate(getattr(self.user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
                     
                     portal = CosinnusPortal.get_current()
                     site = portal.site
