@@ -24,7 +24,7 @@ from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting,\
 from cosinnus.utils.functions import ensure_dict_keys, resolve_attributes
 from threading import Thread
 from django.utils.safestring import mark_safe
-from django.utils.html import strip_tags, urlize
+from django.utils.html import strip_tags, urlize, escape
 from django.contrib.contenttypes.models import ContentType
 from cosinnus.utils.permissions import check_object_read_access
 from django.templatetags.static import static
@@ -464,6 +464,19 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         notification_text = (notification_text % string_variables) if notification_text else None
         sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
         
+        # we escape first, then do markup -> HTML conversion, then mark safe
+        
+        # TODO: refactor this into util function probably
+        object_text = escape(resolve_attributes(obj, data_attributes['object_text']))
+        """# TODO: do the markdown replacements here """
+        object_text = object_text
+        object_text = mark_safe(object_text)
+        
+        sub_object_text = escape(resolve_attributes(obj, data_attributes['sub_object_text']))
+        """# TODO: do the markdown replacements here """
+        sub_object_text = sub_object_text
+        sub_object_text = mark_safe(sub_object_text)
+        
         data = {
             'type': options['snippet_type'],
             'event_text': event_text,
@@ -473,16 +486,20 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
             'object_name': object_name,
             'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
-            'object_text': resolve_attributes(obj, data_attributes['object_text']),
+            'object_text': object_text,
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
             
             'sub_event_text': sub_event_text,
             'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
             'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
-            'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
+            'sub_object_text': sub_object_text,
             
             'string_variables': string_variables,
         }
+        #object_text
+        #sub_object_text
+        
+        
         # clean some attributes
         if not data['object_name']:
             data['object_name'] = _('Untitled')
