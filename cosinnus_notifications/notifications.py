@@ -464,18 +464,9 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         notification_text = (notification_text % string_variables) if notification_text else None
         sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
         
-        # we escape first, then do markup -> HTML conversion, then mark safe
-        
-        # TODO: refactor this into util function probably
-        object_text = escape(resolve_attributes(obj, data_attributes['object_text']))
-        """# TODO: do the markdown replacements here """
-        object_text = object_text
-        object_text = mark_safe(object_text)
-        
-        sub_object_text = escape(resolve_attributes(obj, data_attributes['sub_object_text']))
-        """# TODO: do the markdown replacements here """
-        sub_object_text = sub_object_text
-        sub_object_text = mark_safe(sub_object_text)
+        # full escape and markup conversion
+        object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
+        sub_object_text = textfield(resolve_attributes(obj, data_attributes['sub_object_text']))
         
         data = {
             'type': options['snippet_type'],
