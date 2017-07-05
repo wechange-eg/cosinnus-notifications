@@ -468,6 +468,15 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
         sub_object_text = textfield(resolve_attributes(obj, data_attributes['sub_object_text']))
         
+        content_rows = []
+        if not sub_event_text:
+            # on full-page item displays (where the main object isn't a subtexted item, like a comment),
+            # we display additional data for that item, if defined in the Model's `render_additional_notification_content_rows()`
+            render_func = getattr(obj, "render_additional_notification_content_rows", None)
+            if callable(render_func):
+                content_rows = render_func()
+            
+            
         data = {
             'type': options['snippet_type'],
             'event_text': event_text,
@@ -479,6 +488,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
             'object_text': object_text,
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
+            'content_rows': content_rows,
             
             'sub_event_text': sub_event_text,
             'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
