@@ -463,13 +463,14 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         event_text = (event_text % string_variables) if event_text else None
         notification_text = (notification_text % string_variables) if notification_text else None
         sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
+        sub_image_url = resolve_attributes(obj, data_attributes['sub_image_url'])
         
         # full escape and markup conversion
         object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
         sub_object_text = textfield(resolve_attributes(obj, data_attributes['sub_object_text']))
         
         content_rows = []
-        if not sub_event_text:
+        if not (sub_event_text and sub_image_url):
             # on full-page item displays (where the main object isn't a subtexted item, like a comment),
             # we display additional data for that item, if defined in the Model's `render_additional_notification_content_rows()`
             render_func = getattr(obj, "render_additional_notification_content_rows", None)
@@ -492,7 +493,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             
             'sub_event_text': sub_event_text,
             'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
-            'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
+            'sub_image_url': sub_image_url,
             'sub_object_text': sub_object_text,
             
             'string_variables': string_variables,
