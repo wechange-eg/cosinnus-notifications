@@ -452,17 +452,19 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         
         object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
         string_variables = {
-            'sender_name': sender_name,
-            'object_name': object_name,
-            'portal_name': _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS),
-            'team_name': notification_event.group['name'],
+            'sender_name': escape(sender_name),
+            'object_name': escape(object_name),
+            'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
+            'team_name': escape(notification_event.group['name']),
         }
         event_text = options['event_text']
         notification_text = options['notification_text'] or options['event_text']
         sub_event_text = options['sub_event_text']
-        event_text = (event_text % string_variables) if event_text else None
-        notification_text = (notification_text % string_variables) if notification_text else None
-        sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
+        
+        event_text = mark_safe((event_text % string_variables)) if event_text else None
+        notification_text = mark_safe((notification_text % string_variables)) if notification_text else None
+        sub_event_text = mark_safe((sub_event_text % string_variables)) if sub_event_text else None
+        
         sub_image_url = resolve_attributes(obj, data_attributes['sub_image_url'])
         
         # full escape and markup conversion
@@ -522,11 +524,6 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             if isinstance(val, datetime.datetime):
                 data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
                 
-        # urlize and linebreak item excerpt texts
-        for key in ['object_text', 'sub_object_text']:
-            if key in data and data[key]:
-                data[key] = mark_safe(textfield(data[key]))
-        
         item_html = render_to_string(options['snippet_template'], context=data)
         if return_data:
             return item_html, data
