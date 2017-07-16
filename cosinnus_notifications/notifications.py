@@ -309,7 +309,8 @@ class NotificationsThread(Thread):
                 If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
         
         # we wrap the info in a (non-persisted) NotificationEvent to be compatible with the rendering method
-        notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object = self.obj)
+        notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object=self.obj)
+        setattr(notification_event, '_target_object', self.obj) # this helps reduce lookups by local caching the generic foreign key object
         
         for receiver in self.audience:
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
@@ -429,7 +430,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
     """ Renders the HTML of a single notification event for a receiving user """
     
     try:
-        obj = notification_event.target_object
+        obj = getattr(notification_event, '_target_object', notification_event.target_object)
         options = notifications[notification_event.notification_id]
         
         # stub for missing notification for this digest
