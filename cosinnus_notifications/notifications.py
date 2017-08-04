@@ -24,7 +24,7 @@ from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting,\
 from cosinnus.utils.functions import ensure_dict_keys, resolve_attributes
 from threading import Thread
 from django.utils.safestring import mark_safe
-from django.utils.html import strip_tags, urlize
+from django.utils.html import strip_tags, urlize, escape
 from django.contrib.contenttypes.models import ContentType
 from cosinnus.utils.permissions import check_object_read_access
 from django.templatetags.static import static
@@ -309,7 +309,8 @@ class NotificationsThread(Thread):
                 If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
         
         # we wrap the info in a (non-persisted) NotificationEvent to be compatible with the rendering method
-        notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object = self.obj)
+        notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object=self.obj)
+        setattr(notification_event, '_target_object', self.obj) # this helps reduce lookups by local caching the generic foreign key object
         
         for receiver in self.audience:
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
@@ -429,7 +430,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
     """ Renders the HTML of a single notification event for a receiving user """
     
     try:
-        obj = notification_event.target_object
+        obj = getattr(notification_event, '_target_object', notification_event.target_object)
         options = notifications[notification_event.notification_id]
         
         # stub for missing notification for this digest
@@ -452,18 +453,34 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         
         object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
         string_variables = {
-            'sender_name': sender_name,
-            'object_name': object_name,
-            'portal_name': _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS),
-            'team_name': notification_event.group['name'],
+            'sender_name': escape(sender_name),
+            'object_name': escape(object_name),
+            'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
+            'team_name': escape(notification_event.group['name']),
         }
         event_text = options['event_text']
         notification_text = options['notification_text'] or options['event_text']
         sub_event_text = options['sub_event_text']
-        event_text = (event_text % string_variables) if event_text else None
-        notification_text = (notification_text % string_variables) if notification_text else None
-        sub_event_text = (sub_event_text % string_variables) if sub_event_text else None
         
+        event_text = mark_safe((event_text % string_variables)) if event_text else None
+        notification_text = mark_safe((notification_text % string_variables)) if notification_text else None
+        sub_event_text = mark_safe((sub_event_text % string_variables)) if sub_event_text else None
+        
+        sub_image_url = resolve_attributes(obj, data_attributes['sub_image_url'])
+        
+        # full escape and markup conversion
+        object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
+        sub_object_text = textfield(resolve_attributes(obj, data_attributes['sub_object_text']))
+        
+        content_rows = []
+        if not (sub_event_text and sub_image_url):
+            # on full-page item displays (where the main object isn't a subtexted item, like a comment),
+            # we display additional data for that item, if defined in the Model's `render_additional_notification_content_rows()`
+            render_func = getattr(obj, "render_additional_notification_content_rows", None)
+            if callable(render_func):
+                content_rows = render_func()
+            
+            
         data = {
             'type': options['snippet_type'],
             'event_text': event_text,
@@ -473,16 +490,21 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
             'object_name': object_name,
             'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
-            'object_text': resolve_attributes(obj, data_attributes['object_text']),
+            'object_text': object_text,
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
+            'content_rows': content_rows,
             
             'sub_event_text': sub_event_text,
             'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
-            'sub_image_url': resolve_attributes(obj, data_attributes['sub_image_url']),
-            'sub_object_text': resolve_attributes(obj, data_attributes['sub_object_text']),
+            'sub_image_url': sub_image_url,
+            'sub_object_text': sub_object_text,
             
             'string_variables': string_variables,
         }
+        #object_text
+        #sub_object_text
+        
+        
         # clean some attributes
         if not data['object_name']:
             data['object_name'] = _('Untitled')
@@ -503,11 +525,6 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             if isinstance(val, datetime.datetime):
                 data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
                 
-        # urlize and linebreak item excerpt texts
-        for key in ['object_text', 'sub_object_text']:
-            if key in data and data[key]:
-                data[key] = mark_safe(textfield(data[key]))
-        
         item_html = render_to_string(options['snippet_template'], context=data)
         if return_data:
             return item_html, data
