@@ -30,6 +30,7 @@ from cosinnus.utils.permissions import check_object_read_access
 from django.templatetags.static import static
 from django.utils.encoding import force_text
 from cosinnus.utils.group import get_cosinnus_group_model
+from annoying.functions import get_object_or_None
 
 
 
@@ -144,8 +145,8 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     if not (all_or_none_or_custom.startswith("all_") or all_or_none_or_custom in ("none", "custom")):
         return
     
-    try:
-        al = UserNotificationPreference.objects.get(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
+    al = get_object_or_None(UserNotificationPreference, user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
+    if al:
         if all_or_none_or_custom.startswith("all_"):
             setting_value = int(all_or_none_or_custom.split("_")[1])
             if setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and al.setting != setting_value:
@@ -153,21 +154,22 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
                 al.save()
         else:
             al.delete()
-    except:
+    else:
         if all_or_none_or_custom.startswith("all_"):
             setting_value = int(all_or_none_or_custom.split("_")[1])
             if not setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys():
                 setting_value = UserNotificationPreference.SETTING_NOW
             UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=setting_value)
-    try:
-        non = UserNotificationPreference.objects.get(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
+    
+    non = get_object_or_None(UserNotificationPreference, user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
+    if non:
         if all_or_none_or_custom == "none":
             if not non.setting == UserNotificationPreference.SETTING_NOW:
                 non.setting = UserNotificationPreference.SETTING_NOW
                 non.save()
         else:
             non.delete()
-    except:
+    else:
         if all_or_none_or_custom == "none":
             UserNotificationPreference.objects.create(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW)
         
@@ -252,6 +254,8 @@ class NotificationsThread(Thread):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
         
+        # TODO next: refactor these 4 checks and the 2 new ones (blacklist and global setting) into cosinnus.utils.permissions!
+        
         # anonymous users receive notifications (this is to send recruit emails to non-users)
         if not user.is_authenticated():
             return True
@@ -262,6 +266,12 @@ class NotificationsThread(Thread):
             return False
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
+        
+        # TODO NEXT: enter core-check for user.email:is-in-blacklist (EMAIL!)
+        # TODO NEXT enter check for global user setting here
+        
+        
+        
         # user cannot be object's creator unless explicitly specified
         if hasattr(obj, 'creator'):
             allow_creator_as_audience = False
@@ -272,6 +282,8 @@ class NotificationsThread(Thread):
         # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
+
+        # TODO next: add additional global setting check for the weekly/daily settings!
 
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
             # user didn't want notification because he wants none ever!

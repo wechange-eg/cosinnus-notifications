@@ -63,10 +63,32 @@
                 </div>
             </div>
         </div>
+        
+        <div class="content-box large-space">
+            <div class="row">
+                <div class="col-md-12"><!-- right column -->
+                    <div class="row"> 
+                    
+                        <div class="col-md-4">
+                            <legend style="margin: 0;">{% trans "I wish to receive Notifications" %}:</legend>
+                        </div>
+                        <div class="col-md-8">
+                            <p class="no-horizontal-padding no-vertical-padding">
+                                <select id="id_global_setting" name="global_setting" class="form-control" onchange="toggleGlobalSettingsFrame();">
+                                    {% for choice, label in global_setting_choices %}
+                                        <option {% if global_setting_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
             
     
 		<!-- a box with semi transparent background -->
-	    <div class="content-box">
+	    <div id="custom_settings_frame" class="content-box" style="display: none;"> {# toggled visible on load by JS, depending on global setting #}
             {% for group, notifications, choice in grouped_notifications %}
                 <div class="row large-space">
 	                <div class="col-md-12"><!-- right column -->
@@ -179,6 +201,15 @@
 {% block extrafooter %}
     {{ block.super }}
     <script type="text/javascript">
+        var toggleGlobalSettingsFrame = function() {
+            var $frame = $('#custom_settings_frame');
+            if ($('#id_global_setting').val() == 4) {
+                $frame.fadeIn();
+            } else {
+                $frame.hide();
+            }
+            $.cosinnus.snapToBottom();
+        };
         var toggleCustomNotificationPreferences = function(id) {
             var pref_box = $('#notif_choice_' + id);
             var pref_area = $('#div_notif_choices_' + id);
@@ -201,5 +232,8 @@
             }
             return true;
         };
+        $(function(){
+            toggleGlobalSettingsFrame();
+        });
     </script>
 {% endblock extrafooter %}
