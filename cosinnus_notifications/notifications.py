@@ -259,6 +259,9 @@ class NotificationsThread(Thread):
         # the first and foremost global check if we should ever send a mail at all
         if not check_user_can_receive_emails(user):
             return False
+        # anonymous authors count as YES, used for recruiting users
+        if not user.is_authenticated():
+            return True
         # only active users that have logged in before accepted the TOS get notifications
         if not user.is_active:
             return False
@@ -277,8 +280,8 @@ class NotificationsThread(Thread):
         # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
-
-        # global check blanketing the finer grained checks
+        
+        # global settings check, blanketing the finer grained checks
         global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
         if global_setting in [GlobalUserNotificationSetting.SETTING_NEVER, 
                 GlobalUserNotificationSetting.SETTING_DAILY, GlobalUserNotificationSetting.SETTING_WEEKLY]:
