@@ -41,20 +41,20 @@
     {% endif %}
 
     <form method="POST" action="">{% csrf_token %}
-    
+        
         <div class="content-box large-space">
             <div class="row">
                 <div class="col-md-12"><!-- right column -->
                     <div class="row"> 
                     
                         <div class="col-md-4">
-                            <legend style="margin: 0;">{% trans "Receive notification emails in this language" %}:</legend>
+                            <legend style="margin: 0;">{% trans "I wish to receive notification emails" %}:</legend>
                         </div>
                         <div class="col-md-8">
                             <p class="no-horizontal-padding no-vertical-padding">
-                                <select id="id-language" name="language" class="form-control">
-                                    {% for choice, label in language_choices %}
-                                        <option {% if language_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+                                <select id="id_global_setting" name="global_setting" class="form-control" onchange="toggleGlobalSettingsFrame();">
+                                    {% for choice, label in global_setting_choices %}
+                                        <option {% if global_setting_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
                                     {% endfor %}
                                 </select>
                             </p>
@@ -70,13 +70,13 @@
                     <div class="row"> 
                     
                         <div class="col-md-4">
-                            <legend style="margin: 0;">{% trans "I wish to receive Notifications" %}:</legend>
+                            <legend style="margin: 0;">{% trans "Receive notification emails in this language" %}:</legend>
                         </div>
                         <div class="col-md-8">
                             <p class="no-horizontal-padding no-vertical-padding">
-                                <select id="id_global_setting" name="global_setting" class="form-control" onchange="toggleGlobalSettingsFrame();">
-                                    {% for choice, label in global_setting_choices %}
-                                        <option {% if global_setting_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+                                <select id="id-language" name="language" class="form-control">
+                                    {% for choice, label in language_choices %}
+                                        <option {% if language_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
                                     {% endfor %}
                                 </select>
                             </p>
@@ -111,13 +111,13 @@
 		                        <div class="col-md-8">
 		                            <p class="no-horizontal-padding no-vertical-padding">
 		                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});" onmousedown="return toggleCustomNotificationHeader(event, {{group.pk}});">
-		                                <option {% if choice == "all_1" %}selected{% endif %} value="all_1">{% trans "All notifications" %}</option>
+		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
+		                                <option {% if choice == "all_1" %}selected{% endif %} value="all_1">{% trans "All notifications" %} ({% trans "Immediately" %})</option>
 		                                {% if not SETTINGS.COSINNUS_DIGEST_ONLY_FOR_ADMINS or user.is_superuser %}
 		                                <option {% if choice == "all_2" %}selected{% endif %} value="all_2">{% trans "All notifications" %} ({% trans "Daily" %})</option>
 		                                <option {% if choice == "all_3" %}selected{% endif %} value="all_3">{% trans "All notifications" %} ({% trans "Weekly" %})</option>
 		                                {% endif %}
 		                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
-		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
 		                            </select>
 		                            </p>
 		                        </div>
