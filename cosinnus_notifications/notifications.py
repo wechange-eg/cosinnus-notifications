@@ -26,11 +26,13 @@ from threading import Thread
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags, urlize, escape
 from django.contrib.contenttypes.models import ContentType
-from cosinnus.utils.permissions import check_object_read_access
+from cosinnus.utils.permissions import check_object_read_access,\
+    check_user_can_receive_emails
 from django.templatetags.static import static
 from django.utils.encoding import force_text
 from cosinnus.utils.group import get_cosinnus_group_model
 from annoying.functions import get_object_or_None
+from cosinnus.models.profile import GlobalUserNotificationSetting
 
 
 
@@ -254,11 +256,9 @@ class NotificationsThread(Thread):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
         
-        # TODO next: refactor these 4 checks and the 2 new ones (blacklist and global setting) into cosinnus.utils.permissions!
-        
-        # anonymous users receive notifications (this is to send recruit emails to non-users)
-        if not user.is_authenticated():
-            return True
+        # the first and foremost global check if we should ever send a mail at all
+        if not check_user_can_receive_emails(user):
+            return False
         # only active users that have logged in before accepted the TOS get notifications
         if not user.is_active:
             return False
@@ -266,11 +266,6 @@ class NotificationsThread(Thread):
             return False
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
-        
-        # TODO NEXT: enter core-check for user.email:is-in-blacklist (EMAIL!)
-        # TODO NEXT enter check for global user setting here
-        
-        
         
         # user cannot be object's creator unless explicitly specified
         if hasattr(obj, 'creator'):
@@ -283,27 +278,33 @@ class NotificationsThread(Thread):
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
 
-        # TODO next: add additional global setting check for the weekly/daily settings!
-
+        # global check blanketing the finer grained checks
+        global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
+        if global_setting in [GlobalUserNotificationSetting.SETTING_NEVER, 
+                GlobalUserNotificationSetting.SETTING_DAILY, GlobalUserNotificationSetting.SETTING_WEEKLY]:
+            # user either wants no notification or a digest (the event for which is saved elsewhere)
+            return False
+        if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
+            return True
+        # otherwise, the global setting is set to 'individual', so commence the other checks
+        
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
-            # user didn't want notification because he wants none ever!
+            # user didn't want notification because he wants none ever for this group!
             return False
         elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group):
-            # user wants notification because he wants all!
+            # user wants notification because he wants all for this group!
             return True
         elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group, 
                      alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
-            # user wants all notifications, but daily/weekly!
-            """ TODO: stub for daily/weekly trigger (all notifications) """
+            # user wants all notifications for this group, but daily/weekly (the event itself will be saved into an object elsewhere)!
             return False
         elif self.is_notification_active(notification_id, user, self.group, 
                      alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
-            """ TODO: stub for daily/weekly trigger (single notification) """
+            # user wants this notification for this group, but daily/weekly (the event itself will be saved into an object elsewhere)!
             return False
         else:
-            ret = self.is_notification_active(notification_id, user, self.group)
-        # checked his settings, and user wants this notification is", ret
-        return ret
+            # the individual setting for this notification type and group is in effect:
+            return self.is_notification_active(notification_id, user, self.group)
 
 
     def run(self):

@@ -24,9 +24,11 @@ from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
     render_digest_item_for_notification_event
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
-from cosinnus.utils.permissions import check_object_read_access
+from cosinnus.utils.permissions import check_object_read_access,\
+    check_user_can_receive_emails
 import traceback
 from django.templatetags.static import static
+from cosinnus.models.profile import GlobalUserNotificationSetting
 
 logger = logging.getLogger('cosinnus')
 
@@ -69,6 +71,17 @@ def send_digest_for_current_portal(digest_setting):
     for user in users:
         if getattr(settings, 'COSINNUS_DIGEST_ONLY_FOR_ADMINS', False) and not user.is_superuser:
             continue
+        if not check_user_can_receive_emails(user):
+            continue
+        
+        # check global blanket settings
+        global_wanted = False # flag to allow all events
+        global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
+        if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
+            continue # users who get all emails now never want a digest
+        if (digest_setting == UserNotificationPreference.SETTING_DAILY and global_setting == GlobalUserNotificationSetting.SETTING_DAILY) \
+                or (digest_setting == UserNotificationPreference.SETTING_WEEKLY and global_setting == GlobalUserNotificationSetting.SETTING_WEEKLY):
+            global_wanted = True # user wants ALL events in his digest for this digest setting
         
         cur_language = translation.get_language()
         try:
@@ -79,43 +92,46 @@ def send_digest_for_current_portal(digest_setting):
             # switch language to user's preference language so all i18n and date formats are in their language
             translation.activate(getattr(user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
             
-            # these groups will never get digest notifications because they have a blanketing NONE setting or 
-            # ALL setting (of anything but this ``digest_setting``)
-            # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
-            unwanted_digest_settings = [key for key in dict(UserNotificationPreference.SETTING_CHOICES).keys() if key != digest_setting]
-            exclude_digest_groups = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids) 
-            exclude_digest_groups = exclude_digest_groups.filter(Q(notification_id=ALL_NOTIFICATIONS_ID, setting__in=unwanted_digest_settings) | Q(notification_id=NO_NOTIFICATIONS_ID))
-            exclude_digest_groups = exclude_digest_groups.values_list('group_id', flat=True)  
+            # get all notification events where the user is in the intended audience
+            events = timescope_notification_events.filter(audience__contains=',%d,' % user.id)
             
-            # find out any notification preferences the user has for groups in this portal with the daily/weekly setting
-            # if he doesn't have any, we will not send a mail for them
-            prefs = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids, setting=digest_setting)
-            prefs = prefs.exclude(notification_id=NO_NOTIFICATIONS_ID).exclude(group_id__in=exclude_digest_groups)
-            
-            if len(prefs) == 0:
-                continue
-            
-            # only for these groups does the user get any digest news at all
-            pref_group_ids = list(set([pref.group for pref in prefs]))
-            # get all notification events for these groups
-            events = timescope_notification_events.filter(group_id__in=pref_group_ids)
-            # and also only those where the user is in the intended audience
-            events = events.filter(audience__contains=',%d,' % user.id)
+            # unless we have a blanket YES for this digest, filter events by group notification settings
+            if not global_wanted:
+                # these groups will never get digest notifications because they have a blanketing NONE setting or 
+                # ALL setting (of anything but this ``digest_setting``)
+                # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
+                unwanted_digest_settings = [key for key in dict(UserNotificationPreference.SETTING_CHOICES).keys() if key != digest_setting]
+                exclude_digest_groups = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids) 
+                exclude_digest_groups = exclude_digest_groups.filter(Q(notification_id=ALL_NOTIFICATIONS_ID, setting__in=unwanted_digest_settings) | Q(notification_id=NO_NOTIFICATIONS_ID))
+                exclude_digest_groups = exclude_digest_groups.values_list('group_id', flat=True)  
+                
+                # find out any notification preferences the user has for groups in this portal with the daily/weekly setting
+                # if he doesn't have any, we will not send a mail for them
+                prefs = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids, setting=digest_setting)
+                prefs = prefs.exclude(notification_id=NO_NOTIFICATIONS_ID).exclude(group_id__in=exclude_digest_groups)
+                
+                if len(prefs) == 0:
+                    continue
+                
+                # only for these groups does the user get any digest news at all
+                pref_group_ids = list(set([pref.group for pref in prefs]))
+                # so filter for these groups
+                events = events.filter(group_id__in=pref_group_ids)
             
             if events.count() == 0:
                 continue
             
-            # collect a comparable hash for all wanted user prefs
-            wanted_group_notifications = ['%(group_id)d__%(notification_id)s' % {
-                'group_id': pref.group_id,
-                'notification_id': pref.notification_id,
-            } for pref in prefs]
+            if not global_wanted:
+                # collect a comparable hash for all wanted user prefs
+                wanted_group_notifications = ['%(group_id)d__%(notification_id)s' % {
+                    'group_id': pref.group_id,
+                    'notification_id': pref.notification_id,
+                } for pref in prefs]
             
-            # cluster event messages by group. from here on, the user will definitely get an email.
+            # cluster event messages by group. from here on, the user will almost definitely get an email.
             body_html = ''
             for group in list(set(events.values_list('group', flat=True))): 
                 group_events = events.filter(group=group).order_by('-id') # id faster than ordering by created date 
-                
                 
                 # filter only those events that the user actually has in his prefs, for this group and also
                 # check for target object existing, being visible to user, and other sanity checks if the user should see this object
@@ -123,9 +139,10 @@ def send_digest_for_current_portal(digest_setting):
                 for event in group_events:
                     if user == event.user:
                         continue  # users don't receive infos about events they caused
-                    if not (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
-                            ('%d__%s' % (event.group_id, event.notification_id) in wanted_group_notifications)):
-                        continue  # must have an actual subscription to that event type
+                    if not global_wanted: # skip finegrained preference check on blanket YES
+                        if not (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
+                                ('%d__%s' % (event.group_id, event.notification_id) in wanted_group_notifications)):
+                            continue  # must have an actual subscription to that event type
                     if event.target_object is None:
                         continue  # referenced object has been deleted by now
                     if not check_object_read_access(event.target_object, user):
