@@ -181,3 +181,5 @@ def notification_reset_view(request):
     messages.success(request, _('Your notifications preferences were reset to default!'))
     return HttpResponseRedirect(reverse_lazy('cosinnus:notifications'))
     
+    
+from cosinnus_notifications.hooks import *
