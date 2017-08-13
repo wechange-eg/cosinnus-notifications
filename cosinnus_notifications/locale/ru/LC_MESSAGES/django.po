@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wechange RU\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-21 12:26+0100\n"
+"POT-Creation-Date: 2017-08-12 16:19+0200\n"
 "PO-Revision-Date: 2016-11-28 10:58+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -109,7 +109,7 @@ msgid "These notifications will be sent to your configured email address:"
 msgstr "Эти уведомления будут отправляться по указанному Вами адресу электронной почты:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr "Вы можете выбрать, будете-ли Вы получать уведомления на Вашу электронную почту сразу как только события произошли, или же в ежедневном (еженедельном) отчёте.\r\r"
+msgstr "Вы можете выбрать, будете-ли Вы получать уведомления на Вашу электронную почту сразу как только события произошли, или же в ежедневном (еженедельном) отчёте."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
 msgstr "Отчёт на электронную почту содержит все уведомления вместе, со всех проектов и групп, с отметкой «ежедневный» или «еженедельный». Так Вы получите только одно единственное письмо в день или в неделю, которое содержит всё  самое интересное, что произошло."
@@ -123,8 +123,19 @@ msgstr "Пожалуйста, сохраните изменения в наст�
 msgid "more"
 msgstr "Больше"
 
+#, fuzzy
+#| msgid "Receive notification emails in this language"
+msgid "I wish to receive notification emails"
+msgstr "Электронные письма-уведомления получать на этом языке"
+
 msgid "Receive notification emails in this language"
 msgstr "Электронные письма-уведомления получать на этом языке"
+
+#, fuzzy
+#| msgctxt "notification frequency"
+#| msgid "Immediately"
+msgid "Immediately"
+msgstr "Немедленно "
 
 msgid "Daily"
 msgstr "Ежедневно"

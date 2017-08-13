@@ -26,10 +26,13 @@ from threading import Thread
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags, urlize, escape
 from django.contrib.contenttypes.models import ContentType
-from cosinnus.utils.permissions import check_object_read_access
+from cosinnus.utils.permissions import check_object_read_access,\
+    check_user_can_receive_emails
 from django.templatetags.static import static
 from django.utils.encoding import force_text
 from cosinnus.utils.group import get_cosinnus_group_model
+from annoying.functions import get_object_or_None
+from cosinnus.models.profile import GlobalUserNotificationSetting
 
 
 
@@ -144,8 +147,8 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     if not (all_or_none_or_custom.startswith("all_") or all_or_none_or_custom in ("none", "custom")):
         return
     
-    try:
-        al = UserNotificationPreference.objects.get(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
+    al = get_object_or_None(UserNotificationPreference, user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID)
+    if al:
         if all_or_none_or_custom.startswith("all_"):
             setting_value = int(all_or_none_or_custom.split("_")[1])
             if setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and al.setting != setting_value:
@@ -153,21 +156,22 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
                 al.save()
         else:
             al.delete()
-    except:
+    else:
         if all_or_none_or_custom.startswith("all_"):
             setting_value = int(all_or_none_or_custom.split("_")[1])
             if not setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys():
                 setting_value = UserNotificationPreference.SETTING_NOW
             UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=setting_value)
-    try:
-        non = UserNotificationPreference.objects.get(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
+    
+    non = get_object_or_None(UserNotificationPreference, user=user, group=group, notification_id=NO_NOTIFICATIONS_ID)
+    if non:
         if all_or_none_or_custom == "none":
             if not non.setting == UserNotificationPreference.SETTING_NOW:
                 non.setting = UserNotificationPreference.SETTING_NOW
                 non.save()
         else:
             non.delete()
-    except:
+    else:
         if all_or_none_or_custom == "none":
             UserNotificationPreference.objects.create(user=user, group=group, notification_id=NO_NOTIFICATIONS_ID, setting=UserNotificationPreference.SETTING_NOW)
         
@@ -252,7 +256,10 @@ class NotificationsThread(Thread):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. """
         
-        # anonymous users receive notifications (this is to send recruit emails to non-users)
+        # the first and foremost global check if we should ever send a mail at all
+        if not check_user_can_receive_emails(user):
+            return False
+        # anonymous authors count as YES, used for recruiting users
         if not user.is_authenticated():
             return True
         # only active users that have logged in before accepted the TOS get notifications
@@ -262,6 +269,7 @@ class NotificationsThread(Thread):
             return False
         if not cosinnus_setting(user, 'tos_accepted'):
             return False
+        
         # user cannot be object's creator unless explicitly specified
         if hasattr(obj, 'creator'):
             allow_creator_as_audience = False
@@ -272,26 +280,34 @@ class NotificationsThread(Thread):
         # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
-
+        
+        # global settings check, blanketing the finer grained checks
+        global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
+        if global_setting in [GlobalUserNotificationSetting.SETTING_NEVER, 
+                GlobalUserNotificationSetting.SETTING_DAILY, GlobalUserNotificationSetting.SETTING_WEEKLY]:
+            # user either wants no notification or a digest (the event for which is saved elsewhere)
+            return False
+        if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
+            return True
+        # otherwise, the global setting is set to 'individual', so commence the other checks
+        
         if self.is_notification_active(NO_NOTIFICATIONS_ID, user, self.group):
-            # user didn't want notification because he wants none ever!
+            # user didn't want notification because he wants none ever for this group!
             return False
         elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group):
-            # user wants notification because he wants all!
+            # user wants notification because he wants all for this group!
             return True
         elif self.is_notification_active(ALL_NOTIFICATIONS_ID, user, self.group, 
                      alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
-            # user wants all notifications, but daily/weekly!
-            """ TODO: stub for daily/weekly trigger (all notifications) """
+            # user wants all notifications for this group, but daily/weekly (the event itself will be saved into an object elsewhere)!
             return False
         elif self.is_notification_active(notification_id, user, self.group, 
                      alternate_settings_compare=[UserNotificationPreference.SETTING_DAILY, UserNotificationPreference.SETTING_WEEKLY]):
-            """ TODO: stub for daily/weekly trigger (single notification) """
+            # user wants this notification for this group, but daily/weekly (the event itself will be saved into an object elsewhere)!
             return False
         else:
-            ret = self.is_notification_active(notification_id, user, self.group)
-        # checked his settings, and user wants this notification is", ret
-        return ret
+            # the individual setting for this notification type and group is in effect:
+            return self.is_notification_active(notification_id, user, self.group)
 
 
     def run(self):

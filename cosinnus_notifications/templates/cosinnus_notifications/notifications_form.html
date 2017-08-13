@@ -41,7 +41,29 @@
     {% endif %}
 
     <form method="POST" action="">{% csrf_token %}
-    
+        
+        <div class="content-box large-space">
+            <div class="row">
+                <div class="col-md-12"><!-- right column -->
+                    <div class="row"> 
+                    
+                        <div class="col-md-4">
+                            <legend style="margin: 0;">{% trans "I wish to receive notification emails" %}:</legend>
+                        </div>
+                        <div class="col-md-8">
+                            <p class="no-horizontal-padding no-vertical-padding">
+                                <select id="id_global_setting" name="global_setting" class="form-control" onchange="toggleGlobalSettingsFrame();">
+                                    {% for choice, label in global_setting_choices %}
+                                        <option {% if global_setting_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="content-box large-space">
             <div class="row">
                 <div class="col-md-12"><!-- right column -->
@@ -66,7 +88,7 @@
             
     
 		<!-- a box with semi transparent background -->
-	    <div class="content-box">
+	    <div id="custom_settings_frame" class="content-box" style="display: none;"> {# toggled visible on load by JS, depending on global setting #}
             {% for group, notifications, choice in grouped_notifications %}
                 <div class="row large-space">
 	                <div class="col-md-12"><!-- right column -->
@@ -89,13 +111,13 @@
 		                        <div class="col-md-8">
 		                            <p class="no-horizontal-padding no-vertical-padding">
 		                            <select id="notif_choice_{{group.pk}}" name="notif_choice:{{group.pk}}" class="form-control" onchange="toggleCustomNotificationPreferences({{group.pk}});" onmousedown="return toggleCustomNotificationHeader(event, {{group.pk}});">
-		                                <option {% if choice == "all_1" %}selected{% endif %} value="all_1">{% trans "All notifications" %}</option>
+		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
+		                                <option {% if choice == "all_1" %}selected{% endif %} value="all_1">{% trans "All notifications" %} ({% trans "Immediately" %})</option>
 		                                {% if not SETTINGS.COSINNUS_DIGEST_ONLY_FOR_ADMINS or user.is_superuser %}
 		                                <option {% if choice == "all_2" %}selected{% endif %} value="all_2">{% trans "All notifications" %} ({% trans "Daily" %})</option>
 		                                <option {% if choice == "all_3" %}selected{% endif %} value="all_3">{% trans "All notifications" %} ({% trans "Weekly" %})</option>
 		                                {% endif %}
 		                                <option default {% if choice == "custom" %}selected{% endif %} value="custom">{% trans "Custom" %}</option>
-		                                <option {% if choice == "none" %}selected{% endif %} value="none">{% trans "No notifications" %}</option>
 		                            </select>
 		                            </p>
 		                        </div>
@@ -179,6 +201,15 @@
 {% block extrafooter %}
     {{ block.super }}
     <script type="text/javascript">
+        var toggleGlobalSettingsFrame = function() {
+            var $frame = $('#custom_settings_frame');
+            if ($('#id_global_setting').val() == 4) {
+                $frame.fadeIn();
+            } else {
+                $frame.hide();
+            }
+            $.cosinnus.snapToBottom();
+        };
         var toggleCustomNotificationPreferences = function(id) {
             var pref_box = $('#notif_choice_' + id);
             var pref_area = $('#div_notif_choices_' + id);
@@ -201,5 +232,8 @@
             }
             return true;
         };
+        $(function(){
+            toggleGlobalSettingsFrame();
+        });
     </script>
 {% endblock extrafooter %}
