@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-08-12 16:19+0200\n"
-"PO-Revision-Date: 2015-11-11 10:42+0200\n"
+"PO-Revision-Date: 2017-09-05 13:50+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Language: uk_UA\n"
-"X-Generator: Poedit 1.8.6\n"
+"X-Generator: Poedit 2.0.3\n"
 
 msgid "Notifications"
 msgstr "Сповіщення"
@@ -27,33 +27,33 @@ msgstr "Сповіщення"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "Ваш щоденний звіт на %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "Все, що відбулося протягом вчора!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "Ваш звіт за тиждень на %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "Все, що відбулося за минулий тиждень!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Ніколи"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Негайно"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Щоденно"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Щотижнево"
 
 msgid "Notification Preference for User"
 msgstr "Налаштування сповіщення для користувача/-ки"
@@ -68,37 +68,37 @@ msgid "Notification Preferences"
 msgstr "Налаштування сповіщення"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Користувач, який створив подію"
 
 msgid "Audience"
-msgstr ""
+msgstr "Аудиторія"
 
 msgid "All notifications"
 msgstr "Усі сповіщення"
 
 msgid "No notifications"
-msgstr "Жодних сповіщень"
+msgstr "Немає сповіщень"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "Ви отримали це сповіщення, тому що Ви підписалися на ці види подій у Вашому проекті чи групі."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "Ви отримали це сповіщення, тому що Ви є адміністратором цього проекту чи групи."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "Ви отримали це сповіщення, тому що Ви є адміністратором цього порталу."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "Ви отримали це сповіщення, тому що Ви підписалися на одне чи кілька щоденних сповіщень."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "Ви отримали це сповіщення, тому що Ви підписалися на одне чи кілька щотижневих сповіщень."
 
 msgid "New item"
-msgstr ""
+msgstr "Новий елемент"
 
 msgid "Untitled"
-msgstr ""
+msgstr "Без назви"
 
 msgid "Your Profile"
 msgstr "Ваш профіль"
@@ -110,34 +110,34 @@ msgid "These notifications will be sent to your configured email address:"
 msgstr "Ці сповіщення будуть надсилатися на вказану вами адресу електронної скриньки:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "Ви можете обирати, чи отримувати сповіщення на Вашу електронну скриньку відразу як тільки події відбулися, чи в щоденному (щотижневому) звіті."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "Звіт на електронну пошту вміщує всі сповіщення разом, зі всіх проектів та груп, з поміткою «щоденний» або «щотижневий». Так Ви отримаєте тільки один єдиний лист в день чи в тиждень, який уміщує все найцікавіше, що відбулося."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "Сповіщення, які Ви встановили з позначкою «Негайно», будуть вам надіслані миттєво, відповідно: в одному листі - одне сповіщення."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "Будь ласка, збережіть зміни в налаштуваннях, коли Ви завершите їх редагування! "
 
 msgid "more"
-msgstr ""
+msgstr "Більше"
 
 msgid "I wish to receive notification emails"
-msgstr ""
+msgstr "Я хочу отримувати електронні листи-сповіщення"
 
 msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Електронні листи-сповіщення отримувати цією мовою"
 
 msgid "Immediately"
-msgstr ""
+msgstr "Негайно"
 
 msgid "Daily"
-msgstr ""
+msgstr "Щоденно"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Щотижня"
 
 msgid "Custom"
 msgstr "Індивідуальні налаштування"
