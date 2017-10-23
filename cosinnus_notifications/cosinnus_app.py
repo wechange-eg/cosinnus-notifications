@@ -29,7 +29,7 @@ def register():
 @receiver(all_cosinnus_apps_loaded)
 def cosinnus_ready(sender, **kwargs):
     try:
-        logger.info('Calling cosinnus_notifications:init.')
+        #logger.info('Calling cosinnus_notifications:init.')
         init_notifications()
     except Exception, err:
         logger.error('Exception during cosinnus_notifications:init: %s' % err)
