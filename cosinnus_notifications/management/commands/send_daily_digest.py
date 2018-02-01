@@ -7,7 +7,7 @@ import traceback
 from django.core.management.base import BaseCommand, CommandError
 from cosinnus_notifications.digest import send_digest_for_current_portal
 from cosinnus_notifications.models import UserNotificationPreference
-from cosinnus.core.middleware import initialize_cosinnus_after_startup
+from cosinnus.core.middleware.cosinnus_middleware import initialize_cosinnus_after_startup
 from django.utils.encoding import force_text
 
 logger = logging.getLogger('cosinnus')
