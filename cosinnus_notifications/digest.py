@@ -95,8 +95,11 @@ def send_digest_for_current_portal(digest_setting):
             # get all notification events where the user is in the intended audience
             events = timescope_notification_events.filter(audience__contains=',%d,' % user.id)
             
-            # unless we have a blanket YES for this digest, filter events by group notification settings
-            if not global_wanted:
+            # if we have a blanket YES for this digest, filter events only by portal affiliance,
+            # otherwise filter events by group notification settings
+            if global_wanted:
+                events = events.filter(group_id__in=portal_group_ids)
+            else:
                 # these groups will never get digest notifications because they have a blanketing NONE setting or 
                 # ALL setting (of anything but this ``digest_setting``)
                 # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
