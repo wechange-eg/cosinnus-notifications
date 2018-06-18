@@ -3,155 +3,156 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-05 13:07+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2017-08-12 16:19+0200\n"
+"PO-Revision-Date: 2018-05-15 00:02+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr\n"
+"X-Generator: Poedit 2.0.5\n"
 
 msgid "Notifications"
-msgstr ""
+msgstr "Notifications"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr ""
+msgstr "notification"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "Ton résumé quotidien pour %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "Voici ce qui s’est passé au cours de la dernière journée !"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "Ton résumé hebdomadaire pour %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "Voici ce qui s’est passé au cours de la semaine dernière !"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Jamais"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Immédiatement"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Quotidienne"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Hebdomadaire"
 
 msgid "Notification Preference for User"
-msgstr ""
+msgstr "Préférences de notification pour l'utilisateur"
 
 msgid "Notification ID"
-msgstr ""
+msgstr "ID de notification"
 
 msgid "Notification Preference"
-msgstr ""
+msgstr "Préférence de notification"
 
 msgid "Notification Preferences"
-msgstr ""
+msgstr "Préférences de notification"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Utilisateur qui a causé cet événement de notification"
 
 msgid "Audience"
-msgstr ""
+msgstr "Audience"
 
 msgid "All notifications"
-msgstr ""
+msgstr "Toutes les notifications"
 
 msgid "No notifications"
-msgstr ""
+msgstr "Pas de notifications"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "Tu reçois cette notification car tu t'es abonné à ce type d'événement dans ton projet ou groupe."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "Tu reçois cette notification car tu es admin de ce projet ou groupe."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "Tu reçois cette notification car tu es admin de ce portail."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "Tu reçois cet e-mail car tu t'es abonné à une notification quotidienne ou plus."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "Tu reçois cet e-mail car tu t'es abonné à une notification hebdomadaire ou plus."
 
 msgid "New item"
-msgstr ""
+msgstr "Nouvel item"
 
 msgid "Untitled"
-msgstr ""
+msgstr "Sans titre"
 
 msgid "Your Profile"
-msgstr ""
+msgstr "Ton profil"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr ""
+msgstr "Sélectionne les notifications que tu souhaites recevoir pour chaque groupe ou projet dans lequel tu es impliqué."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr ""
+msgstr "Ces notifications seront envoyée à l'adresse e-mail que tu as configurée :"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "Tu peux choisir de recevoir des notifications immédiatement ou recevoir un résumé quotidien (ou hebdomadaire)."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "Le résumé reprend toutes les notifications des groupes et projets avec le paramètre \"quotidien\" (ou \"hebdomadaire\"). Tu recevras un seul e-mail par jour (ou semaine) contenant toutes les choses intéressantes qui se sont passées."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "Les notifications que tu souhaites recevoir \"immédiatement\" te seront envoyées dès qu'elles arrivent, avec un e-mail par notification."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "N'oublie pas d'enregistrer tes paramètres quand tu as fini de les modifier !"
 
 msgid "more"
-msgstr ""
+msgstr "plus"
 
 msgid "I wish to receive notification emails"
-msgstr ""
+msgstr "Je souhaite recevoir des e-mails de notification"
 
 msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Recevoir les e-mails de notification dans ce langage"
 
 msgid "Immediately"
-msgstr ""
+msgstr "Immédiatement"
 
 msgid "Daily"
-msgstr ""
+msgstr "Quotidien"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Hebdomadaire"
 
 msgid "Custom"
-msgstr ""
+msgstr "Personnalisation"
 
 msgid "Reset to default"
-msgstr ""
+msgstr "Réinitialiser aux valeurs par défaut"
 
 msgid "Save"
-msgstr ""
+msgstr "Enregistrer"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr ""
+msgstr "Cela réinitialisera toutes tes préférences de notifications à leur valeur par défaut. Souhaites-tu vraiment faire ça ?"
 
 msgid "Your notification preferences were updated successfully."
-msgstr ""
+msgstr "Tes préférences de notification ont été mises à jour."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr ""
+msgstr "Tes préférences de notifications ont été réinitialisées aux valeurs par défaut !"
