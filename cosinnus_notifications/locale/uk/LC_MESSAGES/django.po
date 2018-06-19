@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-05 13:07+0100\n"
-"PO-Revision-Date: 2017-09-05 13:50+0200\n"
+"POT-Creation-Date: 2018-06-19 14:36+0200\n"
+"PO-Revision-Date: 2018-06-18 16:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,14 +16,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Language: uk_UA\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 2.0.6\n"
 
 msgid "Notifications"
 msgstr "Сповіщення"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr "Сповіщення"
+msgstr "сповіщення"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
@@ -119,10 +119,10 @@ msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon 
 msgstr "Сповіщення, які Ви встановили з позначкою «Негайно», будуть вам надіслані миттєво, відповідно: в одному листі - одне сповіщення."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr "Будь ласка, збережіть зміни в налаштуваннях, коли Ви завершите їх редагування! "
+msgstr "Будь ласка, збережіть зміни в налаштуваннях, коли Ви завершите їх редагування!"
 
 msgid "more"
-msgstr "Більше"
+msgstr "більше"
 
 msgid "I wish to receive notification emails"
 msgstr "Я хочу отримувати електронні листи-сповіщення"
