@@ -8,151 +8,150 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-06-23 16:59+0200\n"
-"PO-Revision-Date: 2017-08-12 16:30+0200\n"
+"PO-Revision-Date: 2018-06-23 16:54+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: de\n"
+"Language: pl\n"
 "X-Generator: Poedit 1.8.4\n"
 
 msgid "Notifications"
-msgstr "Benachrichtigungen"
+msgstr "Powiadomienia"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr "Benachrichtigungen"
+msgstr "powiadomienia"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr "Dein täglicher Report für %(portal_name)s"
+msgstr "Twój dzienny przegląd %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr "Das ist den letzten Tag passiert!"
+msgstr "To działo się przez ostatni dzień!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr "Dein wöchentlicher Report für %(portal_name)s"
+msgstr "Twój tygodniowy przegląd %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr "Das ist letzte Woche passiert!"
+msgstr "To działo się przez ostatni tydzień!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr "Nie"
+msgstr "Nigdy"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr "Sofort"
+msgstr "Natychmiast"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr "Täglich"
+msgstr "Codziennie"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr "Wöchentlich"
+msgstr "Raz na tydzień"
 
 msgid "Notification Preference for User"
-msgstr "Benachrichtigungseinstellung für Benutzer"
+msgstr "Ustawienia Powiadomień dla Użytkownika"
 
 msgid "Notification ID"
-msgstr "Benachrichtiguns-ID"
+msgstr "ID Powiadomienia"
 
 msgid "Notification Preference"
-msgstr "Benachrichtigungseinstellung"
+msgstr "Preferencje Powiadomień"
 
 msgid "Notification Preferences"
-msgstr "Benachrichtigungseinstellungen"
+msgstr "Preferencje Powiadomień"
 
 msgid "User who caused this notification event"
-msgstr "Benutzer der das Event ausgelöst hat"
+msgstr "Użytkownik, który wywołał to powiadomienie"
 
 msgid "Audience"
-msgstr "Publikum"
+msgstr "Odbiorcy"
 
 msgid "All notifications"
-msgstr "Alle Benachrichtigungen"
+msgstr "Wszystkie powiadomienia"
 
 msgid "No notifications"
-msgstr "Keine Benachrichtigungen"
+msgstr "Brak powiadomień"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr "Du erhältst diese Benachrichtigung, weil du angegeben hast, dass du diese Art von Benachrichtigungen erhalten möchtest."
+msgstr "Otrzymujesz to powiadomienie, ponieważ jesteś subskrybentem tego typu wydarzeń w Twoim projekcie lub grupie."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr "Du erhältst diese Benachrichtigung, weil du ein Administrator dieses Projektes oder dieser Gruppe bist."
+msgstr "Otrzymujesz to powiadomienie, ponieważ jesteś administratorem tego projektu lub grupy."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr "Du erhältst diese Benachrichtigung, weil du ein Administrator dieses Portals bist."
+msgstr "Otrzymujesz to powiadomienie, ponieważ jesteś administratorem tego portalu."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr "Du erhältst diese Benachrichtigung, weil du eine oder mehrere tägliche Benachrichtigungen abonniert hast."
+msgstr "Otrzymujesz tę wiadomość, ponieważ jesteś subskrybentem jednego lub więcej dziennych powiadomień."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr "Du erhältst diese Benachrichtigung, weil du eine oder mehrere wöchentliche Benachrichtigungen abonniert hast."
+msgstr "Otrzymujesz tę wiadomość, ponieważ jesteś subskrybentem jednego lub więcej cotygodniowych powiadomień."
 
 msgid "New item"
-msgstr "Neues Item"
+msgstr "Nowy element"
 
 msgid "Untitled"
-msgstr "Unbenannt"
+msgstr "Bez tytułu"
 
 msgid "Your Profile"
-msgstr "Dein Profil"
+msgstr "Twój profil"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr "Hier kannst du auswählen, welche Benachrichtigungen du von den Gruppen und Projekten erhalten möchtest, in denen du involviert bist."
+msgstr "Wybierz, jakie powiadomienia chcesz otrzymywać dla każdej grupy lub projektu, w których jesteś członkiem."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr "Diese Benachrichtigungen werden dir an deine eingestellte E-Mail-Adresse geschickt:"
+msgstr "Te powiadomienia wysyłane będą na ustawiony przez Ciebie adres e-mail:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr "Du kannst auswählen ob du Benachrichtigungen sobald sie passieren, oder ob du sie in einem täglichen (oder wöchtenlichen) E-Mail Report erhalten möchtest."
+msgstr "Możesz otrzymywać powiadomienia od razu w chwili wydarzenia albo otrzymywać codzienny (lub cotygodniowy) przegląd."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr "Der E-Mail Report fasst Benachrichtigungen mit der Einstellung \"Täglich\" (oder \"Wöchentlich\") von allen Projekten und Gruppen zusammen. So erhältst du nur eine einzige E-Mail pro Tag (oder Woche), in der alles Interessante, was passiert ist, steht."
+msgstr "Przegląd streści wszystkie powiadomienia z ustawieniami \\’’Codziennie\\’ (lub \\’’Co tydzień\\’’) z wszystkich grup i projektów. Otrzymasz więc jedną wiadomość e-mail na dzień (lub na tydzień) zawierającą streszczenie wszystkich ciekawych wydarzeń."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr "Benachrichtigungen die du auf \"Sofort\" gestellt hast, werden dir sofort zugeschickt, mit jeweils einer E-Mail pro Benachrichtigung."
+msgstr "Powiadomienia z ustawieniem \\’’Natychmiast\\’’ zostaną do Ciebie wysłane przez e-mail od razu w chwili wydarzenia, z jedną wiadomością na jedno powiadomienie."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr "Vergiss nicht deine Einstellungen zu speichern wenn du fertig bist!"
+msgstr "Nie zapomnij zapisać ustawień po ukończeniu ich edycji!"
 
 msgid "more"
-msgstr "mehr"
+msgstr "więcej"
 
 msgid "I wish to receive notification emails"
-msgstr "Ich möchte Benachrichtigungs-Emails erhalten"
+msgstr "Chcę otrzymywać powiadomienia e-mail"
 
 msgid "Receive notification emails in this language"
-msgstr "Benachrichtigungs-Emails in dieser Sprache empfangen"
+msgstr "Otrzymuj powiadomienia e-mail w tym języku"
 
 msgid "Immediately"
-msgstr "Sofort"
+msgstr "Natychmiast"
 
 msgid "Daily"
-msgstr "Täglich"
+msgstr "Codziennie"
 
 msgid "Weekly"
-msgstr "Wöchentlich"
+msgstr "Raz na tydzień"
 
 msgid "Custom"
-msgstr "Individuelle Einstellungen"
+msgstr "Ustawienie niestandardowe"
 
 msgid "Reset to default"
-msgstr "Zurücksetzen"
+msgstr "Przywróć ustawienia fabryczne"
 
 msgid "Save"
-msgstr "Speichern"
+msgstr "Zapisz"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr "Hiermit werden sämtliche Benachrichtigungseinstellungen auf ihren empfohlenen Standardwert zurückgesetzt. Bist du sicher dass du das tun willst?"
+msgstr "To przywróci wszystkie ustawienia powiadomień do ustawień fabrycznych. Czy na pewno chcesz to zrobić?"
 
 msgid "Your notification preferences were updated successfully."
-msgstr "Deine Benachrichtigungseinstellungen wurden erfolgreich geändert."
+msgstr "Twoje ustawienia powiadomień zostały zaktualizowane pomyślnie."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr "Deine Benachrichtigungseinstellungen wurden erfolgreich zurückgesetzt!"
+msgstr "Twoje ustawienia powiadomień zostały wyzerowane do ustawień fabrycznych!"
