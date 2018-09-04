@@ -27,12 +27,15 @@ from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags, urlize, escape
 from django.contrib.contenttypes.models import ContentType
 from cosinnus.utils.permissions import check_object_read_access,\
-    check_user_can_receive_emails
+    check_user_can_receive_emails, check_user_portal_admin,\
+    check_user_portal_moderator
 from django.templatetags.static import static
 from django.utils.encoding import force_text
 from cosinnus.utils.group import get_cosinnus_group_model
 from annoying.functions import get_object_or_None
 from cosinnus.models.profile import GlobalUserNotificationSetting
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import get_user_model
 
 
 
@@ -86,6 +89,9 @@ NOTIFICATIONS_DEFAULTS = {
     'default': False,
     # if True, won't be shown in the notification preference form view
     'hidden': False,
+    # this must be True for all kinds of content that could be offensive and can be moderated, 
+    # but must be unique per content (i.e. True for comment created, but False for comment created for tagged members)
+    'moderatable_content': False,
     # can this notification be sent to the objects creator?
     # default False, because most items aren't wanted to be known by the author creating them
     'allow_creator_as_audience': False,
@@ -280,6 +286,13 @@ class NotificationsThread(Thread):
         # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
+        
+        # if a user has marked themselves as moderator (portal admins only), 
+        # they will receive all publicly visible items immediately for this portal
+        if check_user_portal_admin(user) and check_user_portal_moderator(user):
+            # check if object is publicly visible
+            if check_object_read_access(obj, AnonymousUser()):
+                return True
         
         # global settings check, blanketing the finer grained checks
         global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
@@ -575,6 +588,11 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
     
     # sanity check: only send to active users that have an email set (or is anonymous, so we can send emails to non-users)
     audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated()) and aud_user.email)]
+    
+    # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
+    if options['moderatable_content']:
+        portal_admins =  get_user_model().objects.filter(id__in=CosinnusPortal.get_current().admins)
+        audience += [admin for admin in portal_admins if not admin in audience]
     
     notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
     notification_thread.start()

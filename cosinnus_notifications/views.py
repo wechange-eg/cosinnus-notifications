@@ -14,10 +14,13 @@ from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
     set_user_group_notifications_special
-from cosinnus.models.group import CosinnusGroup
+from cosinnus.models.group import CosinnusGroup, CosinnusPortalMembership,\
+    CosinnusPortal
 from django.views.decorators.csrf import csrf_protect
 from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.db import transaction
+from cosinnus.utils.permissions import check_user_portal_moderator,\
+    check_user_portal_admin
 
 
 
@@ -51,6 +54,14 @@ class NotificationPreferenceView(UpdateView):
             if language is not None and language in (lang for lang, label in settings.LANGUAGES):
                 request.user.cosinnus_profile.language = language
                 request.user.cosinnus_profile.save(update_fields=['language'])
+            
+            # save moderator status, only if portal admin
+            is_moderator = bool(request.POST.get('is_moderator', False))
+            if check_user_portal_admin(request.user):
+                membership = CosinnusPortalMembership.objects.get(group=CosinnusPortal.get_current(), user=request.user)
+                if membership.is_moderator != is_moderator:
+                    membership.is_moderator = is_moderator
+                    membership.save()
             
             # save global notification setting
             global_setting = int(request.POST.get('global_setting', '-1'))
@@ -154,6 +165,7 @@ class NotificationPreferenceView(UpdateView):
             #'object_list': self.queryset,
             'grouped_notifications': group_rows,
             'user': self.request.user,
+            'is_moderator': check_user_portal_moderator(self.request.user),
             'all_notifications_id': ALL_NOTIFICATIONS_ID,
             'no_notifications_id': NO_NOTIFICATIONS_ID,
             'language_choices': settings.LANGUAGES,
