@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-22 13:37+0200\n"
-"PO-Revision-Date: 2017-08-12 16:30+0200\n"
+"POT-Creation-Date: 2018-09-05 13:13+0200\n"
+"PO-Revision-Date: 2018-09-05 13:19+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -126,6 +126,15 @@ msgstr "mehr"
 
 msgid "I wish to receive notification emails"
 msgstr "Ich möchte Benachrichtigungs-Emails erhalten"
+
+msgid "Moderator Status (Portal-Admins only)"
+msgstr "Moderator-Status (nur für Portal-Administratoren)"
+
+msgid "I wish to be a Moderator for this portal"
+msgstr "Ich möchte Moderator für dieses Portal sein"
+
+msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
+msgstr "Als Moderator erhältst du eine sofortige Email-Benachrichtigung für JEDEN öffentlich sichtbaren Inhalt, der auf diesem Portal erstellt wird. Da du auch Portal-Administrator bist, kannst du den Inhalt dann löschen, falls er offensiv oder bedenklich ist. Um ihn zu löschen, besuche die Inhaltsseite auf der Webseite, während du mit diesem Benutzerkonto eingeloggt bist."
 
 msgid "Receive notification emails in this language"
 msgstr "Benachrichtigungs-Emails in dieser Sprache empfangen"

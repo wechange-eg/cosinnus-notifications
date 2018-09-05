@@ -36,6 +36,7 @@ from annoying.functions import get_object_or_None
 from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+import six
 
 
 
@@ -67,6 +68,7 @@ NOTIFICATION_REASONS = {
     'portal_admin': _('You are getting this notification because you are an administrator of this portal.'),
     'daily_digest': _('You are getting this email because you are subscribed to one or more daily notifications.'),
     'weekly_digest': _('You are getting this email because you are subscribed to one or more weekly notifications.'),
+    'moderator_alert': 'This is a Portal Moderator notification. Filter your mails using this token: PORTALMODERATORALERT.', # this is untranslated so that moderators can filter their mails for it
     'none': None, # the entire lower section won't be shown
 }
 
@@ -260,7 +262,8 @@ class NotificationsThread(Thread):
     
     def check_user_wants_notification(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
-            notification event. """
+            notification event. 
+            Usually returns a bool, but can return a str with a notification reason instead! """
         
         # the first and foremost global check if we should ever send a mail at all
         if not check_user_can_receive_emails(user):
@@ -291,8 +294,8 @@ class NotificationsThread(Thread):
         # they will receive all publicly visible items immediately for this portal
         if check_user_portal_admin(user) and check_user_portal_moderator(user):
             # check if object is publicly visible
-            if check_object_read_access(obj, AnonymousUser()):
-                return True
+            if check_object_read_access(obj, AnonymousUser()) or getattr(obj, 'cosinnus_always_visible_by_users_moderator_flag', False):
+                return 'moderator_alert'
         
         # global settings check, blanketing the finer grained checks
         global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
@@ -342,8 +345,8 @@ class NotificationsThread(Thread):
         setattr(notification_event, '_target_object', self.obj) # this helps reduce lookups by local caching the generic foreign key object
         
         for receiver in self.audience:
-            if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
-                
+            wants_notification_reason = self.check_user_wants_notification(receiver, self.notification_id, self.obj)
+            if wants_notification_reason:
                 # switch language to user's preference language
                 cur_language = translation.get_language()
                 try:
@@ -374,7 +377,10 @@ class NotificationsThread(Thread):
                         template = '/cosinnus/html_mail/notification.html'
                         portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
                         
-                        reason = NOTIFICATION_REASONS[self.options.get('notification_reason')] 
+                        if isinstance(wants_notification_reason, six.string_types):
+                            reason = NOTIFICATION_REASONS[wants_notification_reason]
+                        else:
+                            reason = NOTIFICATION_REASONS[self.options.get('notification_reason')] 
                         portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
                         
                         # render the notification item (and get back some data from the event)
@@ -592,7 +598,7 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
     # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
     if options['moderatable_content']:
         portal_admins =  get_user_model().objects.filter(id__in=CosinnusPortal.get_current().admins)
-        audience += [admin for admin in portal_admins if not admin in audience]
+        audience += [admin for admin in portal_admins if (admin != user and not admin in audience)]
     
     notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
     notification_thread.start()
