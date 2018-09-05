@@ -260,10 +260,10 @@ class NotificationsThread(Thread):
         return False
         
     
-    def check_user_wants_notification(self, user, notification_id, obj):
+    def check_user_wants_notification(self, user, notification_id, obj, notification_moderator_check=False):
         """ Do multiple pre-checks and a DB check to find if the user wants to receive a mail for a 
             notification event. 
-            Usually returns a bool, but can return a str with a notification reason instead! """
+            @param notification_moderator_check: Do a special check to see if a moderator should receive this """
         
         # the first and foremost global check if we should ever send a mail at all
         if not check_user_can_receive_emails(user):
@@ -292,10 +292,13 @@ class NotificationsThread(Thread):
         
         # if a user has marked themselves as moderator (portal admins only), 
         # they will receive all publicly visible items immediately for this portal
-        if check_user_portal_admin(user) and check_user_portal_moderator(user):
-            # check if object is publicly visible
-            if check_object_read_access(obj, AnonymousUser()) or getattr(obj, 'cosinnus_always_visible_by_users_moderator_flag', False):
-                return 'moderator_alert'
+        if notification_moderator_check:
+            if check_user_portal_admin(user) and check_user_portal_moderator(user):
+                # check if object is publicly visible
+                if check_object_read_access(obj, AnonymousUser()) or getattr(obj, 'cosinnus_always_visible_by_users_moderator_flag', False):
+                    return True
+            # for this special check, we cancel the rest here, because only the moderation check counts
+            return False
         
         # global settings check, blanketing the finer grained checks
         global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
@@ -324,11 +327,112 @@ class NotificationsThread(Thread):
         else:
             # the individual setting for this notification type and group is in effect:
             return self.is_notification_active(notification_id, user, self.group)
-
-
-    def run(self):
+    
+    
+    def send_instant_notification(self, notification_event, receiver, reason_key=None):
+        """ Sends out an instant notification for this thread's event to someone who wants it """
+        
         from cosinnus.utils.context_processors import cosinnus as cosinnus_context
         
+        # switch language to user's preference language
+        cur_language = translation.get_language()
+        try:
+            if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
+                translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+            elif hasattr(self.user, 'cosinnus_profile'): # if receiver is a virtual user, set language to sender's
+                translation.activate(getattr(self.user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+            
+            portal = CosinnusPortal.get_current()
+            site = portal.site
+            domain = portal.get_domain()
+            
+            # if we know the triggering preference, we can link to it directly via ULR anchors
+            url_suffix = ''
+            if self.notification_preference_triggered:
+                group_pk = self.notification_preference_triggered.group_id
+                pref_arg = ''
+                if self.notification_preference_triggered.notification_id not in (NO_NOTIFICATIONS_ID, ALL_NOTIFICATIONS_ID):
+                    pref_arg = 'highlight_pref=%d:%s&' % (group_pk, self.notification_preference_triggered.notification_id)
+                url_suffix = '?%shighlight_choice=%d#notif_choice_%d' % (pref_arg, group_pk, group_pk)
+            preference_url = '%s%s%s' % (domain, reverse('cosinnus:notifications'), url_suffix)
+            
+            is_html = self.options.get('is_html', False)
+            
+            if is_html:
+                template = '/cosinnus/html_mail/notification.html'
+                portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
+                
+                if reason_key:
+                    reason = NOTIFICATION_REASONS[reason_key]
+                else:
+                    reason = NOTIFICATION_REASONS[self.options.get('notification_reason')] 
+                portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+                
+                # render the notification item (and get back some data from the event)
+                notification_item_html, data = render_digest_item_for_notification_event(notification_event, return_data=True)
+                topic = data.get('notification_text', None) or data.get('event_text')
+                subject = self.options.get('subject_text') % data.get('string_variables')
+                
+                context = {
+                    'site': site,
+                    'site_name': site.name,
+                    'domain_url': domain,
+                    'portal_url': domain,
+                    'portal_image_url': portal_image_url,
+                    'portal_name': portal_name,
+                    'receiver': receiver, 
+                    'addressee': mark_safe(strip_tags(full_name(receiver))), 
+                    'topic': topic,
+                    'prefs_url': mark_safe(preference_url),
+                    
+                    'notification_reason': reason,
+                    
+                    'origin_name': self.group['name'],
+                    'origin_url': self.group.get_absolute_url() + self.options.get('origin_url_suffix', ''),
+                    'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
+                    
+                    'notification_body': None, # this is a body text that can be used for group description or similar
+                    
+                    'notification_item_html': mark_safe(notification_item_html),
+                }
+            
+            else:
+                
+                template = self.options['mail_template']
+                subj_template = self.options['subject_template']
+                if self.sender.request:
+                    context = get_common_mail_context(self.sender.request)
+                    context.update(cosinnus_context(self.sender.request))
+                else:
+                    context = {} # no request in sender
+                
+                context.update({
+                    'receiver':receiver, 
+                    'receiver_name':mark_safe(strip_tags(full_name(receiver))), 
+                    'sender':self.user, 
+                    'sender_name':mark_safe(strip_tags(full_name(self.user))), 
+                    'object':self.obj, 
+                    'notification_settings_url':mark_safe(preference_url)
+                })
+                
+                # additional context for BaseTaggableObjectModels
+                context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
+                if issubclass(self.obj.__class__, BaseTaggableObjectModel):
+                    context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
+                try:
+                    context.update({'object_url':self.obj.get_absolute_url()})
+                except:
+                    pass
+                subject = render_to_string(subj_template, context)
+            
+            
+            send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
+            
+        finally:
+            translation.activate(cur_language)
+    
+
+    def run(self):
         # set group, inferred from object
         if type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
             self.group = self.obj
@@ -345,106 +449,16 @@ class NotificationsThread(Thread):
         setattr(notification_event, '_target_object', self.obj) # this helps reduce lookups by local caching the generic foreign key object
         
         for receiver in self.audience:
-            wants_notification_reason = self.check_user_wants_notification(receiver, self.notification_id, self.obj)
-            if wants_notification_reason:
-                # switch language to user's preference language
-                cur_language = translation.get_language()
-                try:
-                    if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
-                        translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
-                    elif hasattr(self.user, 'cosinnus_profile'): # if receiver is a virtual user, set language to sender's
-                        translation.activate(getattr(self.user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
-                    
-                    portal = CosinnusPortal.get_current()
-                    site = portal.site
-                    domain = portal.get_domain()
-                    
-                    # if we know the triggering preference, we can link to it directly via ULR anchors
-                    url_suffix = ''
-                    if self.notification_preference_triggered:
-                        group_pk = self.notification_preference_triggered.group_id
-                        pref_arg = ''
-                        if self.notification_preference_triggered.notification_id not in (NO_NOTIFICATIONS_ID, ALL_NOTIFICATIONS_ID):
-                            pref_arg = 'highlight_pref=%d:%s&' % (group_pk, self.notification_preference_triggered.notification_id)
-                        url_suffix = '?%shighlight_choice=%d#notif_choice_%d' % (pref_arg, group_pk, group_pk)
-                    preference_url = '%s%s%s' % (domain, reverse('cosinnus:notifications'), url_suffix)
-                    
-                    
-                    
-                    is_html = self.options.get('is_html', False)
-                    
-                    if is_html:
-                        template = '/cosinnus/html_mail/notification.html'
-                        portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
-                        
-                        if isinstance(wants_notification_reason, six.string_types):
-                            reason = NOTIFICATION_REASONS[wants_notification_reason]
-                        else:
-                            reason = NOTIFICATION_REASONS[self.options.get('notification_reason')] 
-                        portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
-                        
-                        # render the notification item (and get back some data from the event)
-                        notification_item_html, data = render_digest_item_for_notification_event(notification_event, return_data=True)
-                        topic = data.get('notification_text', None) or data.get('event_text')
-                        subject = self.options.get('subject_text') % data.get('string_variables')
-                        
-                        context = {
-                            'site': site,
-                            'site_name': site.name,
-                            'domain_url': domain,
-                            'portal_url': domain,
-                            'portal_image_url': portal_image_url,
-                            'portal_name': portal_name,
-                            'receiver': receiver, 
-                            'addressee': mark_safe(strip_tags(full_name(receiver))), 
-                            'topic': topic,
-                            'prefs_url': mark_safe(preference_url),
-                            
-                            'notification_reason': reason,
-                            
-                            'origin_name': self.group['name'],
-                            'origin_url': self.group.get_absolute_url() + self.options.get('origin_url_suffix', ''),
-                            'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
-                            
-                            'notification_body': None, # this is a body text that can be used for group description or similar
-                            
-                            'notification_item_html': mark_safe(notification_item_html),
-                        }
-                    
-                    else:
-                        
-                        template = self.options['mail_template']
-                        subj_template = self.options['subject_template']
-                        if self.sender.request:
-                            context = get_common_mail_context(self.sender.request)
-                            context.update(cosinnus_context(self.sender.request))
-                        else:
-                            context = {} # no request in sender
-                        
-                        context.update({
-                            'receiver':receiver, 
-                            'receiver_name':mark_safe(strip_tags(full_name(receiver))), 
-                            'sender':self.user, 
-                            'sender_name':mark_safe(strip_tags(full_name(self.user))), 
-                            'object':self.obj, 
-                            'notification_settings_url':mark_safe(preference_url)
-                        })
-                        
-                        # additional context for BaseTaggableObjectModels
-                        context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
-                        if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                            context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
-                        try:
-                            context.update({'object_url':self.obj.get_absolute_url()})
-                        except:
-                            pass
-                        subject = render_to_string(subj_template, context)
-                    
-                    
-                    send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
-                    
-                finally:
-                    translation.activate(cur_language)
+            if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
+                self.send_instant_notification(notification_event, receiver)
+        
+        # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
+        if self.options['moderatable_content']:
+            portal_admins = get_user_model().objects.filter(id__in=CosinnusPortal.get_current().admins)
+            for admin in portal_admins:
+                if admin != self.user:
+                    if self.check_user_wants_notification(admin, self.notification_id, self.obj, notification_moderator_check=True):
+                        self.send_instant_notification(notification_event, admin, 'moderator_alert')
         
         if self.audience:
             # create a new NotificationEvent that saves this event for digest re-generation
@@ -594,11 +608,6 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
     
     # sanity check: only send to active users that have an email set (or is anonymous, so we can send emails to non-users)
     audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated()) and aud_user.email)]
-    
-    # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
-    if options['moderatable_content']:
-        portal_admins =  get_user_model().objects.filter(id__in=CosinnusPortal.get_current().admins)
-        audience += [admin for admin in portal_admins if (admin != user and not admin in audience)]
     
     notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
     notification_thread.start()
