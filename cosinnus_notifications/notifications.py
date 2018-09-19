@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from builtins import str
 import logging
 import datetime
 
@@ -144,7 +145,7 @@ DIGEST_ITEM_TITLE_MAX_LENGTH = 50
 
 def _find_notification(signal):
     """ Finds a configured notification for a received signal """
-    for signal_id, options in notifications.items():
+    for signal_id, options in list(notifications.items()):
         if signal in options['signals']:
             return signal_id
     return None
@@ -159,7 +160,7 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     if al:
         if all_or_none_or_custom.startswith("all_"):
             setting_value = int(all_or_none_or_custom.split("_")[1])
-            if setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and al.setting != setting_value:
+            if setting_value in list(dict(UserNotificationPreference.SETTING_CHOICES).keys()) and al.setting != setting_value:
                 al.setting = setting_value
                 al.save()
         else:
@@ -167,7 +168,7 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     else:
         if all_or_none_or_custom.startswith("all_"):
             setting_value = int(all_or_none_or_custom.split("_")[1])
-            if not setting_value in dict(UserNotificationPreference.SETTING_CHOICES).keys():
+            if not setting_value in list(dict(UserNotificationPreference.SETTING_CHOICES).keys()):
                 setting_value = UserNotificationPreference.SETTING_NOW
             UserNotificationPreference.objects.create(user=user, group=group, notification_id=ALL_NOTIFICATIONS_ID, setting=setting_value)
     
@@ -188,7 +189,7 @@ def set_user_group_notifications_special(user, group, all_or_none_or_custom):
 def init_notifications():
     global notifications 
     
-    all_items = [item for item in app_registry.items()]
+    all_items = [item for item in list(app_registry.items())]
     all_items.append( ('cosinnus', 'cosinnus', '') )
     for app, app_name, app_label in all_items:
         try:
@@ -196,7 +197,7 @@ def init_notifications():
         except ImportError:
             continue
         if hasattr(notification_module, 'notifications'):
-            for signal_id, options in notification_module.notifications.items():
+            for signal_id, options in list(notification_module.notifications.items()):
                 #label, template, signals
                 signal_id = "%s__%s" % (app_name, signal_id)
                 ensure_dict_keys(options, ['label', 'mail_template', 'subject_template', 'signals'], \
@@ -206,13 +207,13 @@ def init_notifications():
                 options['app_name'] = app_name
                 options['app_label'] = app_label
                 # add missing notification settings
-                for key, default in NOTIFICATIONS_DEFAULTS.items():
+                for key, default in list(NOTIFICATIONS_DEFAULTS.items()):
                     if options.get(key, None) is None:
                         if default == REQUIRED_NOTIFICATION_ATTRIBUTE or \
                                 (options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML):
                             raise ImproperlyConfigured('Notification options key "%s" in notification signal "%s" is required!' % (key, signal_id))
                         options[key] = default
-                for datakey, datadefault in NOTIFICATIONS_DEFAULTS['data_attributes'].items():
+                for datakey, datadefault in list(NOTIFICATIONS_DEFAULTS['data_attributes'].items()):
                     if options['data_attributes'].get(datakey, None) is None:
                         options['data_attributes'][datakey] = datadefault
                     
@@ -220,7 +221,7 @@ def init_notifications():
                 # connect to signals
                 for signal in options['signals']:
                     signal.connect(notification_receiver)
-    logger.info('Cosinnus_notifications: init complete. Available notification signals: %s' % notifications.keys())
+    logger.info('Cosinnus_notifications: init complete. Available notification signals: %s' % list(notifications.keys()))
 
 
 class NotificationsThread(Thread):
@@ -570,7 +571,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                 data[url_field] = CosinnusPortal.get_current().get_domain() + data[url_field]
                 
         # humanize all datetime objects
-        for key, val in data.items():
+        for key, val in list(data.items()):
             if isinstance(val, datetime.datetime):
                 data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
                 
@@ -580,7 +581,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         else:
             return item_html
     
-    except Exception, e:
+    except Exception as e:
         logger.exception('Error while rendering a digest item for a digest email. Exception in extra.', extra={'exception': force_text(e)})
     return ''
 

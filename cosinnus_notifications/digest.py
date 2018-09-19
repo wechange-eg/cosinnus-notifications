@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from __future__ import print_function
 
 import datetime
 import logging
@@ -65,7 +66,7 @@ def send_digest_for_current_portal(digest_setting):
     logger.info('Now starting to sending out digests of SETTING=%s in Portal "%s". Data in extra.' % \
                 (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_info)
     if settings.DEBUG:
-        print ">> ", extra_info
+        print((">> ", extra_info))
     
     emailed = 0
     for user in users:
@@ -103,7 +104,7 @@ def send_digest_for_current_portal(digest_setting):
                 # these groups will never get digest notifications because they have a blanketing NONE setting or 
                 # ALL setting (of anything but this ``digest_setting``)
                 # (they may still have individual preferences in the DB, which are ignored because of the blanket setting)
-                unwanted_digest_settings = [key for key in dict(UserNotificationPreference.SETTING_CHOICES).keys() if key != digest_setting]
+                unwanted_digest_settings = [key for key in list(dict(UserNotificationPreference.SETTING_CHOICES).keys()) if key != digest_setting]
                 exclude_digest_groups = UserNotificationPreference.objects.filter(user=user, group_id__in=portal_group_ids) 
                 exclude_digest_groups = exclude_digest_groups.filter(Q(notification_id=ALL_NOTIFICATIONS_ID, setting__in=unwanted_digest_settings) | Q(notification_id=NO_NOTIFICATIONS_ID))
                 exclude_digest_groups = exclude_digest_groups.values_list('group_id', flat=True)  
@@ -170,7 +171,7 @@ def send_digest_for_current_portal(digest_setting):
                 _send_digest_email(user, mark_safe(body_html), TIME_DIGEST_END, digest_setting)
                 emailed += 1
             
-        except Exception, e:
+        except Exception as e:
             # we never want this subroutine to just die, we need the final saves at the end to ensure
             # the same items do not get into digests twice
             logger.error('An error occured while doing a digest for a user! Exception was: %s' % force_text(e), 
@@ -196,7 +197,7 @@ def send_digest_for_current_portal(digest_setting):
     }
     logger.info('Finished sending out digests of SETTING=%s in Portal "%s". Data in extra.' % (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_log)
     if settings.DEBUG:
-        print extra_log
+        print(extra_log)
     
 
 def _send_digest_email(receiver, body_html, digest_generation_time, digest_setting):

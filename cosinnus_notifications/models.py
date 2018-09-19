@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from builtins import str
+from builtins import object
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
@@ -51,7 +53,7 @@ class UserNotificationPreference(models.Model):
     
     date = models.DateTimeField(auto_now_add=True, editable=False)
 
-    class Meta:
+    class Meta(object):
         app_label = 'cosinnus_notifications'
         unique_together = (('user', 'notification_id', 'group'),)
         verbose_name = _('Notification Preference')
@@ -69,7 +71,7 @@ class UserNotificationPreference(models.Model):
 @python_2_unicode_compatible
 class NotificationEvent(models.Model):
     
-    class Meta:
+    class Meta(object):
         ordering = ('date',)
         
     content_type = models.ForeignKey(ContentType)

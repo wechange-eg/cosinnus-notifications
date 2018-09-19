@@ -20,7 +20,7 @@ class Command(BaseCommand):
         try:
             initialize_cosinnus_after_startup()
             send_digest_for_current_portal(UserNotificationPreference.SETTING_WEEKLY)
-        except Exception, e:
+        except Exception as e:
             logger.error('An critical error occured during weekly digest generation and bubbled up completely! Exception was: %s' % force_text(e),
                          extra={'exception': e, 'trace': traceback.format_exc()})
                                 

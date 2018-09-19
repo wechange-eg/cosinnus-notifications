@@ -31,7 +31,7 @@ def cosinnus_ready(sender, **kwargs):
     try:
         #logger.info('Calling cosinnus_notifications:init.')
         init_notifications()
-    except Exception, err:
+    except Exception as err:
         logger.error('Exception during cosinnus_notifications:init: %s' % err)
         if settings.DEBUG: 
             raise

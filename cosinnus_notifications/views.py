@@ -72,7 +72,7 @@ class NotificationPreferenceView(UpdateView):
             
             # only update the individual group settings if user selected the individual global setting
             if global_setting == GlobalUserNotificationSetting.SETTING_GROUP_INDIVIDUAL:            
-                for name, value in request.POST.items():
+                for name, value in list(request.POST.items()):
                     # we go through all values POSTed to us. some of these are the settings from the dropdown
                     # box (all / none / custom), some of them are the individual custom preference choices
                     # for a group.
@@ -96,7 +96,7 @@ class NotificationPreferenceView(UpdateView):
                             # save / erase setting
                             try:
                                 pref = UserNotificationPreference.objects.get(user=request.user, group=group, notification_id=notification_id)
-                                if value in dict(UserNotificationPreference.SETTING_CHOICES).keys() and value != pref.setting:
+                                if value in list(dict(UserNotificationPreference.SETTING_CHOICES).keys()) and value != pref.setting:
                                     pref.setting = value
                                     pref.save()
                             except UserNotificationPreference.DoesNotExist:
@@ -131,7 +131,7 @@ class NotificationPreferenceView(UpdateView):
         for group in groups:
             choice_selected = "custom"
             notification_rows = [] # [[id, label, value, app, app_label], ...]
-            for notification_id, options in notifications.items():
+            for notification_id, options in list(notifications.items()):
                 # do not show hidden notifications
                 if options.get('hidden', False):
                     continue
@@ -194,4 +194,4 @@ def notification_reset_view(request):
     return HttpResponseRedirect(reverse_lazy('cosinnus:notifications'))
     
     
-from cosinnus_notifications.hooks import *
+import cosinnus_notifications.hooks # noqa
