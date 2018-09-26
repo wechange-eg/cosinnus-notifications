@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+from cosinnus_notifications import views
 
+cosinnus_root_patterns = [
+    url(r'^profile/notifications/$', views.notification_preference_view, name='notifications'),
+    url(r'^profile/reset_notifications/$', views.notification_reset_view, name='reset-notifications'),           
+]
 
-cosinnus_root_patterns = patterns('',
-    url(r'^profile/notifications/$', 'cosinnus_notifications.views.notification_preference_view', name='notifications'),
-    url(r'^profile/reset_notifications/$', 'cosinnus_notifications.views.notification_reset_view', name='reset-notifications'),           
-)
+cosinnus_group_patterns = []
 
-
-cosinnus_group_patterns = patterns('cosinnus_notifications.views',
-)
 
 urlpatterns = cosinnus_group_patterns + cosinnus_root_patterns
