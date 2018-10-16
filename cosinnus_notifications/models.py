@@ -10,7 +10,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 from cosinnus.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 @python_2_unicode_compatible
 class UserNotificationPreference(models.Model):
@@ -76,7 +76,7 @@ class NotificationEvent(models.Model):
         
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    target_object = generic.GenericForeignKey('content_type', 'object_id')
+    target_object = GenericForeignKey('content_type', 'object_id')
     
     group = models.ForeignKey(settings.COSINNUS_GROUP_OBJECT_MODEL, related_name='notifcation_events',
         on_delete=models.CASCADE, db_index=True)

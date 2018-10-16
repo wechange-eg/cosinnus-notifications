@@ -8,7 +8,7 @@ import datetime
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils import translation, formats
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.utils.timezone import localtime
 from django.utils.translation import ugettext_lazy as _
 from django.template.loader import render_to_string
