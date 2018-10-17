@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed,\
     HttpResponseForbidden
 from django.utils.translation import ugettext_lazy as _
-from django.views.generic.edit import UpdateView
 
 from cosinnus.conf import settings
 from cosinnus.core.decorators.views import require_logged_in
@@ -21,10 +20,11 @@ from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.db import transaction
 from cosinnus.utils.permissions import check_user_portal_moderator,\
     check_user_portal_admin
+from django.views.generic.list import ListView
 
 
 
-class NotificationPreferenceView(UpdateView):
+class NotificationPreferenceView(ListView):
     
     object = {}
     model = UserNotificationPreference
@@ -41,6 +41,7 @@ class NotificationPreferenceView(UpdateView):
         Handles GET requests and instantiates a blank version of the form.
         """
         self.user = self.request.user
+        self.object_list = self.get_queryset()
         return self.render_to_response(self.get_context_data())
     
     def post(self, request, *args, **kwargs):
@@ -116,7 +117,7 @@ class NotificationPreferenceView(UpdateView):
         """
         Insert the single object into the context dict.
         """
-        context = super(UpdateView, self).get_context_data(**kwargs)
+        context = super(NotificationPreferenceView, self).get_context_data(**kwargs)
         
         # build lookup dict for all active existing preferences vs groups
         prefs = {} # 'groupid:notification_id' 
