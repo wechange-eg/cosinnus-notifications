@@ -74,7 +74,7 @@ class NotificationEvent(models.Model):
     class Meta(object):
         ordering = ('date',)
         
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     target_object = GenericForeignKey('content_type', 'object_id')
     

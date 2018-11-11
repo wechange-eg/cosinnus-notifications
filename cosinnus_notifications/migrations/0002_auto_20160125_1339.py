@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='usernotificationpreference',
             name='group',
-            field=models.ForeignKey(related_name='user_notification_preferences', to=settings.COSINNUS_GROUP_OBJECT_MODEL),
+            field=models.ForeignKey(related_name='user_notification_preferences', to=settings.COSINNUS_GROUP_OBJECT_MODEL, on_delete=models.CASCADE),
         ),
     ]
