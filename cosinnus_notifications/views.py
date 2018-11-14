@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.contrib import messages
 from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed,\
     HttpResponseForbidden
@@ -185,7 +185,7 @@ notification_preference_view = NotificationPreferenceView.as_view()
 def notification_reset_view(request):
     if not request.method=='POST':
         return HttpResponseNotAllowed(['POST'])
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return HttpResponseForbidden('You must be logged in to do that!')
     
     # deleting all preferences resets the user's notifications to default

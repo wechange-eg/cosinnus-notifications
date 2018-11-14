@@ -6,7 +6,7 @@ import logging
 import datetime
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import translation, formats
 from importlib import import_module
 from django.utils.timezone import localtime
@@ -270,7 +270,7 @@ class NotificationsThread(Thread):
         if not check_user_can_receive_emails(user):
             return False
         # anonymous authors count as YES, used for recruiting users
-        if not user.is_authenticated():
+        if not user.is_authenticated:
             return True
         # only active users that have logged in before accepted the TOS get notifications
         if not user.is_active:
@@ -608,7 +608,7 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
         options = copy_options
     
     # sanity check: only send to active users that have an email set (or is anonymous, so we can send emails to non-users)
-    audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated()) and aud_user.email)]
+    audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated) and aud_user.email)]
     
     notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
     notification_thread.start()
