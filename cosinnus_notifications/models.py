@@ -12,8 +12,8 @@ from cosinnus.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-@python_2_unicode_compatible
-class UserNotificationPreference(models.Model):
+
+class BaseUserNotificationPreference(models.Model):
     
     # do not send notifications for this event
     SETTING_NEVER = 0
@@ -38,6 +38,19 @@ class UserNotificationPreference(models.Model):
         SETTING_WEEKLY: 7,        
     }
     
+    setting = models.PositiveSmallIntegerField(choices=SETTING_CHOICES,
+            db_index=True, default=SETTING_NOW,
+            help_text='Determines if the mail for this notification should be sent out at all, immediately, or aggregated (if so, every how often)')
+    
+    date = models.DateTimeField(auto_now_add=True, editable=False)
+    
+    class Meta(object):
+        abstract = True
+        
+    
+@python_2_unicode_compatible
+class UserNotificationPreference(BaseUserNotificationPreference):
+    
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
         verbose_name=_('Notification Preference for User'),
         on_delete=models.CASCADE,
@@ -47,12 +60,6 @@ class UserNotificationPreference(models.Model):
         on_delete=models.CASCADE)
     notification_id = models.CharField(_('Notification ID'), max_length=100)
     
-    setting = models.PositiveSmallIntegerField(choices=SETTING_CHOICES,
-            db_index=True, default=SETTING_NOW,
-            help_text='Determines if the mail for this notification should be sent out at all, immediately, or aggregated (if so, every how often)')
-    
-    date = models.DateTimeField(auto_now_add=True, editable=False)
-
     class Meta(object):
         app_label = 'cosinnus_notifications'
         unique_together = (('user', 'notification_id', 'group'),)
@@ -66,6 +73,34 @@ class UserNotificationPreference(models.Model):
             'setting': self.setting,
             'group': self.group,
         }
+
+
+@python_2_unicode_compatible
+class UserMultiNotificationPreference(BaseUserNotificationPreference):
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+        verbose_name=_('Notification Preference for User'),
+        on_delete=models.CASCADE,
+        related_name='multi_notifications'
+    )
+    portal = models.ForeignKey('cosinnus.CosinnusPortal', verbose_name=_('Portal'), related_name='user_multi_notifications', 
+        null=False, blank=False, default=1)
+    multi_notification_id = models.CharField(_('Multi Notification ID'), max_length=100)
+    
+    class Meta(object):
+        app_label = 'cosinnus_notifications'
+        unique_together = (('user', 'multi_notification_id',),)
+        verbose_name = _('Multi Notification Preference')
+        verbose_name_plural = _('Multi Notification Preferences')
+
+    def __str__(self):
+        return "<User multi notification preference: %(user)s, multi_notification_id: %(multi_notification_id)s, setting: %(setting)d>" % {
+            'user': self.user,
+            'notification_id': self.notification_id,
+            'setting': self.setting,
+        }
+
+
 
 
 @python_2_unicode_compatible

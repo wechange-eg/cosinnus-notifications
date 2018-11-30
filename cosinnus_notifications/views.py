@@ -10,10 +10,12 @@ from django.views.generic.edit import UpdateView
 
 from cosinnus.conf import settings
 from cosinnus.core.decorators.views import require_logged_in
-from cosinnus_notifications.models import UserNotificationPreference
+from cosinnus_notifications.models import UserNotificationPreference,\
+    UserMultiNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
-    set_user_group_notifications_special
+    set_user_group_notifications_special, MULTI_NOTIFICATION_IDS,\
+    MULTI_NOTIFICATION_LABELS
 from cosinnus.models.group import CosinnusGroup, CosinnusPortalMembership,\
     CosinnusPortal
 from django.views.decorators.csrf import csrf_protect
@@ -21,6 +23,7 @@ from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.db import transaction
 from cosinnus.utils.permissions import check_user_portal_moderator,\
     check_user_portal_admin
+from annoying.functions import get_object_or_None
 
 
 
@@ -161,6 +164,17 @@ class NotificationPreferenceView(UpdateView):
         global_setting_choices = GlobalUserNotificationSetting.SETTING_CHOICES
         global_setting_selected = GlobalUserNotificationSetting.objects.get_for_user(self.request.user) 
         
+        multi_notification_preferences = []
+        for multi_notification_id, default_multi_setting in MULTI_NOTIFICATION_IDS.items():
+            multi_pref = get_object_or_None(UserMultiNotificationPreference, user=self.request.user, multi_notification_id=multi_notification_id, portal=CosinnusPortal.get_current())
+            
+            multi_notification_preferences.append({
+                'multi_notification_id': multi_notification_id,
+                'multi_notification_label': MULTI_NOTIFICATION_LABELS[multi_notification_id],
+                'multi_preference_choices': UserMultiNotificationPreference.SETTING_CHOICES,
+                'multi_preference_setting': multi_pref.setting if multi_pref else default_multi_setting,
+            })
+        
         context.update({
             #'object_list': self.queryset,
             'grouped_notifications': group_rows,
@@ -172,6 +186,7 @@ class NotificationPreferenceView(UpdateView):
             'language_selected': self.request.user.cosinnus_profile.language,
             'global_setting_choices': global_setting_choices,
             'global_setting_selected': global_setting_selected,
+            'multi_notification_preferences': multi_notification_preferences,
             'notification_choices': UserNotificationPreference.SETTING_CHOICES,
         })
         return context

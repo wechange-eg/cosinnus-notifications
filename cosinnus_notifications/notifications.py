@@ -19,7 +19,7 @@ from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup, CosinnusPortal
 from cosinnus.models.tagged import BaseTaggableObjectModel, BaseTagObject
 from cosinnus_notifications.models import UserNotificationPreference,\
-    NotificationEvent
+    NotificationEvent, UserMultiNotificationPreference
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting,\
     textfield
 from cosinnus.utils.functions import ensure_dict_keys, resolve_attributes
@@ -61,6 +61,17 @@ notifications = {
         'subject_template': '',
         'signals': [], 
     },  
+}
+
+# a list of all selecteable UserMultiNotificationPreferences and their default choices
+# if one hasn't been created for a user
+MULTI_NOTIFICATION_IDS = {
+    # a followed object has been updated, or an interesting event has occured to it (different for each content model)
+    'MULTI_followed_object_notification': getattr(settings, 'COSINNUS_DEFAULT_FOLLOWED_OBJECT_NOTIFICATION_SETTING', UserMultiNotificationPreference.SETTING_DAILY),
+}
+# the option labels for the multi notifications:
+MULTI_NOTIFICATION_LABELS = {
+    'MULTI_followed_object_notification': _('For content that I am following, I wish to receive notifications on changes, comments (TODO better description for when notifications are sent):'),
 }
 
 NOTIFICATION_REASONS = {
