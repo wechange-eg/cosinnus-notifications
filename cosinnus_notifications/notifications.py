@@ -120,6 +120,10 @@ NOTIFICATIONS_DEFAULTS = {
     # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
     # see notifications.NOTIFICATION_REASONS
     'notification_reason': 'default', 
+    # should the like button be shown?
+    'show_like_button': False,
+    # should the follow button be shown?
+    'show_follow_button': False,
     # object attributes to fille the snippet template with. 
     # these will be looked up on the object as attribute or functions with no params
     # additionally, special attributes will be added to the object for the object during lookup-time:
@@ -134,6 +138,8 @@ NOTIFICATIONS_DEFAULTS = {
         'sub_event_meta': None, # property of a sub-divided item below the main one, see doc above
         'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
         'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
+        'like_button_url': 'get_absolute_like_url', # url for the like button
+        'follow_button_url': 'get_absolute_follow_url', # url for the follow button
     },
     # can be used to suffix the origin URL (group url for originating group) with parameters to take different actions when clicked
     'origin_url_suffix': '',
@@ -396,6 +402,25 @@ class NotificationsThread(Thread):
                     
                     'notification_item_html': mark_safe(notification_item_html),
                 }
+                # add like/follow buttons if specified in notification event options
+                if self.options.get('show_like_button', False) or self.options.get('show_follow_button', False):
+                    obj = getattr(notification_event, '_target_object', notification_event.target_object)
+                    
+                    counter = 1
+                    context.update({
+                        'show_action_buttons': True,
+                    })
+                    if self.options.get('show_like_button', False):
+                        context.update({
+                            'action_button_%d_text' % counter: _('Like'),
+                            'action_button_%d_url' % counter: resolve_attributes(obj, self.options['data_attributes']['like_button_url']),
+                        })
+                        counter += 1
+                    if self.options.get('show_follow_button', False):
+                        context.update({
+                            'action_button_%d_text' % counter: _('Follow'),
+                            'action_button_%d_url' % counter: resolve_attributes(obj, self.options['data_attributes']['follow_button_url']),
+                        })
             
             else:
                 
