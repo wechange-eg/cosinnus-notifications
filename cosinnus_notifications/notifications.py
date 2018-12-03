@@ -38,6 +38,7 @@ from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 import six
+from _collections import defaultdict
 
 
 
@@ -61,10 +62,13 @@ notifications = {
         'subject_template': '',
         'signals': [], 
     },  
+    # ...,
+    # more will be added as each cosinnus app's cosinnus_notifications.py is inited
 }
 
 # a list of all selecteable UserMultiNotificationPreferences and their default choices
 # if one hasn't been created for a user
+# these are also listed in <notification_setting['multi_preference_set']>
 MULTI_NOTIFICATION_IDS = {
     # a followed object has been updated, or an interesting event has occured to it (different for each content model)
     'MULTI_followed_object_notification': getattr(settings, 'COSINNUS_DEFAULT_FOLLOWED_OBJECT_NOTIFICATION_SETTING', UserMultiNotificationPreference.SETTING_DAILY),
@@ -86,18 +90,28 @@ NOTIFICATION_REASONS = {
 
 REQUIRED_NOTIFICATION_ATTRIBUTE = object()
 REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML = object()
-
+REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_NON_HTML = object()
 
 # this is a lookup for all defaults of a notification definition
 NOTIFICATIONS_DEFAULTS = {
     # Label for the notification option in user's preference
     'label': REQUIRED_NOTIFICATION_ATTRIBUTE, 
     # text-only mail body template. ignored for HTML mails
-    'mail_template': REQUIRED_NOTIFICATION_ATTRIBUTE,
+    'mail_template': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_NON_HTML,
     # text-only mail subject template. ignored for HTML mails
-    'subject_template': REQUIRED_NOTIFICATION_ATTRIBUTE,
+    'subject_template': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_NON_HTML,
     # a django signal on which to listen for
     'signals': [REQUIRED_NOTIFICATION_ATTRIBUTE],
+    # if this is set to an item from `MULTI_NOTIFICATION_IDS`, it means that the notification
+    # belongs to a set for which options can be set with a single setting by the user
+    # these are not group specific and are handled seperately from other notification preferences
+    'multi_preference_set': None,
+    # other notification events with a notification_ids in this list, with the same target_object and time-setting,
+    # will be dropped if a notification for this is going to be sent.
+    #  this is used for prioritizing and de-duplicating notifications of different type but that are for
+    # the same actual event, and would cause a quasi-duplicated notification
+    # superceding notification ids CAN ONLY be done by multi-preferences with `multi_preference_set` set
+    'supercedes_notifications': [],
     # should this notification preference be on by default (if the user has never changed the setting?)
     # this may be False or 0 (off), True or 1 (on, immediately), 2 (daily) or 3 (weekly)
     'default': False,
@@ -167,6 +181,31 @@ def _find_notification(signal):
             return signal_id
     return None
 
+REVERESE_MULTI_PREF_SUPERCEDE_DICT = None
+
+
+def get_superceding_multi_preferences(notification_id):
+    """ Returns all multi-pref-set ids from MULTI_NOTIFICATION_IDS that supercede the given notification_id """
+    global REVERESE_MULTI_PREF_SUPERCEDE_DICT
+    if REVERESE_MULTI_PREF_SUPERCEDE_DICT is None:
+        # build reverse lookup dict
+        lookup_dict = defaultdict(set)
+        for __, notification_options in notifications.items():
+            supercedes = notification_options.get('supercedes_notifications', [])
+            multi_pref_set = notification_options.get('multi_preference_set', None)
+            if multi_pref_set and supercedes:
+                for superceded_notif in supercedes:
+                    lookup_dict[superceded_notif].add(multi_pref_set)
+        lookup_dict = dict(lookup_dict)
+        for k,v in lookup_dict.items():
+            lookup_dict[k] = list(v)
+        REVERESE_MULTI_PREF_SUPERCEDE_DICT = lookup_dict
+    
+    # remove the leading app_name from the given notification
+    if '__' in notification_id:
+        notification_id = notification_id.split('__')[1]
+    return REVERESE_MULTI_PREF_SUPERCEDE_DICT.get(notification_id, [])
+
 
 def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     """ Sets the user preference settings for a group to all or none or custom (deleting the special setting flag) """
@@ -217,7 +256,7 @@ def init_notifications():
             for signal_id, options in list(notification_module.notifications.items()):
                 #label, template, signals
                 signal_id = "%s__%s" % (app_name, signal_id)
-                ensure_dict_keys(options, ['label', 'mail_template', 'subject_template', 'signals'], \
+                ensure_dict_keys(options, ['label', 'signals'], \
                     "The configured notification '%s' of app '%s' was missing the following dict keys: %%s" \
                     % (signal_id, app_name))
                 
@@ -227,7 +266,8 @@ def init_notifications():
                 for key, default in list(NOTIFICATIONS_DEFAULTS.items()):
                     if options.get(key, None) is None:
                         if default == REQUIRED_NOTIFICATION_ATTRIBUTE or \
-                                (options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML):
+                                (options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML) or \
+                                (not options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_NON_HTML):
                             raise ImproperlyConfigured('Notification options key "%s" in notification signal "%s" is required!' % (key, signal_id))
                         options[key] = default
                 for datakey, datadefault in list(NOTIFICATIONS_DEFAULTS['data_attributes'].items()):
@@ -242,9 +282,32 @@ def init_notifications():
 
 
 class NotificationsThread(Thread):
+    """ A thread to run on an event that causes notifications to be sent out.
+        Handles both sending out mails instantly, and saving a persistent event for later
+        re-creation during digest generation.
+        There is some 'magic' here: After the thread has been initied normally, instead of
+        running it immediately, it can be initiated an additional number of times by calling
+        `mythread.add_session_frame(*args)` that takes the same arguments as the __init__ function.
+        Then, when the thread is finally started, it will run using its normal set of args until it 
+        finishes, but then replace the args with the next set of queued args and run again. This happens
+        until no further queued arg sets exist. This is done so if we have a physical event with 
+        n notifications spawned, we can run the n events off sequentially in just this one thread.
+        Also this allows us to remember which users already received an email, to de-duplicate
+        very similar event notifications and only send out 1 mail for each actual event.
+        Example: If I follow my own News Post and somebody comments on it, I will only receive the
+            'somebody commented on your post', and not also the 'a comment on a post you follow' notification.
+         """
+    
+    # a complete set of arguments for a next run of this thread. not cleared during sessions
+    next_session_args = []
+    # list of user ids that already have been emailed for this session. not cleared during sessions
+    already_emailed_user_ids = []
 
-    def __init__(self, sender, user, obj, audience, notification_id, options):
-        super(NotificationsThread, self).__init__()
+    def __init__(self, sender, user, obj, audience, notification_id, options, first_init=True):
+        if first_init:
+            super(NotificationsThread, self).__init__()
+            self.next_session_args = []
+            self.already_emailed_user_ids = []
         self.sender = sender
         self.user = user
         self.obj = obj
@@ -256,7 +319,19 @@ class NotificationsThread(Thread):
         self.notification_preference_triggered = None
         # will be set at runtime
         self.group = None
+        
+    def add_session_frame(self, sender, user, obj, audience, notification_id, options):
+        """ Add a set of init variables to the queue of params,
+            basically so that this thread can be reused again after its first run finished """
+        self.next_session_args.append((sender, user, obj, audience, notification_id, options, False))
     
+    def _apply_next_session_frame_and_run(self):
+        """ Re-inits the thread with another set of init args and runs it again. """
+        if len(self.next_session_args) > 0:
+            session_frame = self.next_session_args.pop(0)
+            self.__init__(*session_frame)
+            self.inner_run()
+        
     def is_notification_active(self, notification_id, user, group, alternate_settings_compare=[]):
         """ Checks against the DB if a user notifcation preference exists, and if so, if it is set to active """
         try:
@@ -304,6 +379,7 @@ class NotificationsThread(Thread):
                 allow_creator_as_audience = notifications[notification_id].get('allow_creator_as_audience', False)
             if obj.creator == user and not allow_creator_as_audience:
                 return False
+        
         # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
@@ -470,6 +546,9 @@ class NotificationsThread(Thread):
     
 
     def run(self):
+        self.inner_run()
+        
+    def inner_run(self):
         # set group, inferred from object
         if type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
             self.group = self.obj
@@ -486,8 +565,12 @@ class NotificationsThread(Thread):
         setattr(notification_event, '_target_object', self.obj) # this helps reduce lookups by local caching the generic foreign key object
         
         for receiver in self.audience:
+            # check that we do not email a user for this session twice
+            if receiver.id in self.already_emailed_user_ids:
+                continue
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
                 self.send_instant_notification(notification_event, receiver)
+                self.already_emailed_user_ids.append(receiver.id)
         
         # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
         if self.options['moderatable_content']:
@@ -499,6 +582,7 @@ class NotificationsThread(Thread):
         
         if self.audience:
             # create a new NotificationEvent that saves this event for digest re-generation
+            # no need to worry about de-duplicating events here, the digest generation handles it
             content_type = ContentType.objects.get_for_model(self.obj.__class__)
             notifevent = NotificationEvent.objects.create(
                 content_type=content_type,
@@ -508,6 +592,9 @@ class NotificationsThread(Thread):
                 notification_id=self.notification_id,
                 audience=',%s,' % ','.join([str(receiver.id) for receiver in self.audience]),
             )
+        
+        if len(self.next_session_args) > 0:
+            self._apply_next_session_frame_and_run()
           
         return
 
@@ -622,12 +709,29 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
     return ''
 
 
-def notification_receiver(sender, user, obj, audience, **kwargs):
+notification_sessions = {}
+
+
+def notification_receiver(sender, user, obj, audience, session_id=None, end_session=False, **kwargs):
     """ Generic receiver function for all notifications 
         sender: the main object that is being updated / created
         user: the user that modified the object and caused the event
         audience: a list of users that are potential targets for the event 
+        
+        Feature: Physical event de-duplication and queuing: To achieve that a single physical event, 
+            which has multiple different notification types, doesn't end up sending the 
+            almost-same-but-slightly-similar mail multiple times to the same user:
+            - add a unique `session_id` to each of the notification signals in the same event group,
+            - and also add `end_session=False` to the last notification signal.
+        This will cause all of the notification signals with the same session_id to be processed sequentially
+            in a single thread, one after another in the order they got sent. During the entire session, each user
+            from the audience will receive at most 1 email for the first notification event they qualify for, 
+            and none after that. 
+        IMPORTANT: The last signal must ALWAYS have the end_session flag, or none of the events will be processed!
+        Example: If I follow my own News Post and somebody comments on it, I will only receive the
+            'somebody commented on your post', and not also the 'a comment on a post you follow' notification.
     """
+    global notification_sessions
     signal = kwargs['signal']
     # find out configured signal id for the signal we received
     notification_id = _find_notification(signal)
@@ -646,6 +750,22 @@ def notification_receiver(sender, user, obj, audience, **kwargs):
     # sanity check: only send to active users that have an email set (or is anonymous, so we can send emails to non-users)
     audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated()) and aud_user.email)]
     
-    notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
-    notification_thread.start()
-
+    if audience:
+        if not session_id:
+            # we start this notification thread instantly and alone
+            notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
+            notification_thread.start()
+        elif session_id and session_id not in notification_sessions:
+            # we are starting a new session and waiting for more events to be pooled into the thread
+            notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
+            notification_sessions[session_id] = notification_thread
+        elif session_id and session_id in notification_sessions:
+            # we have a started session and are pooling this new event into it
+            notification_thread = notification_sessions[session_id]
+            notification_thread.add_session_frame(sender, user, obj, audience, notification_id, options)
+        
+    if session_id and end_session:
+        # we also end the session here, so we start the thread
+        notification_thread = notification_sessions.pop(session_id)
+        notification_thread.start()
+        

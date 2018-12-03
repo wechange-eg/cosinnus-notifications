@@ -72,6 +72,15 @@ class NotificationPreferenceView(UpdateView):
                 setting_obj = GlobalUserNotificationSetting.objects.get_object_for_user(request.user)
                 setting_obj.setting = global_setting
                 setting_obj.save()
+                
+            # save all multi preference choices
+            for multi_notification_id, __ in MULTI_NOTIFICATION_IDS.items():
+                multi_choice = int(request.POST.get('multi_pref__%s' % multi_notification_id, '-1'))
+                if multi_choice >= 0 and multi_choice in (sett for sett, label in UserMultiNotificationPreference.SETTING_CHOICES):
+                    multi_pref, created = UserMultiNotificationPreference.objects.get_or_create(user=self.request.user, multi_notification_id=multi_notification_id, portal=CosinnusPortal.get_current())
+                    if created or multi_pref.setting != multi_choice:
+                        multi_pref.setting = multi_choice
+                        multi_pref.save()
             
             # only update the individual group settings if user selected the individual global setting
             if global_setting == GlobalUserNotificationSetting.SETTING_GROUP_INDIVIDUAL:            
@@ -165,14 +174,12 @@ class NotificationPreferenceView(UpdateView):
         global_setting_selected = GlobalUserNotificationSetting.objects.get_for_user(self.request.user) 
         
         multi_notification_preferences = []
-        for multi_notification_id, default_multi_setting in MULTI_NOTIFICATION_IDS.items():
-            multi_pref = get_object_or_None(UserMultiNotificationPreference, user=self.request.user, multi_notification_id=multi_notification_id, portal=CosinnusPortal.get_current())
-            
+        for multi_notification_id, __ in MULTI_NOTIFICATION_IDS.items():
             multi_notification_preferences.append({
                 'multi_notification_id': multi_notification_id,
                 'multi_notification_label': MULTI_NOTIFICATION_LABELS[multi_notification_id],
                 'multi_preference_choices': UserMultiNotificationPreference.SETTING_CHOICES,
-                'multi_preference_setting': multi_pref.setting if multi_pref else default_multi_setting,
+                'multi_preference_setting': UserMultiNotificationPreference.get_setting_for_user(self.request.user, multi_notification_id),
             })
         
         context.update({

@@ -11,6 +11,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from cosinnus.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from cosinnus.models.group import CosinnusPortal
+from annoying.functions import get_object_or_None
 
 
 class BaseUserNotificationPreference(models.Model):
@@ -99,8 +101,20 @@ class UserMultiNotificationPreference(BaseUserNotificationPreference):
             'notification_id': self.notification_id,
             'setting': self.setting,
         }
-
-
+        
+    @classmethod
+    def get_setting_for_user(cls, user, multi_notification_id, portal=None):
+        """ Gets the setting for a multi-preference set for a user, or the default value
+            TODO: cache!
+        """
+        if portal is None:
+            portal = CosinnusPortal.get_current()
+        multi_pref = get_object_or_None(cls, user=user, multi_notification_id=multi_notification_id, portal=CosinnusPortal.get_current())
+        if multi_pref is not None:
+            return multi_pref.setting
+        else:
+            from cosinnus_notifications.notifications import MULTI_NOTIFICATION_IDS
+            return MULTI_NOTIFICATION_IDS[multi_notification_id]
 
 
 @python_2_unicode_compatible

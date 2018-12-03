@@ -152,7 +152,15 @@ def send_digest_for_current_portal(digest_setting):
                     if not check_object_read_access(event.target_object, user):
                         continue  # user must be able to even see referenced object 
                     wanted_group_events.append(event)
-                    
+                
+                # TODO: loop backwards through all events
+                #     for each event, loop through again backwards
+                #         throw out each event that:
+                #             - continue on self
+                #             - has the same target-object AND (notification-id is same OR notification-id is in supercedes-id_list!)
+                # - follow-events have supercede list, that are always less important than the follow-event
+                # - this means that a "created" event would be thrown out by a later "an item you followed was updated" on the same object
+                
                 if wanted_group_events:
                     group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
                     group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
