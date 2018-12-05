@@ -75,7 +75,7 @@ MULTI_NOTIFICATION_IDS = {
 }
 # the option labels for the multi notifications:
 MULTI_NOTIFICATION_LABELS = {
-    'MULTI_followed_object_notification': _('For content that I am following, I wish to receive notifications on changes, comments (TODO better description for when notifications are sent):'),
+    'MULTI_followed_object_notification': _('For content that I am following, I wish to receive notification emails'),
 }
 
 NOTIFICATION_REASONS = {
@@ -112,6 +112,11 @@ NOTIFICATIONS_DEFAULTS = {
     # the same actual event, and would cause a quasi-duplicated notification
     # superceding notification ids CAN ONLY be done by multi-preferences with `multi_preference_set` set
     'supercedes_notifications': [],
+    # if given, this dotted path with be used as a function with the arg `user` on the object
+    # as a test if it should still be included in the digest
+    # example: requires_object_state_check: 'group.is_user_following'
+    #                will result in a call to `object.group.is_user_following(user)`
+    'requires_object_state_check': None,
     # should this notification preference be on by default (if the user has never changed the setting?)
     # this may be False or 0 (off), True or 1 (on, immediately), 2 (daily) or 3 (weekly)
     'default': False,
@@ -208,6 +213,9 @@ def get_superceding_multi_preferences(notification_id):
 
 def get_superceded_multi_preferences(notification_id):
     return notifications[notification_id]['supercedes_notifications']
+
+def get_requires_object_state_check(notification_id):
+    return notifications[notification_id]['requires_object_state_check']
 
 def is_notification_multipref(notification_id):
     """ Checks if a notification belongs to a multi_preference_set """
@@ -800,7 +808,7 @@ def notification_receiver(sender, user, obj, audience, session_id=None, end_sess
             notification_thread = notification_sessions[session_id]
             notification_thread.add_session_frame(sender, user, obj, audience, notification_id, options)
         
-    if session_id and end_session:
+    if session_id and end_session and session_id in notification_sessions:
         # we also end the session here, so we start the thread
         notification_thread = notification_sessions.pop(session_id)
         notification_thread.start()

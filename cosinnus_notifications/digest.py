@@ -24,7 +24,7 @@ from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
     ALL_NOTIFICATIONS_ID, NOTIFICATION_REASONS,\
     render_digest_item_for_notification_event,\
     get_multi_preference_notification_ids, is_notification_multipref,\
-    get_superceded_multi_preferences
+    get_superceded_multi_preferences, get_requires_object_state_check
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access,\
@@ -32,6 +32,7 @@ from cosinnus.utils.permissions import check_object_read_access,\
 import traceback
 from django.templatetags.static import static
 from cosinnus.models.profile import GlobalUserNotificationSetting
+from cosinnus.utils.functions import resolve_attributes
 
 logger = logging.getLogger('cosinnus')
 
@@ -162,6 +163,7 @@ def send_digest_for_current_portal(digest_setting):
                 wanted_group_events = []
                 for event in group_events:
                     is_multipref = is_notification_multipref(event.notification_id)
+                    statecheck = get_requires_object_state_check(event.notification_id)
                     if user == event.user:
                         continue  # users don't receive infos about events they caused
                     if not is_multipref and not global_wanted and not only_multi_prefs_wanted: # skip finegrained preference check on blanket YES
@@ -172,9 +174,9 @@ def send_digest_for_current_portal(digest_setting):
                         continue  # referenced object has been deleted by now
                     if not check_object_read_access(event.target_object, user):
                         continue  # user must be able to even see referenced object 
-                    # if the event is a multi-pref event check if user is following the object
-                    if is_multipref:
-                        if not event.target_object.is_user_following(user):
+                    # statecheck if defined, for example for checking if the user is still following the object
+                    if statecheck:
+                        if not resolve_attributes(event.target_object, statecheck, func_args=[user]):
                             continue
                     wanted_group_events.append(event)
                 
