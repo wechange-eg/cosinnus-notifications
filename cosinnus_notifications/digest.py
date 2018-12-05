@@ -23,7 +23,8 @@ from cosinnus_notifications.models import UserNotificationPreference,\
 from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
     ALL_NOTIFICATIONS_ID, NOTIFICATION_REASONS,\
     render_digest_item_for_notification_event,\
-    get_multi_preference_notification_ids, is_notification_multipref
+    get_multi_preference_notification_ids, is_notification_multipref,\
+    get_superceded_multi_preferences
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access,\
@@ -177,13 +178,21 @@ def send_digest_for_current_portal(digest_setting):
                             continue
                     wanted_group_events.append(event)
                 
-                # TODO: loop backwards through all events
-                #     for each event, loop through again backwards
-                #         throw out each event that:
-                #             - continue on self
-                #             - has the same target-object AND (notification-id is same OR notification-id is in supercedes-id_list!)
-                # - follow-events have supercede list, that are always less important than the follow-event
+                wanted_group_events = sorted(wanted_group_events,  key=lambda e: e.date)
+                
+                # Throw out duplicate events (eg "X was updated" multiple times) for the same object and superceded events. 
+                # The most recent event is always kept.
+                # - follow-events have a supercede list of events that are always less important than the follow-event
                 # - this means that a "created" event would be thrown out by a later "an item you followed was updated" on the same object
+                for this_event in wanted_group_events[:]:
+                    for other_event in wanted_group_events[:]:
+                        if not other_event == this_event:
+                            unprefixed_this_notification_id = this_event.notification_id.split('__')[1]
+                            if this_event.target_object == other_event.target_object and \
+                                    (this_event.notification_id == other_event.notification_id or \
+                                     unprefixed_this_notification_id in get_superceded_multi_preferences(other_event.notification_id)):
+                                wanted_group_events.remove(this_event)
+                                break
                 
                 if wanted_group_events:
                     group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints

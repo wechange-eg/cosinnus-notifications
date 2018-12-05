@@ -206,10 +206,13 @@ def get_superceding_multi_preferences(notification_id):
         notification_id = notification_id.split('__')[1]
     return REVERESE_MULTI_PREF_SUPERCEDE_DICT.get(notification_id, [])
 
+def get_superceded_multi_preferences(notification_id):
+    return notifications[notification_id]['supercedes_notifications']
 
 def is_notification_multipref(notification_id):
     """ Checks if a notification belongs to a multi_preference_set """
     return bool(notifications[notification_id].get('multi_preference_set', None))
+
 
 MULTI_PREF_NOTIFICATION_DICT = None
 
