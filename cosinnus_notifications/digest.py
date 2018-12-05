@@ -19,10 +19,11 @@ from django.utils.translation import ugettext_lazy as _
 from cosinnus.conf import settings
 from cosinnus.models.group import CosinnusPortal
 from cosinnus_notifications.models import UserNotificationPreference,\
-    NotificationEvent
+    NotificationEvent, UserMultiNotificationPreference
 from cosinnus_notifications.notifications import NO_NOTIFICATIONS_ID,\
     ALL_NOTIFICATIONS_ID, NOTIFICATION_REASONS,\
-    render_digest_item_for_notification_event
+    render_digest_item_for_notification_event,\
+    get_multi_preference_notification_ids, is_notification_multipref
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting
 from cosinnus.core.mail import send_mail_or_fail
 from cosinnus.utils.permissions import check_object_read_access,\
@@ -75,11 +76,19 @@ def send_digest_for_current_portal(digest_setting):
         if not check_user_can_receive_emails(user):
             continue
         
+        # get all of user's multi prefs for this digest setting 
+        only_multi_prefs_wanted = False
+        multi_prefs = list(UserMultiNotificationPreference.objects.filter(user=user, portal=CosinnusPortal.get_current(), setting=digest_setting)\
+                .values_list('multi_notification_id', flat=True))
         # check global blanket settings
         global_wanted = False # flag to allow all events
         global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
         if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
-            continue # users who get all emails now never want a digest
+            if not multi_prefs:
+                continue # users who get all emails now never want a digest
+            else:
+                only_multi_prefs_wanted = True # except they may want notification events for things they follow
+        
         if (digest_setting == UserNotificationPreference.SETTING_DAILY and global_setting == GlobalUserNotificationSetting.SETTING_DAILY) \
                 or (digest_setting == UserNotificationPreference.SETTING_WEEKLY and global_setting == GlobalUserNotificationSetting.SETTING_WEEKLY):
             global_wanted = True # user wants ALL events in his digest for this digest setting
@@ -100,6 +109,8 @@ def send_digest_for_current_portal(digest_setting):
             # otherwise filter events by group notification settings
             if global_wanted:
                 events = events.filter(group_id__in=portal_group_ids)
+            elif only_multi_prefs_wanted:
+                events = NotificationEvent.objects.none()
             else:
                 # these groups will never get digest notifications because they have a blanketing NONE setting or 
                 # ALL setting (of anything but this ``digest_setting``)
@@ -122,10 +133,18 @@ def send_digest_for_current_portal(digest_setting):
                 # so filter for these groups
                 events = events.filter(group_id__in=pref_group_ids)
             
+            # add multi pref events that the user wants to see to regular events
+            if multi_prefs:
+                multi_pref_notification_ids = []
+                for multi_pref in multi_prefs:
+                    multi_pref_notification_ids.extend(get_multi_preference_notification_ids(multi_pref))
+                multi_pref_events = timescope_notification_events.filter(notification_id__in=multi_pref_notification_ids)
+                events = events | multi_pref_events
+            
             if events.count() == 0:
                 continue
             
-            if not global_wanted:
+            if not global_wanted and not only_multi_prefs_wanted:
                 # collect a comparable hash for all wanted user prefs
                 wanted_group_notifications = ['%(group_id)d__%(notification_id)s' % {
                     'group_id': pref.group_id,
@@ -141,9 +160,10 @@ def send_digest_for_current_portal(digest_setting):
                 # check for target object existing, being visible to user, and other sanity checks if the user should see this object
                 wanted_group_events = []
                 for event in group_events:
+                    is_multipref = is_notification_multipref(event.notification_id)
                     if user == event.user:
                         continue  # users don't receive infos about events they caused
-                    if not global_wanted: # skip finegrained preference check on blanket YES
+                    if not is_multipref and not global_wanted and not only_multi_prefs_wanted: # skip finegrained preference check on blanket YES
                         if not (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
                                 ('%d__%s' % (event.group_id, event.notification_id) in wanted_group_notifications)):
                             continue  # must have an actual subscription to that event type
@@ -151,6 +171,10 @@ def send_digest_for_current_portal(digest_setting):
                         continue  # referenced object has been deleted by now
                     if not check_object_read_access(event.target_object, user):
                         continue  # user must be able to even see referenced object 
+                    # if the event is a multi-pref event check if user is following the object
+                    if is_multipref:
+                        if not event.target_object.is_user_following(user):
+                            continue
                     wanted_group_events.append(event)
                 
                 # TODO: loop backwards through all events

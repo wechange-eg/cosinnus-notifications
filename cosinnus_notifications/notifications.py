@@ -207,6 +207,30 @@ def get_superceding_multi_preferences(notification_id):
     return REVERESE_MULTI_PREF_SUPERCEDE_DICT.get(notification_id, [])
 
 
+def is_notification_multipref(notification_id):
+    """ Checks if a notification belongs to a multi_preference_set """
+    return bool(notifications[notification_id].get('multi_preference_set', None))
+
+MULTI_PREF_NOTIFICATION_DICT = None
+
+def get_multi_preference_notification_ids(multi_pref_id):
+    """ Returns all notification_ids that are part of a multi_preference_set """
+    global MULTI_PREF_NOTIFICATION_DICT
+    if MULTI_PREF_NOTIFICATION_DICT is None:
+        # build reverse lookup dict
+        lookup_dict = defaultdict(set)
+        for notification_id, notification_options in notifications.items():
+            multi_pref_set = notification_options.get('multi_preference_set', None)
+            if multi_pref_set:
+                lookup_dict[multi_pref_set].add(notification_id)
+        lookup_dict = dict(lookup_dict)
+        for k,v in lookup_dict.items():
+            lookup_dict[k] = list(v)
+        MULTI_PREF_NOTIFICATION_DICT = lookup_dict
+    
+    return MULTI_PREF_NOTIFICATION_DICT.get(multi_pref_id, [])
+
+
 def set_user_group_notifications_special(user, group, all_or_none_or_custom):
     """ Sets the user preference settings for a group to all or none or custom (deleting the special setting flag) """
     if not (all_or_none_or_custom.startswith("all_") or all_or_none_or_custom in ("none", "custom")):
@@ -400,6 +424,15 @@ class NotificationsThread(Thread):
                 GlobalUserNotificationSetting.SETTING_DAILY, GlobalUserNotificationSetting.SETTING_WEEKLY]:
             # user either wants no notification or a digest (the event for which is saved elsewhere)
             return False
+        # check the specific multi-preference if this notification belongs to it
+        multi_preference_set = notifications[notification_id].get('multi_preference_set', None)
+        if multi_preference_set:
+            if UserMultiNotificationPreference.get_setting_for_user(user, multi_preference_set) == UserMultiNotificationPreference.SETTING_NOW:
+                return True
+            else:
+                # we actually return False here, because this setting is on a different category than the other notifications
+                return False
+        
         if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
             return True
         # otherwise, the global setting is set to 'individual', so commence the other checks
