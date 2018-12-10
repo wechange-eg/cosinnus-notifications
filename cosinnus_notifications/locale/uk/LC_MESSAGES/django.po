@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 22:51+0200\n"
+"POT-Creation-Date: 2018-12-06 18:01+0100\n"
 "PO-Revision-Date: 2018-09-30 18:52+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -67,6 +67,24 @@ msgstr "Налаштування сповіщення"
 msgid "Notification Preferences"
 msgstr "Налаштування сповіщення"
 
+msgid "Portal"
+msgstr ""
+
+#, fuzzy
+#| msgid "Notification ID"
+msgid "Multi Notification ID"
+msgstr "ІН сповіщення"
+
+#, fuzzy
+#| msgid "Notification Preference"
+msgid "Multi Notification Preference"
+msgstr "Налаштування сповіщення"
+
+#, fuzzy
+#| msgid "Notification Preferences"
+msgid "Multi Notification Preferences"
+msgstr "Налаштування сповіщення"
+
 msgid "User who caused this notification event"
 msgstr "Користувач, який створив подію"
 
@@ -78,6 +96,11 @@ msgstr "Усі сповіщення"
 
 msgid "No notifications"
 msgstr "Немає сповіщень"
+
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "For content that I am following, I wish to receive notification emails"
+msgstr "Я хочу отримувати електронні листи-сповіщення"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
 msgstr "Ви отримали це сповіщення, тому що Ви підписалися на ці види подій у Вашому проекті чи групі."
@@ -96,6 +119,12 @@ msgstr "Ви отримали це сповіщення, тому що Ви пі
 
 msgid "New item"
 msgstr "Новий елемент"
+
+msgid "Like"
+msgstr ""
+
+msgid "Follow"
+msgstr ""
 
 msgid "Untitled"
 msgstr "Без назви"

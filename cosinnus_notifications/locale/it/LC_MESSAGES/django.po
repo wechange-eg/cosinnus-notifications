@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 22:51+0200\n"
+"POT-Creation-Date: 2018-12-06 18:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,6 +66,18 @@ msgstr ""
 msgid "Notification Preferences"
 msgstr ""
 
+msgid "Portal"
+msgstr ""
+
+msgid "Multi Notification ID"
+msgstr ""
+
+msgid "Multi Notification Preference"
+msgstr ""
+
+msgid "Multi Notification Preferences"
+msgstr ""
+
 msgid "User who caused this notification event"
 msgstr ""
 
@@ -76,6 +88,9 @@ msgid "All notifications"
 msgstr ""
 
 msgid "No notifications"
+msgstr ""
+
+msgid "For content that I am following, I wish to receive notification emails"
 msgstr ""
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
@@ -94,6 +109,12 @@ msgid "You are getting this email because you are subscribed to one or more week
 msgstr ""
 
 msgid "New item"
+msgstr ""
+
+msgid "Like"
+msgstr ""
+
+msgid "Follow"
 msgstr ""
 
 msgid "Untitled"
