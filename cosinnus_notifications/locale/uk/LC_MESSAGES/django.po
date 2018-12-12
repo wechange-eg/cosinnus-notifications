@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-12-10 12:53+0100\n"
-"PO-Revision-Date: 2018-09-30 18:52+0200\n"
+"PO-Revision-Date: 2018-12-12 14:07+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Language: uk_UA\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 1.8.4\n"
 
 msgid "Notifications"
 msgstr "Сповіщення"
@@ -68,22 +68,16 @@ msgid "Notification Preferences"
 msgstr "Налаштування сповіщення"
 
 msgid "Portal"
-msgstr ""
+msgstr "Портал"
 
-#, fuzzy
-#| msgid "Notification ID"
 msgid "Multi Notification ID"
-msgstr "ІН сповіщення"
+msgstr "Мульти сповіщення ID"
 
-#, fuzzy
-#| msgid "Notification Preference"
 msgid "Multi Notification Preference"
-msgstr "Налаштування сповіщення"
+msgstr "Преференція мульти сповіщень"
 
-#, fuzzy
-#| msgid "Notification Preferences"
 msgid "Multi Notification Preferences"
-msgstr "Налаштування сповіщення"
+msgstr "Преференції мульти сповіщень"
 
 msgid "User who caused this notification event"
 msgstr "Користувач, який створив подію"
@@ -97,10 +91,8 @@ msgstr "Усі сповіщення"
 msgid "No notifications"
 msgstr "Немає сповіщень"
 
-#, fuzzy
-#| msgid "I wish to receive notification emails"
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr "Я хочу отримувати електронні листи-сповіщення"
+msgstr "Я хочу отримувати електронні листи-сповіщення щодо контенту, який я відстежую"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
 msgstr "Ви отримали це сповіщення, тому що Ви підписалися на ці види подій у Вашому проекті чи групі."
@@ -121,10 +113,10 @@ msgid "New item"
 msgstr "Новий елемент"
 
 msgid "Like"
-msgstr ""
+msgstr "Вподобати"
 
 msgid "Follow"
-msgstr ""
+msgstr "Відстежувати"
 
 msgid "Untitled"
 msgstr "Без назви"
