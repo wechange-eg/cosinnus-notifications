@@ -5,6 +5,7 @@ import logging
 import traceback
 
 from django.core.management.base import BaseCommand, CommandError
+from cosinnus.conf import settings
 from cosinnus_notifications.digest import send_digest_for_current_portal
 from cosinnus_notifications.models import UserNotificationPreference
 from cosinnus.core.middleware.cosinnus_middleware import initialize_cosinnus_after_startup
@@ -23,4 +24,6 @@ class Command(BaseCommand):
         except Exception as e:
             logger.error('An critical error occured during daily digest generation and bubbled up completely! Exception was: %s' % force_text(e), 
                          extra={'exception': e, 'trace': traceback.format_exc()})
+            if settings.DEBUG:
+                raise
             

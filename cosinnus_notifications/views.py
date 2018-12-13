@@ -9,10 +9,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from cosinnus.conf import settings
 from cosinnus.core.decorators.views import require_logged_in
-from cosinnus_notifications.models import UserNotificationPreference
+from cosinnus_notifications.models import UserNotificationPreference,\
+    UserMultiNotificationPreference
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
-    set_user_group_notifications_special
+    set_user_group_notifications_special, MULTI_NOTIFICATION_IDS,\
+    MULTI_NOTIFICATION_LABELS
 from cosinnus.models.group import CosinnusGroup, CosinnusPortalMembership,\
     CosinnusPortal
 from django.views.decorators.csrf import csrf_protect
@@ -70,6 +72,15 @@ class NotificationPreferenceView(ListView):
                 setting_obj = GlobalUserNotificationSetting.objects.get_object_for_user(request.user)
                 setting_obj.setting = global_setting
                 setting_obj.save()
+                
+            # save all multi preference choices
+            for multi_notification_id, __ in MULTI_NOTIFICATION_IDS.items():
+                multi_choice = int(request.POST.get('multi_pref__%s' % multi_notification_id, '-1'))
+                if multi_choice >= 0 and multi_choice in (sett for sett, label in UserMultiNotificationPreference.SETTING_CHOICES):
+                    multi_pref, created = UserMultiNotificationPreference.objects.get_or_create(user=self.request.user, multi_notification_id=multi_notification_id, portal=CosinnusPortal.get_current())
+                    if created or multi_pref.setting != multi_choice:
+                        multi_pref.setting = multi_choice
+                        multi_pref.save()
             
             # only update the individual group settings if user selected the individual global setting
             if global_setting == GlobalUserNotificationSetting.SETTING_GROUP_INDIVIDUAL:            
@@ -162,6 +173,15 @@ class NotificationPreferenceView(ListView):
         global_setting_choices = GlobalUserNotificationSetting.SETTING_CHOICES
         global_setting_selected = GlobalUserNotificationSetting.objects.get_for_user(self.request.user) 
         
+        multi_notification_preferences = []
+        for multi_notification_id, __ in MULTI_NOTIFICATION_IDS.items():
+            multi_notification_preferences.append({
+                'multi_notification_id': multi_notification_id,
+                'multi_notification_label': MULTI_NOTIFICATION_LABELS[multi_notification_id],
+                'multi_preference_choices': UserMultiNotificationPreference.SETTING_CHOICES,
+                'multi_preference_setting': UserMultiNotificationPreference.get_setting_for_user(self.request.user, multi_notification_id),
+            })
+        
         context.update({
             #'object_list': self.queryset,
             'grouped_notifications': group_rows,
@@ -173,6 +193,7 @@ class NotificationPreferenceView(ListView):
             'language_selected': self.request.user.cosinnus_profile.language,
             'global_setting_choices': global_setting_choices,
             'global_setting_selected': global_setting_selected,
+            'multi_notification_preferences': multi_notification_preferences,
             'notification_choices': UserNotificationPreference.SETTING_CHOICES,
         })
         return context

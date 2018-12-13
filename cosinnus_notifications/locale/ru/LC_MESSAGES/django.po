@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wechange RU\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 22:51+0200\n"
-"PO-Revision-Date: 2018-09-26 15:19+0200\n"
+"POT-Creation-Date: 2018-12-10 12:53+0100\n"
+"PO-Revision-Date: 2018-12-11 19:40+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Language: ru\n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.0.6\n"
 
 msgid "Notifications"
 msgstr "Уведомления"
@@ -66,6 +66,18 @@ msgstr "Настройки уведомлений"
 msgid "Notification Preferences"
 msgstr "Настройки уведомлений"
 
+msgid "Portal"
+msgstr "Портал"
+
+msgid "Multi Notification ID"
+msgstr "Мульти уведомление ID"
+
+msgid "Multi Notification Preference"
+msgstr "Предпочтение о мульты уведомлениях"
+
+msgid "Multi Notification Preferences"
+msgstr "Предпочтения о мульти уведомлениях"
+
 msgid "User who caused this notification event"
 msgstr "Пользователь, который создал событие"
 
@@ -77,6 +89,9 @@ msgstr "Все уведомления"
 
 msgid "No notifications"
 msgstr "Нет уведомлений"
+
+msgid "For content that I am following, I wish to receive notification emails"
+msgstr "Я хочу получать электронные письма-уведомления о контенте, за которым я слежу"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
 msgstr "Вы получили это уведомление, потому что Вы подписались на эти виды событий в Вашем проекте или группе."
@@ -95,6 +110,12 @@ msgstr "Вы получили это уведомление, потому что
 
 msgid "New item"
 msgstr "Новый элемент"
+
+msgid "Like"
+msgstr "Лайк"
+
+msgid "Follow"
+msgstr "Следить"
 
 msgid "Untitled"
 msgstr "Без названия"

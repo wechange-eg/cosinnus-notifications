@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 22:51+0200\n"
+"POT-Creation-Date: 2018-12-10 12:53+0100\n"
 "PO-Revision-Date: 2018-09-26 12:44+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -67,6 +67,24 @@ msgstr "Préférence de notification"
 msgid "Notification Preferences"
 msgstr "Préférences de notification"
 
+msgid "Portal"
+msgstr ""
+
+#, fuzzy
+#| msgid "Notification ID"
+msgid "Multi Notification ID"
+msgstr "ID de notification"
+
+#, fuzzy
+#| msgid "Notification Preference"
+msgid "Multi Notification Preference"
+msgstr "Préférence de notification"
+
+#, fuzzy
+#| msgid "Notification Preferences"
+msgid "Multi Notification Preferences"
+msgstr "Préférences de notification"
+
 msgid "User who caused this notification event"
 msgstr "Utilisateur qui a causé cet événement de notification"
 
@@ -78,6 +96,11 @@ msgstr "Toutes les notifications"
 
 msgid "No notifications"
 msgstr "Pas de notifications"
+
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "For content that I am following, I wish to receive notification emails"
+msgstr "Je souhaite recevoir des e-mails de notification"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
 msgstr "Tu reçois cette notification car tu t'es abonné à ce type d'événement dans ton projet ou groupe."
@@ -96,6 +119,12 @@ msgstr "Tu reçois cet e-mail car tu t'es abonné à une notification hebdomadai
 
 msgid "New item"
 msgstr "Nouvel item"
+
+msgid "Like"
+msgstr ""
+
+msgid "Follow"
+msgstr ""
 
 msgid "Untitled"
 msgstr "Sans titre"

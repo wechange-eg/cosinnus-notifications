@@ -90,29 +90,53 @@
 	        </div>
         {% endif %}
         
-        
-        <div class="content-box large-space">
-            <div class="row">
-                <div class="col-md-12"><!-- right column -->
-                    <div class="row"> 
-                    
-                        <div class="col-md-4">
-                            <legend style="margin: 0;">{% trans "Receive notification emails in this language" %}:</legend>
-                        </div>
-                        <div class="col-md-8">
-                            <p class="no-horizontal-padding no-vertical-padding">
-                                <select id="id-language" name="language" class="form-control">
-                                    {% for choice, label in language_choices %}
-                                        <option {% if language_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="normal_settings_frame">
+	        <div class="content-box large-space">
+	            <div class="row">
+	                <div class="col-md-12"><!-- right column -->
+	                    <div class="row"> 
+	                    
+	                        <div class="col-md-4">
+	                            <legend style="margin: 0;">{% trans "Receive notification emails in this language" %}:</legend>
+	                        </div>
+	                        <div class="col-md-8">
+	                            <p class="no-horizontal-padding no-vertical-padding">
+	                                <select id="id-language" name="language" class="form-control">
+	                                    {% for choice, label in language_choices %}
+	                                        <option {% if language_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+	                                    {% endfor %}
+	                                </select>
+	                            </p>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	        
+	        <div class="content-box large-space">
+	            {% for multi_notification_preference in multi_notification_preferences %}
+	                <div class="row">
+	                    <div class="col-md-12"><!-- right column -->
+	                        <div class="row"> 
+	                        
+	                            <div class="col-md-4">
+	                                <legend style="margin: 0;">{{ multi_notification_preference.multi_notification_label }}:</legend>
+	                            </div>
+	                            <div class="col-md-8">
+	                                <p class="no-horizontal-padding no-vertical-padding">
+	                                    <select id="id_multi_pref__{{ multi_notification_preference.multi_notification_id }}" name="multi_pref__{{ multi_notification_preference.multi_notification_id }}" class="form-control">
+	                                        {% for choice, label in multi_notification_preference.multi_preference_choices %}
+	                                            <option {% if multi_notification_preference.multi_preference_setting == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+	                                        {% endfor %}
+	                                    </select>
+	                                </p>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            {% endfor %}
+	        </div>
         </div>
-            
     
 		<!-- a box with semi transparent background -->
 	    <div id="custom_settings_frame" class="content-box" style="display: none;"> {# toggled visible on load by JS, depending on global setting #}
@@ -229,11 +253,18 @@
     {{ block.super }}
     <script type="text/javascript">
         var toggleGlobalSettingsFrame = function() {
-            var $frame = $('#custom_settings_frame');
+            var $custom_frame = $('#custom_settings_frame');
             if ($('#id_global_setting').val() == 4) {
-                $frame.fadeIn();
+                $custom_frame.fadeIn();
             } else {
-                $frame.hide();
+                $custom_frame.hide();
+            }
+            
+            var $normal_frame = $('#normal_settings_frame');
+            if ($('#id_global_setting').val() > 0) {
+                $normal_frame.fadeIn();
+            } else {
+                $normal_frame.hide();
             }
             $.cosinnus.snapToBottom();
         };
