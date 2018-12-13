@@ -86,7 +86,7 @@ class UserMultiNotificationPreference(BaseUserNotificationPreference):
         related_name='multi_notifications'
     )
     portal = models.ForeignKey('cosinnus.CosinnusPortal', verbose_name=_('Portal'), related_name='user_multi_notifications', 
-        null=False, blank=False, default=1)
+        null=False, blank=False, default=1, on_delete=models.CASCADE)
     multi_notification_id = models.CharField(_('Multi Notification ID'), max_length=100)
     
     class Meta(object):
