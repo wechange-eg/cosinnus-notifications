@@ -541,6 +541,9 @@ class NotificationsThread(Thread):
                     
                     'notification_item_html': mark_safe(notification_item_html),
                 }
+                # add object name to outer template for preview text
+                if data.get('object_name', None):
+                    context['preview_summary'] = data.get('object_name')
                 
                 # check for an action button url being specifiied. mutually exclusive with like/follow buttons for now.
                 if self.options.get('action_button_text', None):
