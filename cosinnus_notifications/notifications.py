@@ -154,6 +154,12 @@ NOTIFICATIONS_DEFAULTS = {
     'show_like_button': False,
     # should the follow button be shown?
     'show_follow_button': False,
+    # if set, an action button is shown with this label.
+    # mutually exclusive with like/follow buttons. its URL will be either data_attributes[action_button_url] if set, or origin url
+    'action_button_text': None,
+    # if set, a grey, alternate looking action button is shown with this label.
+    # mutually exclusive with like/follow buttons. its URL will be either data_attributes[action_button_alternate_url] if set, or origin url
+    'action_button_alternate_text': None,
     # object attributes to fille the snippet template with. 
     # these will be looked up on the object as attribute or functions with no params
     # additionally, special attributes will be added to the object for the object during lookup-time:
@@ -170,6 +176,8 @@ NOTIFICATIONS_DEFAULTS = {
         'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
         'like_button_url': 'get_absolute_like_url', # url for the like button
         'follow_button_url': 'get_absolute_follow_url', # url for the follow button
+        'action_button_url': None, # url for the action button, if options['action_button_text'] is set. can also be hardcoded 'http*' url.
+        'action_button_alternate_url': None, # same as `action_button_url`, only for the secondary, passivle looking button
     },
     # can be used to suffix the origin URL (group url for originating group) with parameters to take different actions when clicked
     'origin_url_suffix': '',
@@ -533,8 +541,31 @@ class NotificationsThread(Thread):
                     
                     'notification_item_html': mark_safe(notification_item_html),
                 }
-                # add like/follow buttons if specified in notification event options
-                if self.options.get('show_like_button', False) or self.options.get('show_follow_button', False):
+                # add object name to outer template for preview text
+                if data.get('object_name', None):
+                    context['preview_summary'] = data.get('object_name')
+                
+                # check for an action button url being specifiied. mutually exclusive with like/follow buttons for now.
+                if self.options.get('action_button_text', None):
+                    action_button_url = self.options['data_attributes']['action_button_url']
+                    if action_button_url is None:
+                        # default action url is the original url (main url for the notification, plus suffix if set)
+                        action_button_url = context['origin_url']
+                    elif action_button_url.startswith('http'):
+                        # we accept a hardcoded url
+                        pass
+                    else:
+                        obj = getattr(notification_event, '_target_object', notification_event.target_object)
+                        action_button_url = resolve_attributes(obj, action_button_url)
+                        
+                    context.update({
+                        'show_action_buttons': True,
+                        'action_button_1_text': self.options.get('action_button_text'),
+                        'action_button_1_url': action_button_url,
+                    })
+                # add like/follow buttons if specified in notification event options, can not show up
+                # if any other action buttons exist
+                elif self.options.get('show_like_button', False) or self.options.get('show_follow_button', False):
                     obj = getattr(notification_event, '_target_object', notification_event.target_object)
                     
                     counter = 1
@@ -552,6 +583,25 @@ class NotificationsThread(Thread):
                             'action_button_%d_text' % counter: _('Follow'),
                             'action_button_%d_url' % counter: resolve_attributes(obj, self.options['data_attributes']['follow_button_url']),
                         })
+                        
+                # check for an action button url being specifiied
+                if self.options.get('action_button_alternate_text', None):
+                    action_button_alternate_url = self.options['data_attributes']['action_button_alternate_url']
+                    if action_button_alternate_url is None:
+                        # default action url is the original url (main url for the notification, plus suffix if set)
+                        action_button_alternate_url = context['origin_url']
+                    elif action_button_alternate_url.startswith('http'):
+                        # we accept a hardcoded url
+                        pass
+                    else:
+                        obj = getattr(notification_event, '_target_object', notification_event.target_object)
+                        action_button_alternate_url = resolve_attributes(obj, action_button_alternate_url)
+                        
+                    context.update({
+                        'show_action_buttons': True,
+                        'action_button_alternate_text': self.options.get('action_button_alternate_text'),
+                        'action_button_alternate_url': action_button_alternate_url,
+                    })
             
             else:
                 
@@ -718,9 +768,6 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             
             'string_variables': string_variables,
         }
-        #object_text
-        #sub_object_text
-        
         
         # clean some attributes
         if not data['object_name']:
