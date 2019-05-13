@@ -91,7 +91,7 @@ class UserMultiNotificationPreference(BaseUserNotificationPreference):
     
     class Meta(object):
         app_label = 'cosinnus_notifications'
-        unique_together = (('user', 'multi_notification_id',),)
+        unique_together = (('user', 'multi_notification_id', 'portal',),)
         verbose_name = _('Multi Notification Preference')
         verbose_name_plural = _('Multi Notification Preferences')
 
@@ -109,7 +109,7 @@ class UserMultiNotificationPreference(BaseUserNotificationPreference):
         """
         if portal is None:
             portal = CosinnusPortal.get_current()
-        multi_pref = get_object_or_None(cls, user=user, multi_notification_id=multi_notification_id, portal=CosinnusPortal.get_current())
+        multi_pref = get_object_or_None(cls, user=user, multi_notification_id=multi_notification_id, portal=portal)
         if multi_pref is not None:
             return multi_pref.setting
         else:
