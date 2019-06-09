@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-09 12:59+0200\n"
-"PO-Revision-Date: 2019-05-06 16:54+0100\n"
+"POT-Creation-Date: 2019-06-09 13:20+0200\n"
+"PO-Revision-Date: 2019-06-09 13:18+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: be\n"
@@ -89,7 +89,7 @@ msgid "All notifications"
 msgstr "Усе апавяшчэнні"
 
 msgid "No notifications"
-msgstr "Няма апавяшчэнняў"
+msgstr "Ніякіх апавяшчэнняў"
 
 msgid "For content that I am following, I wish to receive notification emails"
 msgstr "Я жадаю атрымліваць электронныя лісты с апавяшчэннямі пра змесціва, за якім я сачу"
@@ -128,7 +128,7 @@ msgid "Select which notifications you would like to receive for each group or pr
 msgstr "Адзначце, якія апавяшчэнні Вы хочаце атрымліваць для кожнай групы або праекта, у якіх Вы ўдзельнічаеце."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr "Гэтыя апавяшчэнні будуць дасылацца на наладжаны электронны адрас:"
+msgstr "Гэтыя апавяшчэнні будуць дасылацца на вызначаны электронны адрас:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
 msgstr "Вы можаце выбраць: атрымліваць апавяшчэнні як толькі адбываецца падзея, або ў выглядзе штодзённай (штотыднёвай) зводкі па электроннай пошце."
