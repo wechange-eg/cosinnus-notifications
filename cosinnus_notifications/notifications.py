@@ -841,19 +841,18 @@ def notification_receiver(sender, user, obj, audience, session_id=None, end_sess
     # sanity check: only send to active users that have an email set (or is anonymous, so we can send emails to non-users)
     audience = [aud_user for aud_user in audience if ((aud_user.is_active or not aud_user.is_authenticated) and aud_user.email)]
     
-    if audience:
-        if not session_id:
-            # we start this notification thread instantly and alone
-            notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
-            notification_thread.start()
-        elif session_id and session_id not in notification_sessions:
-            # we are starting a new session and waiting for more events to be pooled into the thread
-            notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
-            notification_sessions[session_id] = notification_thread
-        elif session_id and session_id in notification_sessions:
-            # we have a started session and are pooling this new event into it
-            notification_thread = notification_sessions[session_id]
-            notification_thread.add_session_frame(sender, user, obj, audience, notification_id, options)
+    if not session_id:
+        # we start this notification thread instantly and alone
+        notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
+        notification_thread.start()
+    elif session_id and session_id not in notification_sessions:
+        # we are starting a new session and waiting for more events to be pooled into the thread
+        notification_thread = NotificationsThread(sender, user, obj, audience, notification_id, options)
+        notification_sessions[session_id] = notification_thread
+    elif session_id and session_id in notification_sessions:
+        # we have a started session and are pooling this new event into it
+        notification_thread = notification_sessions[session_id]
+        notification_thread.add_session_frame(sender, user, obj, audience, notification_id, options)
         
     if session_id and end_session and session_id in notification_sessions:
         # we also end the session here, so we start the thread
