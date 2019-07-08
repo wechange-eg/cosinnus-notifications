@@ -535,7 +535,7 @@ class NotificationsThread(Thread):
                     
                     'origin_name': self.group['name'],
                     'origin_url': self.group.get_absolute_url() + self.options.get('origin_url_suffix', ''),
-                    'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
+                    'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder-small.png')),
                     
                     'notification_body': None, # this is a body text that can be used for group description or similar
                     
@@ -777,7 +777,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         # default for image_url is the notifcation event's causer
         if not data['image_url']:
             data['image_url'] = CosinnusPortal.get_current().get_domain() + \
-                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe.png'))
+                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe-small.png'))
         # ensure URLs are absolute
         for url_field in ['image_url', 'object_url', 'sub_image_url']:
             url = data[url_field]
