@@ -344,13 +344,13 @@ class NotificationsThread(Thread):
     # a complete set of arguments for a next run of this thread. not cleared during sessions
     next_session_args = []
     # list of user ids that already have been emailed for this session. not cleared during sessions
-    already_emailed_user_ids = []
+    already_emailed_user_emails = []
 
     def __init__(self, sender, user, obj, audience, notification_id, options, first_init=True):
         if first_init:
             super(NotificationsThread, self).__init__()
             self.next_session_args = []
-            self.already_emailed_user_ids = []
+            self.already_emailed_user_emails = []
         self.sender = sender
         self.user = user
         self.obj = obj
@@ -660,11 +660,11 @@ class NotificationsThread(Thread):
         
         for receiver in self.audience:
             # check that we do not email a user for this session twice
-            if receiver.id in self.already_emailed_user_ids:
+            if receiver.email in self.already_emailed_user_emails:
                 continue
             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
                 self.send_instant_notification(notification_event, receiver)
-                self.already_emailed_user_ids.append(receiver.id)
+                self.already_emailed_user_emails.append(receiver.email)
         
         # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
         if self.options['moderatable_content']:
