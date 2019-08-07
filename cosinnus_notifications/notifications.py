@@ -517,7 +517,7 @@ class NotificationsThread(Thread):
                 # render the notification item (and get back some data from the event)
                 notification_item_html, data = render_digest_item_for_notification_event(notification_event, return_data=True)
                 topic = data.get('notification_text', None) or data.get('event_text')
-                subject = self.options.get('subject_text') % data.get('string_variables')
+                subject = _unescape(self.options.get('subject_text') % data.get('string_variables'))
                 
                 context = {
                     'site': site,
@@ -623,9 +623,9 @@ class NotificationsThread(Thread):
                 })
                 
                 # additional context for BaseTaggableObjectModels
-                context.update({'team_name': mark_safe(strip_tags(self.group['name']))})
+                context.update({'team_name': self.group['name']})
                 if issubclass(self.obj.__class__, BaseTaggableObjectModel):
-                    context.update({'object_name': mark_safe(strip_tags(self.obj.title))})
+                    context.update({'object_name': self.obj.title})
                 try:
                     context.update({'object_url':self.obj.get_absolute_url()})
                 except:
@@ -858,4 +858,7 @@ def notification_receiver(sender, user, obj, audience, session_id=None, end_sess
         # we also end the session here, so we start the thread
         notification_thread = notification_sessions.pop(session_id)
         notification_thread.start()
-        
+
+
+def _unescape(text):
+    return text.replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'").replace('&amp;', '&')
