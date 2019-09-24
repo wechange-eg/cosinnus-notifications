@@ -3,186 +3,186 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-03 17:47+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-09-05 13:50+0200\n"
+"PO-Revision-Date: 2019-09-22 18:01+0200\n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.3\n"
 
 msgid "Notifications"
-msgstr ""
+msgstr "Notificaties"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr ""
+msgstr "notificatie"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "Uw dagelijkse samenvatting voor %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "Dit is wat er de laatste dag is gebeurd!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "Uw wekelijkse samenvatting voor %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "Dit is wat er de afgelopen week is gebeurd!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Nooit"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Inmiddelijk"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Dagelijks"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Wekelijks"
 
 msgid "Notification Preference for User"
-msgstr ""
+msgstr "Meldingsvoorkeuren voor Gebruikers"
 
 msgid "Notification ID"
-msgstr ""
+msgstr "Notificatie ID"
 
 msgid "Notification Preference"
-msgstr ""
+msgstr "Notificatievoorkeuren"
 
 msgid "Notification Preferences"
-msgstr ""
+msgstr "Notificatievoorkeuren"
 
 msgid "Portal"
-msgstr ""
+msgstr "Portaal"
 
 msgid "Multi Notification ID"
-msgstr ""
+msgstr "Multi-Notificatie ID"
 
 msgid "Multi Notification Preference"
-msgstr ""
+msgstr "Multi-Notificatievoorkeuren"
 
 msgid "Multi Notification Preferences"
-msgstr ""
+msgstr "Multi-Notificatievoorkeuren"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Gebruiker die deze meldingsgebeurtenis heeft veroorzaakt"
 
 msgid "Audience"
-msgstr ""
+msgstr "Publiek"
 
 msgid "All notifications"
-msgstr ""
+msgstr "Alle notificaties"
 
 msgid "No notifications"
-msgstr ""
+msgstr "Geen notificaties"
 
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr ""
+msgstr "Voor inhoud die ik volg, wens ik meldingen per e-mail te ontvangen"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "U ontvangt deze melding omdat u bent geabonneerd op dit soort evenementen in uw project of groep."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "U ontvangt deze melding omdat u een beheerder bent van dit project of deze groep."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "U ontvangt deze melding omdat u een beheerder bent van dit portaal."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "U ontvangt deze e-mail omdat u bent geabonneerd op een of meer dagelijkse meldingen."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "U ontvangt deze e-mail omdat u bent geabonneerd op een of meer wekelijkse meldingen."
 
 msgid "New item"
-msgstr ""
+msgstr "Nieuw item"
 
 msgid "Like"
-msgstr ""
+msgstr "Vind ik leuk"
 
 msgid "Follow"
-msgstr ""
+msgstr "Volg"
 
 msgid "Untitled"
-msgstr ""
+msgstr "Ongetiteld"
 
 msgid "Your Profile"
-msgstr ""
+msgstr "Uw Profiel"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr ""
+msgstr "Selecteer welke meldingen u wilt ontvangen voor elke groep of project waarbij u betrokken bent."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr ""
+msgstr "Deze meldingen worden verzonden naar uw geconfigureerde e-mailadres:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "U kunt ervoor kiezen om meldingen te ontvangen zodra ze plaatsvinden, of u kunt een dagelijkse (of wekelijkse) e-mailoverzicht ontvangen."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "De samenvatting verzamelt alle meldingen met de instelling “Dagelijks” (of “Wekelijks”) van alle groepen en projecten. U ontvangt dus slechts één e-mail per dag (of week) met alles wat er is gebeurd."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "Meldingen die u instelt op ‘Onmiddellijk’, worden u per e-mail toegezonden zodra ze plaatsvinden, met één e-mail per melding."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "Vergeet niet om uw instellingen op te slaan als u klaar bent met het bewerken!"
 
 msgid "more"
-msgstr ""
+msgstr "meer"
 
 msgid "I wish to receive notification emails"
-msgstr ""
+msgstr "Ik wil graag e-mailmeldingen ontvangen"
 
 msgid "Moderator Status (Portal-Admins only)"
-msgstr ""
+msgstr "Moderator Status (Portal-Admins only)"
 
 msgid "I wish to be a Moderator for this portal"
-msgstr ""
+msgstr "Ik wil graag Moderator te worden voor dit portaal"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
-msgstr ""
+msgstr "Als Moderator ontvangt u een onmiddellijke melding wanneer ELKE openbaar zichtbare inhoud op dit portaal wordt geplaatst. Omdat u een portaalbeheerder bent, kunt u inhoud verwijderen als deze aanstootgevend of kritisch is. Als u dit wilt verwijderen, moet u de inhoudspagina op de website bezoeken, terwijl u bent aangemeld met dit account."
 
 msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Ontvangt notificatie e-mails in deze taal"
 
 msgid "Immediately"
-msgstr ""
+msgstr "Onmiddelijk"
 
 msgid "Daily"
-msgstr ""
+msgstr "Dagelijks"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Wekelijks"
 
 msgid "Custom"
-msgstr ""
+msgstr "Aangepast"
 
 msgid "Reset to default"
-msgstr ""
+msgstr "Reset naar standaard"
 
 msgid "Save"
-msgstr ""
+msgstr "Opslaan"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr ""
+msgstr "Hiermee worden al uw meldingsvoorkeuren teruggezet naar hun standaardinstelling. Weet u zeker dat u dat wilt doen?"
 
 msgid "Your notification preferences were updated successfully."
-msgstr ""
+msgstr "Uw meldingsvoorkeuren zijn succesvol bijgewerkt."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr ""
+msgstr "Uw meldingsvoorkeuren zijn gereset naar de standaardsvoorkeuren!"
