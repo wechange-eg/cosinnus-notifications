@@ -39,6 +39,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 import six
 from _collections import defaultdict
+from cosinnus.utils.urls import BETTER_URL_RE
 
 
 
@@ -734,6 +735,8 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         sub_event_text = mark_safe((sub_event_text % string_variables)) if sub_event_text else None
         
         sub_image_url = resolve_attributes(obj, data_attributes['sub_image_url'])
+        object_url = resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url')
+        portal_url = CosinnusPortal.get_current().get_domain()
         
         # full escape and markup conversion
         object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
@@ -756,7 +759,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
             'object_name': object_name,
-            'object_url': resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url'),
+            'object_url': object_url,
             'object_text': object_text,
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
             'content_rows': content_rows,
@@ -776,13 +779,13 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
         # default for image_url is the notifcation event's causer
         if not data['image_url']:
-            data['image_url'] = CosinnusPortal.get_current().get_domain() + \
+            data['image_url'] = portal_url + \
                  (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe-small.png'))
         # ensure URLs are absolute
         for url_field in ['image_url', 'object_url', 'sub_image_url']:
             url = data[url_field]
             if url and not url.startswith('http'):
-                data[url_field] = CosinnusPortal.get_current().get_domain() + data[url_field]
+                data[url_field] = portal_url + data[url_field]
                 
         # humanize all datetime objects
         for key, val in list(data.items()):
@@ -790,6 +793,14 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                 data[key] = formats.date_format(localtime(val), 'SHORT_DATETIME_FORMAT')
                 
         item_html = render_to_string(options['snippet_template'], context=data)
+        
+        # replace all external URLs with the URL to the item itself to prevent possible spam
+        for m in reversed([it for it in BETTER_URL_RE.finditer(item_html)]):
+            matched_url = m.group()
+            if not matched_url.startswith(portal_url):
+                item_html = item_html[:m.start()] + object_url + item_html[m.end():]
+        
+        
         if return_data:
             return item_html, data
         else:
