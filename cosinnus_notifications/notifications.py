@@ -40,6 +40,7 @@ from django.contrib.auth import get_user_model
 import six
 from _collections import defaultdict
 from cosinnus.utils.urls import BETTER_URL_RE
+from cosinnus_notifications.alerts import create_user_alert
 
 
 
@@ -126,6 +127,9 @@ NOTIFICATIONS_DEFAULTS = {
     # this must be True for all kinds of content that could be offensive and can be moderated, 
     # but must be unique per content (i.e. True for comment created, but False for comment created for tagged members)
     'moderatable_content': False,
+    # if True, this notification will also create NotificationAlerts for any user who follows a content/group
+    # set this to False to make a notification type be e-mail only.
+    'can_be_alert': True,
     # can this notification be sent to the objects creator?
     # default False, because most items aren't wanted to be known by the author creating them
     'allow_creator_as_audience': False,
@@ -346,12 +350,15 @@ class NotificationsThread(Thread):
     next_session_args = []
     # list of user ids that already have been emailed for this session. not cleared during sessions
     already_emailed_user_emails = []
+    # list of user ids that have already gotten alerts for this session. not cleared during sessions
+    already_alerted_user_ids = []
 
     def __init__(self, sender, user, obj, audience, notification_id, options, first_init=True):
         if first_init:
             super(NotificationsThread, self).__init__()
             self.next_session_args = []
             self.already_emailed_user_emails = []
+            self.already_alerted_user_ids = []
         self.sender = sender
         self.user = user
         self.obj = obj
@@ -475,6 +482,48 @@ class NotificationsThread(Thread):
             # the individual setting for this notification type and group is in effect:
             return self.is_notification_active(notification_id, user, self.group)
     
+    def check_user_wants_alert(self, user, notification_id, obj):
+        """ Do multiple pre-checks and a DB check to find out if the user would like to receive an alert for this 
+            notification event. """
+        
+        # anonymous users can never receive alerts
+        if not user.is_authenticated:
+            return False
+        # only active users that have logged in before accepted the TOS get alerts
+        if not user.is_active:
+            return False
+        if not user.last_login:
+            return False
+        if not cosinnus_setting(user, 'tos_accepted'):
+            return False
+        
+        """
+        # user cannot be object's creator unless explicitly specified
+        if hasattr(obj, 'creator'):
+            allow_creator_as_audience = False
+            if notification_id in notifications:
+                allow_creator_as_audience = notifications[notification_id].get('allow_creator_as_audience', False)
+            if obj.creator == user and not allow_creator_as_audience:
+                return False
+        """
+        # if the object is a group always create an alert (otherwise group invitations would never create alerts)
+        if type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model()):
+            return True
+        # user must be able to see an object if it is contained in a group 
+        if not check_object_read_access(obj, user):
+            return False
+        # user must be either
+        #    - the creator of the object (likes, attendances) OR
+        #    - be following the object's group (group content) OR
+        #    - be following the object (public events)
+        if hasattr(obj, 'creator') and obj.creator == user:
+            return True
+        if hasattr(obj, 'group') and obj.group.is_user_following(user):
+            return True
+        if hasattr(obj, 'is_user_following') and obj.is_user_following(user):
+            return True
+        
+        return False
     
     def send_instant_notification(self, notification_event, receiver, reason_key=None):
         """ Sends out an instant notification for this thread's event to someone who wants it """
@@ -638,8 +687,13 @@ class NotificationsThread(Thread):
             
         finally:
             translation.activate(cur_language)
-    
 
+    def create_new_user_alert(self, notification_event, receiver, reason_key=None):
+        """ Creates a NotificationAlert for this Thread for a NotificationEvent to someone who wants it """
+        create_user_alert(notification_event.target_object, notification_event.group, 
+                          receiver, notification_event.user, notification_event.notification_id,
+                          notification_event=notification_event)
+        
     def run(self):
         self.inner_run()
         
@@ -659,13 +713,25 @@ class NotificationsThread(Thread):
         notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object=self.obj)
         setattr(notification_event, '_target_object', self.obj) # this helps reduce lookups by local caching the generic foreign key object
         
+        options = notifications[self.notification_id]
         for receiver in self.audience:
-            # check that we do not email a user for this session twice
-            if receiver.email in self.already_emailed_user_emails:
-                continue
-            if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
-                self.send_instant_notification(notification_event, receiver)
-                self.already_emailed_user_emails.append(receiver.email)
+            # check for alerts if this notification type can be an alert,
+            # that the user is not a temporary email one, and that we do not alert a user for this session twice
+            if options['can_be_alert'] and receiver.id and not receiver.id in self.already_alerted_user_ids:
+                try:
+                    if self.check_user_wants_alert(receiver, self.notification_id, self.obj):
+                        # create a new NotificationAlert
+                        self.create_new_user_alert(notification_event, receiver)
+                        self.already_alerted_user_ids.append(receiver.id)
+                except Exception as e:
+                    logger.exception('An unknown error occured during NotificationAlert check/creation! Exception in extra.', extra={'exception': force_text(e)})
+                    if settings.DEBUG:
+                        raise
+            # check for notifications and that we do not email a user for this session twice
+            if not receiver.email in self.already_emailed_user_emails:
+                if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
+                    self.send_instant_notification(notification_event, receiver)
+                    self.already_emailed_user_emails.append(receiver.email)
         
         # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
         if self.options['moderatable_content']:
@@ -694,7 +760,7 @@ class NotificationsThread(Thread):
         return
 
 
-def render_digest_item_for_notification_event(notification_event, return_data=False):
+def render_digest_item_for_notification_event(notification_event, return_data=False, only_compile_alert_data=False):
     """ Renders the HTML of a single notification event for a receiving user """
     
     try:
@@ -724,7 +790,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'sender_name': escape(sender_name),
             'object_name': escape(object_name),
             'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
-            'team_name': escape(notification_event.group['name']),
+            'team_name': escape(notification_event.group['name']) if notification_event.group else '(unknowngroup)',
         }
         event_text = options['event_text']
         notification_text = options['notification_text'] or options['event_text']
@@ -777,6 +843,10 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             data['object_name'] = _('Untitled')
         if len(data['object_name']) > DIGEST_ITEM_TITLE_MAX_LENGTH:
             data['object_name'] = data['object_name'][:DIGEST_ITEM_TITLE_MAX_LENGTH-3] + '...'
+        
+        if only_compile_alert_data:
+            return data
+            
         # default for image_url is the notifcation event's causer
         if not data['image_url']:
             data['image_url'] = portal_url + \
@@ -786,7 +856,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             url = data[url_field]
             if url and not url.startswith('http'):
                 data[url_field] = portal_url + data[url_field]
-                
+        
         # humanize all datetime objects
         for key, val in list(data.items()):
             if isinstance(val, datetime.datetime):

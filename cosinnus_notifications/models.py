@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from builtins import str
 from builtins import object
-from django.db import models
-from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _, pgettext_lazy
-from django.utils.encoding import python_2_unicode_compatible
+from builtins import str
+import logging
 
-from cosinnus.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from cosinnus.models.group import CosinnusPortal
 from annoying.functions import get_object_or_None
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields.jsonb import JSONField
+from django.db import models
+from django.db.models import Q
+from django.template.defaultfilters import date
+from django.utils.encoding import python_2_unicode_compatible
+from django.utils.html import escape
+from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _, pgettext_lazy
+
+from cosinnus.conf import settings
+from cosinnus.models.group import CosinnusPortal
 from cosinnus.templatetags.cosinnus_tags import full_name
 
-import logging
-from django.template.defaultfilters import date
+
 logger = logging.getLogger('cosinnus')
 
 
@@ -187,6 +191,7 @@ class NotificationAlert(models.Model):
 
     portal = models.ForeignKey('cosinnus.CosinnusPortal', verbose_name=_('Portal'), related_name='notification_alerts', 
         null=False, blank=False, default=1, on_delete=models.CASCADE)
+    # the target object's group. if the target_object is a group itself, this will be None!
     group = models.ForeignKey(settings.COSINNUS_GROUP_OBJECT_MODEL, related_name='notifcation_alerts',
         on_delete=models.CASCADE, blank=True, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -221,10 +226,10 @@ class NotificationAlert(models.Model):
     
     item_hash = models.CharField(max_length=250,
             help_text='A unique-per-user pseudo-hash to identify an alert and detect multi-user alerts.'
-                        'Consists of `<portal-id>/<group-id>/<item-id>/<notification-id>`')
+                        'Consists of `<portal-id>/<group-id>/<item-model>/<notification-id>/<item-id>`')
     bundle_hash = models.CharField(max_length=250,
             help_text='A non-unique hash used to detect very similar events to merge as a bundle.' +\
-                        'Consists of `<portal-id>/<group-id>/<item-model>/<action-user-id>/<notification-id>`')
+                        'Consists of `<portal-id>/<group-id>/<item-model>/<notification-id>/<action-user-id>`')
     counter = models.PositiveIntegerField(default=0,
             help_text='A counter for displaying a number in the alert like "Amy and <counter> more liked your post".' +\
                         'Used in multi and bundle alerts.')
@@ -233,8 +238,108 @@ class NotificationAlert(models.Model):
             'Contains a list of objects for referenced users [{"user_id", "title" (username), "url", "icon_or_image_url"}, ...]')
     bundle_list = JSONField(null=True, blank=True,
             help_text='Only filled if type==TYPE_BUNDLE_ALERT, None else.' +\
-            'Contains a list of objects for referenced content objects [{"obj_id", "title", "url", "icon_or_image_url"}, ...]')
+            'Contains a list of objects for referenced content objects [{"object_id", "title", "url", "icon_or_image_url"}, ...]')
     
+    def __init__(self, user, target_object, action_user, notification_id, *args, **kwargs):
+        # fill supplied values
+        super().__init__(self, user=user, target_object=target_object, action_user=action_user,
+                         notification_id=notification_id, *args, **kwargs)
+        # fill default values
+        self.type = NotificationAlert.TYPE_SINGLE_ALERT
+        self.last_event_at = now()
+        self.seen = False
+        self.counter = 0
+        self.multi_user_list = []
+        self.bundle_list = []
+        # fill derived/cache values
+        self.group = target_object.group if hasattr(target_object, 'group') else None
+        self.portal = (self.group and self.group.portal) \
+                or (hasattr(target_object, 'portal') and target_object.portal) \
+                or CosinnusPortal.get_current()
+        # generate item hashes
+        self.item_hash = self.generate_alert_item_hash()
+        self.bundle_hash = self.generate_alert_bundle_hash()
+        # notification-dependent data must be filled manually or by calling `fill_notification_dependent_data()`
+    
+    def fill_notification_dependent_data(self):
+        """ Fills data fields that depend on different model fields depending on different model 
+            types of the target_object. """
+        # generate data specific for notificationevent and object type
+        from cosinnus_notifications.notifications import render_digest_item_for_notification_event
+        notification_event = NotificationEvent(
+            group=self.group, user=self.action_user, 
+            otification_id=self.notification_id, target_object=self.target_object
+        )
+        notification_event_data = render_digest_item_for_notification_event(
+            notification_event, only_compile_alert_data=True)
+            
+        self.target_title = notification_event_data['object_name']
+        self.target_url = notification_event_data['object_url']
+        if notification_event_data['image_url']:
+            self.icon_or_image_url = notification_event_data['image_url']
+        elif hasattr(self.target_object, 'get_icon'):
+            # if no image url can be derived from the object, use the icon-by-type for the object
+            self.icon_or_image_url = self.target_object.get_icon()
+        else:
+            self.icon_or_image_url = 'fa-question'
+        if self.group:
+            self.subtitle = self.group.name
+            self.subtitle_icon = self.group.get_icon()
+    
+    def generate_label(self):
+        from cosinnus_notifications.notifications import notifications
+        notification_options = notifications[self.notification_id]
+        # TODO: we skip sender_name and replace it at GET delivery time!
+        string_variables = {
+            # 'sender_name': escape(full_name(self.action_user)),
+            'object_name': escape(self.target_title),
+            'counter': self.counter,
+        }
+        # TODO: get label specific for single/multi/bundle type!
+        self.label = notification_options.get('subject_text') % string_variables    
+    
+    def _get_alert_base_hash(self):
+        """ Consists of `<portal-id>/<group-id>/<item-model>/<notification-id>/.
+            Note the trailing slash` """
+        data = {
+            'portal_id': CosinnusPortal.get_current().id,
+            'group_id': self.target_object.group.id if hasattr(self.target_object, 'group') else 'None',
+            'item_model': self.target_object._meta.model_name,
+            'notification_id': self.notification_id,
+        }
+        return '%(portal_id)s/%(group_id)s/%(item_model)s/%(notification_id)s/' % data
+    
+    def get_alert_item_hash(self):
+        """ Generates the multi user item hash for an alert.
+            Consists of <portal-id>/<group-id>/<item-model>/<notification-id>/<item-id> """
+        return self._get_alert_base_hash() + self.target_object
+        
+    def get_alert_bundle_hash(self):
+        """ Generates the bundle hash for an alert.
+            Consists of <portal-id>/<group-id>/<item-model>/<notification-id>/<action-user-id> """
+        return self._get_alert_base_hash() + self.action_user.id
+
+    def add_new_multi_action_user(self, new_action_user):
+        """ Adds a new action_user to the multi_user_list """
+        profile = new_action_user.cosinnus_profile
+        user_item = {
+            'user_id': new_action_user.id,
+            'title': full_name(new_action_user),
+            'url': profile.get_absolute_url(),
+            'usericon_or_image_url_id': profile.get_avatar_thumbnail_url(),
+        }
+        self.multi_user_list = [user_item] + self.multi_user_list
+    
+    def add_new_bundle_item(self, alert):
+        """ Adds a new alert item object bundle to the bundle_list """
+        bundle_item = {
+            'object_id': alert.object_id,
+            'title': alert.target_title,
+            'url': alert.target_url,
+            'usericon_or_image_url_id': alert.icon_or_image_url,
+        }
+        self.bundle_list = [bundle_item] + self.bundle_list
+        
     def __str__(self):
         return "<NotificationAlert: %(user)s, group: %(group)s, item_hash: %(item_hash)s, last_event_at: %(last_event_at)s>" % {
             'user': self.user,
