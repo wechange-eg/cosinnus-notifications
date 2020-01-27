@@ -244,9 +244,7 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
         self.unseen_count = -1
         if not self.offset_timestamp:
             unseen_aggr = alerts_qs.aggregate(seen_count=Count(Case(When(seen=False, then=1))))
-            import ipdb;ipdb.set_trace()
-            self.unseen_count = unseen_aggr.get('amount__sum???', None)
-            self.unseen_count = 0 if self.unseen_count is None else self.unseen_count
+            self.unseen_count = unseen_aggr.get('seen_count', 0)
         if self.newer_than_timestamp:
             after_dt = datetime_from_timestamp(self.newer_than_timestamp)
             alerts_qs = alerts_qs.filter(last_event_at__gt=after_dt)
@@ -279,7 +277,7 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
             'newest_timestamp': self.newest_timestamp,
             'unseen_count': self.unseen_count,
         })
-        return
+        return data
     
 alerts_retrieval_view = AlertsRetrievalView.as_view()
 

@@ -23,11 +23,12 @@ admin.site.register(NotificationEvent, NotificationEventAdmin)
 
 
 class NotificationAlertAdmin(admin.ModelAdmin):
-    list_display = ('last_event_at', 'notification_id', 'group', 'user', 'action_user')
+    list_display = ('last_event_at', 'type', 'notification_id', 'group', 'user', 'action_user')
     list_filter = ('notification_id',)
     search_fields = ('user__first_name', 'user__last_name', 'user__email', 
         'action_user__first_name', 'action_user__last_name', 'action_user__email',
         'notification_id', 'group__name') 
+    readonly_fields = ('type',)
 
 admin.site.register(NotificationAlert, NotificationAlertAdmin)
 

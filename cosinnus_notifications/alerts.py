@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import logging
+from cosinnus_notifications.models import NotificationAlert
 from datetime import timedelta
-from cosinnus_notifications.notifications import render_digest_item_for_notification_event
-from cosinnus_notifications.models import NotificationAlert, NotificationEvent
+import logging
+
 from django.utils.timezone import now
-from builtins import None
+from django.utils.translation import ugettext_lazy as _
+
 
 logger = logging.getLogger('cosinnus')
 
@@ -26,7 +27,8 @@ def create_user_alert(obj, group, receiver, action_user, notification_id, reason
         @param reason_key: a key of `ALERT_REASONS` or None. """
         
     # create preliminary alert (not persisted yet!)
-    alert = NotificationAlert(
+    alert = NotificationAlert()
+    alert.initialize(
         user=receiver,
         target_object=obj,
         group=group,
@@ -76,7 +78,7 @@ def create_user_alert(obj, group, receiver, action_user, notification_id, reason
         return
     
     # Case C: if the event caused neither a multi user alert or bundle alert, save alert as a new alert
-    alert.generate_label() 
+    alert.generate_label()
     alert.save()
     
 
