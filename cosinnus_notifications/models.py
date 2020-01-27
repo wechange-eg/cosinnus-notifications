@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from cosinnus.conf import settings
 from cosinnus.models.group import CosinnusPortal
 from cosinnus.templatetags.cosinnus_tags import full_name
+from django.templatetags.static import static
 
 
 logger = logging.getLogger('cosinnus')
@@ -353,6 +354,7 @@ class NotificationAlert(models.Model):
 
 class SerializedNotificationAlert(dict):
     
+    id = None
     label = None # combines username and count and item name
     url = None
     user_icon_or_image_url = None
@@ -377,10 +379,13 @@ class SerializedNotificationAlert(dict):
             'count': alert.counter,
         }
         # translate the label using current variables
+        self['id'] = alert.id
         self['label'] = _(alert.label) % label_vars
         self['url'] = alert.target_url
         self['item_icon_or_image_url'] = alert.icon_or_image_url
-        self['user_icon_or_image_url'] = action_user_profile.get_avatar_thumbnail_url()
+        # profile might be None for deleted users
+        self['user_icon_or_image_url'] = action_user_profile.get_avatar_thumbnail_url() if \
+            action_user_profile else static('images/jane-doe-small.png')
         self['subtitle'] = alert.subtitle
         self['subtitle_icon'] = alert.subtitle_icon
         self['action_datetime'] = date(alert.last_event_at, 'c') # moment-compatible datetime string

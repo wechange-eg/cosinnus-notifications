@@ -4,13 +4,14 @@ from __future__ import unicode_literals
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed,\
-    HttpResponseForbidden
+    HttpResponseForbidden, HttpResponseBadRequest, HttpResponse
 from django.utils.translation import ugettext_lazy as _
 
 from cosinnus.conf import settings
 from cosinnus.core.decorators.views import require_logged_in
 from cosinnus_notifications.models import UserNotificationPreference,\
-    UserMultiNotificationPreference
+    UserMultiNotificationPreference, SerializedNotificationAlert,\
+    NotificationAlert
 from cosinnus_notifications.notifications import notifications,\
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
     set_user_group_notifications_special, MULTI_NOTIFICATION_IDS,\
@@ -23,6 +24,13 @@ from django.db import transaction
 from cosinnus.utils.permissions import check_user_portal_moderator,\
     check_user_portal_admin
 from django.views.generic.list import ListView
+from cosinnus.views.user_dashboard import BasePagedOffsetWidgetView
+from cosinnus.utils.dates import datetime_from_timestamp,\
+    timestamp_from_datetime
+from cosinnus.utils.functions import is_number
+from django.db.models import Count, Case, When
+from django.utils.timezone import now
+from django.contrib.auth import get_user_model
 
 
 
@@ -214,6 +222,88 @@ def notification_reset_view(request):
     
     messages.success(request, _('Your notifications preferences were reset to default!'))
     return HttpResponseRedirect(reverse_lazy('cosinnus:notifications'))
+
+
+class AlertsRetrievalView(BasePagedOffsetWidgetView):
+
+    default_page_size = 10
+    offset_model_field = 'last_event_at'
     
+    # from kwargs. if given, we will only return alerts *newer* than this timestamp
+    newer_than_timestamp = None 
+    
+    def get(self, request, *args, **kwargs):
+        self.newer_than_timestamp = kwargs.pop('newer_than_timestamp', None)
+        if self.newer_than_timestamp is not None and not is_number(self.newer_than_timestamp):
+            return HttpResponseBadRequest('Malformed parameter: "newer_than_timestamp"')
+        return super(AlertsRetrievalView, self).get(request, *args, **kwargs)
+        
+    def get_queryset(self):
+        alerts_qs = NotificationAlert.objects.filter(user=self.request.user).order_by('last_event_at')
+        # retrieve number of unseen alerts from ALL alerts (before pagination) unless we're loading "more..." paged items
+        self.unseen_count = -1
+        if not self.offset_timestamp:
+            unseen_aggr = alerts_qs.aggregate(seen_count=Count(Case(When(seen=False, then=1))))
+            import ipdb;ipdb.set_trace()
+            self.unseen_count = unseen_aggr.get('amount__sum???', None)
+            self.unseen_count = 0 if self.unseen_count is None else self.unseen_count
+        if self.newer_than_timestamp:
+            after_dt = datetime_from_timestamp(self.newer_than_timestamp)
+            alerts_qs = alerts_qs.filter(last_event_at__gt=after_dt)
+        return alerts_qs
+    
+    def get_items_from_queryset(self, queryset):
+        alerts = list(queryset)
+        # retrieve the newest item's timestamp, but only if we arent loading "more..." paged items
+        self.newest_timestamp = None
+        if not self.offset_timestamp and len(alerts) > 0:
+            self.newest_timestamp = timestamp_from_datetime(alerts[0].last_event_at)
+        # get (user_obj, profile_obj) for each user_id into a dict
+        # to optimize and retrieve each user once, even if they are action_user of multiple alerts
+        user_ids = list(set([alert.action_user_id for alert in alerts]))
+        users = get_user_model().objects.filter(id__in=user_ids).prefetch_related('cosinnus_profile')
+        user_cache = dict(((user.id, (user, user.cosinnus_profile)) for user in users))
+        # serialize items
+        items = [
+            SerializedNotificationAlert(
+                alert, 
+                action_user=user_cache[alert.action_user_id][0], 
+                action_user_profile=user_cache[alert.action_user_id][1],
+            ) for alert in alerts
+        ]
+        return items
+    
+    def get_data(self, **kwargs):
+        data = super(AlertsRetrievalView, self).get_data(**kwargs)
+        data.update({
+            'newest_timestamp': self.newest_timestamp,
+            'unseen_count': self.unseen_count,
+        })
+        return
+    
+alerts_retrieval_view = AlertsRetrievalView.as_view()
+
+
+@csrf_protect
+def alerts_mark_seen(request, before_timestamp=None):
+    """ Marks all NotificationAlerts of the current user as seen.
+        @param before_timestamp: if kwarg is given, only marks alerts older than the given timestamp as seen. 
+    """
+    if request and not request.user.is_authenticated:
+        return HttpResponseForbidden('Not authenticated')
+    if not request.method == 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    if before_timestamp is not None and not is_number(before_timestamp):
+        return HttpResponseBadRequest('Malformed parameter: "before_timestamp"')
+    
+    if before_timestamp:
+        before_dt = datetime_from_timestamp(before_timestamp)
+    else:
+        before_dt = now()
+    
+    unseen_alerts = NotificationAlert.objects.filter(user=request.user, last_event_at__lte=before_dt, seen=False)
+    unseen_alerts.update(seen=True)
+    return HttpResponse('ok')
+
     
 import cosinnus_notifications.hooks # noqa
