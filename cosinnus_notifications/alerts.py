@@ -6,13 +6,24 @@ from datetime import timedelta
 from cosinnus_notifications.notifications import render_digest_item_for_notification_event
 from cosinnus_notifications.models import NotificationAlert, NotificationEvent
 from django.utils.timezone import now
+from builtins import None
 
 logger = logging.getLogger('cosinnus')
 
 
-def create_user_alert(obj, group, receiver, action_user, notification_id, notification_event=None):
+
+ALERT_REASONS = {
+    'is_group': None, # -- reason will not be shown. the item is a group and is always shown for invitations etc
+    'is_creator': _('You are seeing this alert because you created this content.'),
+    'follow_group': _('You are seeing this alert because you are following the item\'s project or group.'),
+    'follow_object': _('You are seeing this alert because you are following this item.'),
+    'none': None, # -- reason will not be shown
+}
+
+def create_user_alert(obj, group, receiver, action_user, notification_id, reason_key=None):
     """ Creates a NotificationAlert for a NotificationEvent to someone who wants it.
-        @param group: can be None (for non-group items or groups themselves) """
+        @param group: can be None (for non-group items or groups themselves) 
+        @param reason_key: a key of `ALERT_REASONS` or None. """
         
     # create preliminary alert (not persisted yet!)
     alert = NotificationAlert(
@@ -24,6 +35,7 @@ def create_user_alert(obj, group, receiver, action_user, notification_id, notifi
     )
     # generate some derived data in the alert derived from its object/event
     alert.fill_notification_dependent_data()
+    alert.reason_key = reason_key
     
     # Case A: check if the alert should be merged into an existing multi user alert or bundle alert
     # multi user check: the owner is same, datetime < 3d, and the item_hash matches, 

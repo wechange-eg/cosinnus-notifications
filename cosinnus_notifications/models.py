@@ -188,7 +188,9 @@ class NotificationAlert(models.Model):
         on_delete=models.CASCADE, related_name='+'
     )
     notification_id = models.CharField(_('Notification ID'), max_length=100)
-
+    reason_key = models.CharField(_('Alert Reason key'), max_length=32, null=True, blank=True,
+        help_text='One of `cosinnus_notifications.alerts.ALERT_REASONS` or None.')
+    
     portal = models.ForeignKey('cosinnus.CosinnusPortal', verbose_name=_('Portal'), related_name='notification_alerts', 
         null=False, blank=False, default=1, on_delete=models.CASCADE)
     # the target object's group. if the target_object is a group itself, this will be None!

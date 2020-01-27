@@ -484,7 +484,10 @@ class NotificationsThread(Thread):
     
     def check_user_wants_alert(self, user, notification_id, obj):
         """ Do multiple pre-checks and a DB check to find out if the user would like to receive an alert for this 
-            notification event. """
+            notification event. 
+            @return: False if an alert should not be created for the user.
+                <reason>::str if an alert should be created.
+                <reason> can be one of `cosinnus_notifications.alerts.ALERT_REASONS` """
         
         # anonymous users can never receive alerts
         if not user.is_authenticated:
@@ -508,7 +511,7 @@ class NotificationsThread(Thread):
         """
         # if the object is a group always create an alert (otherwise group invitations would never create alerts)
         if type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model()):
-            return True
+            return 'is_group'
         # user must be able to see an object if it is contained in a group 
         if not check_object_read_access(obj, user):
             return False
@@ -517,11 +520,11 @@ class NotificationsThread(Thread):
         #    - be following the object's group (group content) OR
         #    - be following the object (public events)
         if hasattr(obj, 'creator') and obj.creator == user:
-            return True
+            return 'is_creator'
         if hasattr(obj, 'group') and obj.group.is_user_following(user):
-            return True
+            return 'follow_group'
         if hasattr(obj, 'is_user_following') and obj.is_user_following(user):
-            return True
+            return 'follow_object'
         
         return False
     
@@ -692,7 +695,7 @@ class NotificationsThread(Thread):
         """ Creates a NotificationAlert for this Thread for a NotificationEvent to someone who wants it """
         create_user_alert(notification_event.target_object, notification_event.group, 
                           receiver, notification_event.user, notification_event.notification_id,
-                          notification_event=notification_event)
+                          reason_key=reason_key)
         
     def run(self):
         self.inner_run()
@@ -719,9 +722,10 @@ class NotificationsThread(Thread):
             # that the user is not a temporary email one, and that we do not alert a user for this session twice
             if options['can_be_alert'] and receiver.id and not receiver.id in self.already_alerted_user_ids:
                 try:
-                    if self.check_user_wants_alert(receiver, self.notification_id, self.obj):
+                    alert_reason = self.check_user_wants_alert(receiver, self.notification_id, self.obj)
+                    if alert_reason:
                         # create a new NotificationAlert
-                        self.create_new_user_alert(notification_event, receiver)
+                        self.create_new_user_alert(notification_event, receiver, reason_key=alert_reason)
                         self.already_alerted_user_ids.append(receiver.id)
                 except Exception as e:
                     logger.exception('An unknown error occured during NotificationAlert check/creation! Exception in extra.', extra={'exception': force_text(e)})
