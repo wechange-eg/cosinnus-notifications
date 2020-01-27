@@ -181,7 +181,6 @@ class NotificationAlert(models.Model):
     
     class Meta(object):
         ordering = ('last_event_at',)
-        unique_together = ('user', 'item_hash', )
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
         verbose_name=_('Owner of the alert'),

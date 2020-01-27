@@ -521,10 +521,10 @@ class NotificationsThread(Thread):
         #    - be following the object (public events)
         if hasattr(obj, 'creator') and obj.creator == user:
             return 'is_creator'
-        if hasattr(obj, 'group') and obj.group.is_user_following(user):
-            return 'follow_group'
         if hasattr(obj, 'is_user_following') and obj.is_user_following(user):
             return 'follow_object'
+        if hasattr(obj, 'group') and obj.group.is_user_following(user):
+            return 'follow_group'
         
         return False
     
