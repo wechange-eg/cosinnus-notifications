@@ -279,7 +279,7 @@ class NotificationAlert(models.Model):
             
         self.target_title = notification_event_data['object_name']
         self.target_url = notification_event_data['object_url']
-        if notification_event_data['image_url']:
+        if notification_event_data.get('image_url', None):
             self.icon_or_image_url = notification_event_data['image_url']
         elif hasattr(self.target_object, 'get_icon'):
             # if no image url can be derived from the object, use the icon-by-type for the object
@@ -325,7 +325,7 @@ class NotificationAlert(models.Model):
             'user_id': new_action_user.id,
             'title': full_name(new_action_user),
             'url': profile.get_absolute_url(),
-            'usericon_or_image_url_id': profile.get_avatar_thumbnail_url(),
+            'icon_or_image_url': profile.get_avatar_thumbnail_url(),
         }
         self.multi_user_list = [user_item] + self.multi_user_list
     
@@ -335,7 +335,7 @@ class NotificationAlert(models.Model):
             'object_id': alert.object_id,
             'title': alert.target_title,
             'url': alert.target_url,
-            'usericon_or_image_url_id': alert.icon_or_image_url,
+            'icon_or_image_url': alert.icon_or_image_url,
         }
         self.bundle_list = [bundle_item] + self.bundle_list
         
