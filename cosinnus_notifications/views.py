@@ -237,9 +237,15 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
         if self.newer_than_timestamp is not None and not is_number(self.newer_than_timestamp):
             return HttpResponseBadRequest('Malformed parameter: "newer_than_timestamp"')
         return super(AlertsRetrievalView, self).get(request, *args, **kwargs)
-        
+    
+    def set_options(self):
+        super(AlertsRetrievalView, self).set_options()
+        # no page size for newest-poll retrieval
+        if self.newer_than_timestamp:
+            self.page_size = 999
+    
     def get_queryset(self):
-        alerts_qs = NotificationAlert.objects.filter(user=self.request.user).order_by('last_event_at')
+        alerts_qs = NotificationAlert.objects.filter(user=self.request.user)
         # retrieve number of unseen alerts from ALL alerts (before pagination) unless we're loading "more..." paged items
         self.unseen_count = -1
         if not self.offset_timestamp:
@@ -277,6 +283,10 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
             'newest_timestamp': self.newest_timestamp,
             'unseen_count': self.unseen_count,
         })
+        if self.newer_than_timestamp:
+            data.update({
+                'polled_timestamp': self.newer_than_timestamp,
+            })
         return data
     
 alerts_retrieval_view = AlertsRetrievalView.as_view()

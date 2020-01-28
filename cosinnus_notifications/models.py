@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
 from cosinnus.conf import settings
 from cosinnus.models.group import CosinnusPortal
+from cosinnus.models.user_dashboard import DashboardItem
 
 
 logger = logging.getLogger('cosinnus')
@@ -180,7 +181,7 @@ class NotificationAlert(models.Model):
     )
     
     class Meta(object):
-        ordering = ('last_event_at',)
+        ordering = ('-last_event_at',)
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
         verbose_name=_('Owner of the alert'),
@@ -348,17 +349,17 @@ class NotificationAlert(models.Model):
         }
 
 
-class SerializedNotificationAlert(dict):
+class SerializedNotificationAlert(DashboardItem):
     
+    # super.text == label
+    # super.group == subtitle
+    # super.group_icon == subtitle_icon
+    # super.url = url
+    # super.is_emphasized = !seen
     id = None
-    label = None # combines username and count and item name
-    url = None
     user_icon_or_image_url = None
     item_icon_or_image_url = None
-    subtitle = None
-    subtitle_icon = None
     action_datetime = None
-    seen = False
     is_multi_user_alert = False
     is_bundle_alert = False
     sub_items = []  # class `BundleItem`
@@ -374,23 +375,23 @@ class SerializedNotificationAlert(dict):
             
         # translate the label using current variables
         string_variables = {
-            'sender_name': escape(full_name(action_user)),
-            'team_name': alert.group.name if alert.group else '*unknowngroup*',
+            'sender_name': "<b>%s</b>" % escape(full_name(action_user)),
+            'team_name': escape(alert.group.name) if alert.group else '*unknowngroup*',
             'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
-            'object_name': escape(alert.target_title),
+            'object_name': "<b>%s</b>" % escape(alert.target_title),
             'count': alert.counter,
         }
-        self['label'] = _(alert.label) % string_variables
+        self['text'] = _(alert.label) % string_variables
         self['id'] = alert.id
         self['url'] = alert.target_url
         self['item_icon_or_image_url'] = alert.icon_or_image_url
         # profile might be None for deleted users
         self['user_icon_or_image_url'] = action_user_profile.get_avatar_thumbnail_url() if \
             action_user_profile else static('images/jane-doe-small.png')
-        self['subtitle'] = alert.subtitle
-        self['subtitle_icon'] = alert.subtitle_icon
+        self['group'] = alert.subtitle
+        self['group_icon'] = alert.subtitle_icon
         self['action_datetime'] = date(alert.last_event_at, 'c') # moment-compatible datetime string
-        self['seen'] = alert.seen
+        self['is_emphasized'] = not alert.seen
         
         sub_items = []
         if alert.type == NotificationAlert.TYPE_MULTI_USER_ALERT:
