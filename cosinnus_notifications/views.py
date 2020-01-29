@@ -305,6 +305,7 @@ def alerts_mark_seen(request, before_timestamp=None):
         return HttpResponseBadRequest('Malformed parameter: "before_timestamp"')
     
     if before_timestamp:
+        before_timestamp = float(before_timestamp)
         before_dt = datetime_from_timestamp(before_timestamp)
     else:
         before_dt = now()
