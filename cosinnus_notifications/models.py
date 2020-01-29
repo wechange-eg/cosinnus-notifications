@@ -311,7 +311,14 @@ class NotificationAlert(models.Model):
     def get_alert_item_hash(self):
         """ Generates the multi user item hash for an alert.
             Consists of [portal-id]/[group-id]/[item-model]/[notification-id]/[item-id] """
-        return self._get_alert_base_hash() + str(self.target_object.id)
+        target_object = self.target_object
+        # allow overriding of hashed ids to consider e.g. alerts of different child objects
+        # to belong to the same parent object's alert
+        if hasattr(target_object, 'get_notification_hash_id'):
+            hash_id = target_object.get_notification_hash_id()
+        else:
+            hash_id = target_object.id
+        return self._get_alert_base_hash() + str(hash_id)
         
     def get_alert_bundle_hash(self):
         """ Generates the bundle hash for an alert.
@@ -410,7 +417,7 @@ class BundleItem(dict):
     icon_or_image_url = None
     
     def __init__(self, obj):
-        self['title'] = obj.get('title', None)
+        self['title'] = escape(obj.get('title', None))
         self['url'] = obj.get('url', None)
         self['icon_or_image_url'] = obj.get('icon_or_image_url', None)
         

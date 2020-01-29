@@ -93,28 +93,33 @@ def merge_new_alert_into_multi_alert(new_alert, multi_alert):
                        extra={'alert': str(multi_alert)})
         return
     
-    # If the new alert's action_user is any of the action_users in the old alert, we only bump this alert to most recent
-    # and make it unseen. this is case like a user editing or liking/unliking an item multiple times, 
-    # but we're not gonna try to be a "smart" here, and hide the alert from the user at risk of omitting important events
-    if new_alert.action_user == multi_alert.action_user or \
-            any([user_item['user_id'] == new_alert.action_user.id for user_item in multi_alert.multi_user_list]):
-        multi_alert.last_event_at = now()
-        multi_alert.seen = False
-        multi_alert.action_user = new_alert.action_user
-        multi_alert.save()
-        return
+    is_repeat_alert = bool(new_alert.action_user == multi_alert.action_user or \
+            any([user_item['user_id'] == new_alert.action_user.id for user_item in multi_alert.multi_user_list]))
     
     # if there was a matching alert with the user not in the multi_user_list, merge the alerts.
     # make the old alert a multi alert, add the new action user and reset it to be current
-    if multi_alert.type == NotificationAlert.TYPE_SINGLE_ALERT:
+    if not is_repeat_alert and multi_alert.type == NotificationAlert.TYPE_SINGLE_ALERT:
         multi_alert.type = NotificationAlert.TYPE_MULTI_USER_ALERT
+        # save aways the old (first) action user first
         multi_alert.add_new_multi_action_user(multi_alert.action_user)
         multi_alert.counter = 1
+    
+    # re-fill the cached data (so the most recent user and object is always the target)
     multi_alert.last_event_at = now()
     multi_alert.seen = False
-    multi_alert.counter += 1
-    multi_alert.add_new_multi_action_user(new_alert.action_user)
+    multi_alert.action_user = new_alert.action_user
+    multi_alert.target_object = new_alert.target_object
+    multi_alert.fill_notification_dependent_data()
     multi_alert.generate_label()
+    
+    # If the new alert's action_user is any of the action_users in the old alert, we only bump this alert to most recent
+    #     and make it unseen. this is case like a user editing or liking/unliking an item multiple times, 
+    #     but we're not gonna try to be a "smart" here, and hide the alert from the user at risk of omitting important events
+    # Else, for non-repeated alerts (alert from a new user), we bump the counter and add the user to the list
+    if not is_repeat_alert:
+        multi_alert.counter += 1
+        multi_alert.add_new_multi_action_user(new_alert.action_user)
+    
     multi_alert.save()
 
 
