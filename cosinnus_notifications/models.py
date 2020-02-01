@@ -25,6 +25,9 @@ from cosinnus.models.user_dashboard import DashboardItem
 
 logger = logging.getLogger('cosinnus')
 
+# global for from cosinnus_notifications.notifications import notifications
+NOTIFICATIONS_DICT = None
+
 
 class BaseUserNotificationPreference(models.Model):
     
@@ -257,7 +260,8 @@ class NotificationAlert(models.Model):
         self.multi_user_list = []
         self.bundle_list = []
         # fill derived/cache values
-        self.group = target_object.group if hasattr(target_object, 'group') else None
+        if self.group is None:
+            self.group = target_object.group if hasattr(target_object, 'group') else None
         self.portal = (self.group and self.group.portal) \
                 or (hasattr(target_object, 'portal') and target_object.portal) \
                 or CosinnusPortal.get_current()
@@ -277,10 +281,12 @@ class NotificationAlert(models.Model):
         )
         notification_event_data = render_digest_item_for_notification_event(
             notification_event, only_compile_alert_data=True)
-            
+        
         self.target_title = notification_event_data['object_name']
         self.target_url = notification_event_data['object_url']
-        if notification_event_data.get('image_url', None):
+        if notification_event_data.get('alert_image_url', None):
+            self.icon_or_image_url = notification_event_data['alert_image_url']
+        elif notification_event_data.get('image_url', None):
             self.icon_or_image_url = notification_event_data['image_url']
         elif hasattr(self.target_object, 'get_icon'):
             # if no image url can be derived from the object, use the icon-by-type for the object
@@ -292,10 +298,35 @@ class NotificationAlert(models.Model):
             self.subtitle_icon = self.group.get_icon()
     
     def generate_label(self):
-        from cosinnus_notifications.notifications import notifications
-        notification_options = notifications[self.notification_id]
-        # TODO: get label specific for single/multi/bundle type!
-        self.label = notification_options.get('subject_text')   
+        """ Sets the proper alert text for `self.label` depending on the notification type of the event
+            and the single/multi/bundle type of this alert """
+        notification_options = self._get_notification_options()
+        # get label specific for single/multi/bundle type
+        if self.type > self.TYPE_SINGLE_ALERT and notification_options.get('alert_text_multi') is not None:
+            self.label = notification_options.get('alert_text_multi')
+        elif notification_options.get('alert_text') is not None:
+            self.label = notification_options.get('alert_text')
+        else:
+            self.label = notification_options.get('subject_text')   
+    
+    def get_alert_reason(self):
+        notification_options = self._get_notification_options()
+        alert_reason = notification_options['alert_reason']
+        if alert_reason is None:
+            alert_reason = _('You are following this content or its Project or Group')
+        return alert_reason
+    
+    def get_allowed_type(self):
+        """ Returns the type of multi/bundle alert this alert may become """
+        notification_options = self._get_notification_options()
+        return notification_options['alert_multi_type']
+    
+    def _get_notification_options(self):
+        global NOTIFICATIONS_DICT
+        if NOTIFICATIONS_DICT is None:
+            from cosinnus_notifications.notifications import notifications
+            NOTIFICATIONS_DICT = notifications
+        return NOTIFICATIONS_DICT[self.notification_id]
     
     def _get_alert_base_hash(self):
         """ Consists of `[portal-id]/[group-id]/[item-model]/[notification-id]/.
@@ -370,6 +401,7 @@ class SerializedNotificationAlert(DashboardItem):
     is_multi_user_alert = False
     is_bundle_alert = False
     sub_items = []  # class `BundleItem`
+    alert_reason = None
     
     def __init__(self, alert, action_user=None, action_user_profile=None):
         from cosinnus.templatetags.cosinnus_tags import full_name
@@ -383,12 +415,16 @@ class SerializedNotificationAlert(DashboardItem):
         # translate the label using current variables
         string_variables = {
             'sender_name': "<b>%s</b>" % escape(full_name(action_user)),
-            'team_name': escape(alert.group.name) if alert.group else '*unknowngroup*',
+            'team_name': "<b>%s</b>" % (escape(alert.group.name) if alert.group else '*unknowngroup*'),
             'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
             'object_name': "<b>%s</b>" % escape(alert.target_title),
             'count': alert.counter,
+            'count_minus_one': max(alert.counter-1, 0),
         }
+        # translate the label text only now!
         self['text'] = _(alert.label) % string_variables
+        # add a period for the alert_text sentence here
+        self['text'] += '.'
         self['id'] = alert.id
         self['url'] = alert.target_url
         self['item_icon_or_image_url'] = alert.icon_or_image_url
@@ -399,6 +435,7 @@ class SerializedNotificationAlert(DashboardItem):
         self['group_icon'] = alert.subtitle_icon
         self['action_datetime'] = date(alert.last_event_at, 'c') # moment-compatible datetime string
         self['is_emphasized'] = not alert.seen
+        self['alert_reason'] = alert.get_alert_reason()
         
         sub_items = []
         if alert.type == NotificationAlert.TYPE_MULTI_USER_ALERT:

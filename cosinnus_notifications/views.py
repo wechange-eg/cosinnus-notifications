@@ -1,37 +1,39 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.urls import reverse_lazy
+import cosinnus_notifications.hooks  # noqa
+from cosinnus_notifications.models import UserNotificationPreference, \
+    UserMultiNotificationPreference, SerializedNotificationAlert, \
+    NotificationAlert
+from cosinnus_notifications.notifications import notifications, \
+    ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID, \
+    set_user_group_notifications_special, MULTI_NOTIFICATION_IDS, \
+    MULTI_NOTIFICATION_LABELS
+
 from django.contrib import messages
-from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed,\
+from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.db.models import Count, Case, When
+from django.http.response import HttpResponseRedirect, HttpResponseNotAllowed, \
     HttpResponseForbidden, HttpResponseBadRequest, HttpResponse
+from django.urls import reverse_lazy
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_protect
+from django.views.generic.list import ListView
+import six
 
 from cosinnus.conf import settings
 from cosinnus.core.decorators.views import require_logged_in
-from cosinnus_notifications.models import UserNotificationPreference,\
-    UserMultiNotificationPreference, SerializedNotificationAlert,\
-    NotificationAlert
-from cosinnus_notifications.notifications import notifications,\
-    ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID,\
-    set_user_group_notifications_special, MULTI_NOTIFICATION_IDS,\
-    MULTI_NOTIFICATION_LABELS
-from cosinnus.models.group import CosinnusGroup, CosinnusPortalMembership,\
+from cosinnus.models.group import CosinnusGroup, CosinnusPortalMembership, \
     CosinnusPortal
-from django.views.decorators.csrf import csrf_protect
 from cosinnus.models.profile import GlobalUserNotificationSetting
-from django.db import transaction
-from cosinnus.utils.permissions import check_user_portal_moderator,\
-    check_user_portal_admin
-from django.views.generic.list import ListView
-from cosinnus.views.user_dashboard import BasePagedOffsetWidgetView
-from cosinnus.utils.dates import datetime_from_timestamp,\
+from cosinnus.utils.dates import datetime_from_timestamp, \
     timestamp_from_datetime
 from cosinnus.utils.functions import is_number
-from django.db.models import Count, Case, When
-from django.utils.timezone import now
-from django.contrib.auth import get_user_model
-
+from cosinnus.utils.permissions import check_user_portal_moderator, \
+    check_user_portal_admin
+from cosinnus.views.user_dashboard import BasePagedOffsetWidgetView
 
 
 class NotificationPreferenceView(ListView):
@@ -226,7 +228,7 @@ def notification_reset_view(request):
 
 class AlertsRetrievalView(BasePagedOffsetWidgetView):
 
-    default_page_size = 10
+    default_page_size = 3
     offset_model_field = 'last_event_at'
     
     # from kwargs. if given, we will only return alerts *newer* than this timestamp
@@ -236,6 +238,9 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
         self.newer_than_timestamp = kwargs.pop('newer_than_timestamp', None)
         if self.newer_than_timestamp is not None and not is_number(self.newer_than_timestamp):
             return HttpResponseBadRequest('Malformed parameter: "newer_than_timestamp"')
+        if self.newer_than_timestamp is not None and isinstance(self.newer_than_timestamp, six.string_types):
+            self.newer_than_timestamp = float(self.newer_than_timestamp)
+        
         return super(AlertsRetrievalView, self).get(request, *args, **kwargs)
     
     def set_options(self):
@@ -315,4 +320,3 @@ def alerts_mark_seen(request, before_timestamp=None):
     return HttpResponse('ok')
 
     
-import cosinnus_notifications.hooks # noqa

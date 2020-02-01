@@ -44,40 +44,42 @@ def create_user_alert(obj, group, receiver, action_user, notification_id, reason
     # Case A: check if the alert should be merged into an existing multi user alert 
     # multi user check: the owner is same, and the item_hash matches, 
     # and the existing alert is a single alert or already a multi alert
-    multi_user_qs = NotificationAlert.objects.filter(
-        user=alert.user,
-        item_hash=alert.item_hash,
-        type__in=[NotificationAlert.TYPE_SINGLE_ALERT, NotificationAlert.TYPE_MULTI_USER_ALERT])
-    multi_user_qs = list(multi_user_qs)
-    if len(multi_user_qs) > 1:
-        logger.warning('Inconsistency: Trying to match a multi user alert, but had a QS with more than 1 items!',
-                       extra={'alert': str(alert)})
-        if settings.DEBUG:
-            raise Exception('DEBUG ERROR: Multi alert double inconsistency')
-    elif len(multi_user_qs) == 1:
-        multi_alert = multi_user_qs[0]
-        merge_new_alert_into_multi_alert(alert, multi_alert)
-        return
+    if alert.get_allowed_type() == NotificationAlert.TYPE_MULTI_USER_ALERT:
+        multi_user_qs = NotificationAlert.objects.filter(
+            user=alert.user,
+            item_hash=alert.item_hash,
+            type__in=[NotificationAlert.TYPE_SINGLE_ALERT, NotificationAlert.TYPE_MULTI_USER_ALERT])
+        multi_user_qs = list(multi_user_qs)
+        if len(multi_user_qs) > 1:
+            logger.warning('Inconsistency: Trying to match a multi user alert, but had a QS with more than 1 items!',
+                           extra={'alert': str(alert)})
+            if settings.DEBUG:
+                raise Exception('DEBUG ERROR: Multi alert double inconsistency')
+        elif len(multi_user_qs) == 1:
+            multi_alert = multi_user_qs[0]
+            merge_new_alert_into_multi_alert(alert, multi_alert)
+            return
     
     # Case B: if no matching alerts for multi alerts were found, check if a bundle alert matches:
     # bundle alert check: the owner is same, datetime < 3h, the bundle_hash matches
     # and the existing alert is a single alert or already a bundle alert
     # TODO: optionize the timeframe
-    a_short_time_ago = now() - timedelta(hours=3)
-    bundle_qs = NotificationAlert.objects.filter(
-        user=alert.user,
-        last_event_at__gte=a_short_time_ago,
-        bundle_hash=alert.bundle_hash,
-        type__in=[NotificationAlert.TYPE_SINGLE_ALERT, NotificationAlert.TYPE_BUNDLE_ALERT])
-    bundle_qs = list(bundle_qs)
-    if len(bundle_qs) > 1:
-        logger.warning('Inconsistency: Trying to match a multi user alert, but had a QS with more than 1 items!',
-                       extra={'alert': str(alert)})
-        if settings.DEBUG:
-            raise Exception('DEBUG ERROR: Bundle alert double inconsistency')
-    elif len(bundle_qs) == 1:
-        merge_new_alert_into_bundle_alert(alert, bundle_qs[0])
-        return
+    if alert.get_allowed_type() == NotificationAlert.TYPE_BUNDLE_ALERT:
+        a_short_time_ago = now() - timedelta(hours=3)
+        bundle_qs = NotificationAlert.objects.filter(
+            user=alert.user,
+            last_event_at__gte=a_short_time_ago,
+            bundle_hash=alert.bundle_hash,
+            type__in=[NotificationAlert.TYPE_SINGLE_ALERT, NotificationAlert.TYPE_BUNDLE_ALERT])
+        bundle_qs = list(bundle_qs)
+        if len(bundle_qs) > 1:
+            logger.warning('Inconsistency: Trying to match a multi user alert, but had a QS with more than 1 items!',
+                           extra={'alert': str(alert)})
+            if settings.DEBUG:
+                raise Exception('DEBUG ERROR: Bundle alert double inconsistency')
+        elif len(bundle_qs) == 1:
+            merge_new_alert_into_bundle_alert(alert, bundle_qs[0])
+            return
     
     # Case C: if the event caused neither a multi user alert or bundle alert, save alert as a new alert
     alert.generate_label()

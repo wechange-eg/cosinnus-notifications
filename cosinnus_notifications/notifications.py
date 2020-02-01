@@ -19,7 +19,7 @@ from cosinnus.core.registries.apps import app_registry
 from cosinnus.models.group import CosinnusGroup, CosinnusPortal
 from cosinnus.models.tagged import BaseTaggableObjectModel, BaseTagObject
 from cosinnus_notifications.models import UserNotificationPreference,\
-    NotificationEvent, UserMultiNotificationPreference
+    NotificationEvent, UserMultiNotificationPreference, NotificationAlert
 from cosinnus.templatetags.cosinnus_tags import full_name, cosinnus_setting,\
     textfield
 from cosinnus.utils.functions import ensure_dict_keys, resolve_attributes
@@ -130,9 +130,36 @@ NOTIFICATIONS_DEFAULTS = {
     # if True, this notification will also create NotificationAlerts for any user who follows a content/group
     # set this to False to make a notification type be e-mail only.
     'can_be_alert': True,
+    # if True, this notification will also send instant emails and create NotificationEvents 
+    # for email digest generation for any user who wants this type of notification
+    # set this to False to make a notification type be alert only.
+    'can_be_email': True,
     # can this notification be sent to the objects creator?
     # default False, because most items aren't wanted to be known by the author creating them
     'allow_creator_as_audience': False,
+    
+    # the text used to render the notification alert's text. 
+    # can contain all string variables and `count` and `count_minus_one` in addition.
+    # note that "team_name" needs not be in here, because it is shown
+    # seperately, along with the alert text
+    # if an alert has `None` for this, `subject_text` is used instead
+    'alert_text': None,
+    # the text used for this alert once it becomes a multi/bundled alert. if None, uses `alert_text`.
+    # always include this if `alert_multi_type` is not 0. 
+    # can contain all string variables and `count` and `count_minus_one` in addition.
+    # depending on the `alert_multi_type`, this text should be formed differently:
+    # - TYPE_MULTI_USER_ALERT: Many actors, one object: "Jane and 3 others commented on your post"
+    # - TYPE_BUNDLE_ALERT: Many objects, one actor: "Jane uploaded 4 files"
+    'alert_text_multi': None,
+    # which type of alert this notification can become. each notification type can only be one of
+    # the multi types, not both (might conflict) 
+    # if this is set to 0 (TYPE_SINGLE_ALERT), the alert can not become a multi/bundled alert
+    'alert_multi_type': NotificationAlert.TYPE_SINGLE_ALERT,
+    # A special reason why the user got an alert for this specific option.
+    # eg "You were tagged in this post", "You have voted in this poll"
+    # This is great to not over-vary alert text strings too much, like ("X commented on X *you were tagged in*")  
+    # if this is None, the reason is the default (a user is a member/following the content's group)
+    'alert_reason': None,
     
     # does this notification support HTML emails and digest chunking?
     'is_html': False,
@@ -175,6 +202,7 @@ NOTIFICATIONS_DEFAULTS = {
         'object_url': 'get_absolute_url', # URL of the object
         'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
         'image_url': None, # image URL for the item. default if omitted is the event creator's user avatar
+        'alert_image_url': None, # if given, prefers this image/icon for alerts
         'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
         'sub_event_meta': None, # property of a sub-divided item below the main one, see doc above
         'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
@@ -521,6 +549,8 @@ class NotificationsThread(Thread):
         #    - be following the object (public events)
         if hasattr(obj, 'creator') and obj.creator == user:
             return 'is_creator'
+        if hasattr(obj, 'special_alert_check') and obj.special_alert_check(user):
+            return 'special_alert'
         if hasattr(obj, 'is_user_following') and obj.is_user_following(user):
             return 'follow_object'
         if hasattr(obj, 'group') and obj.group.is_user_following(user):
@@ -732,7 +762,7 @@ class NotificationsThread(Thread):
                     if settings.DEBUG:
                         raise
             # check for notifications and that we do not email a user for this session twice
-            if not receiver.email in self.already_emailed_user_emails:
+            if options['can_be_email'] and not receiver.email in self.already_emailed_user_emails:
                 if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
                     self.send_instant_notification(notification_event, receiver)
                     self.already_emailed_user_emails.append(receiver.email)
@@ -745,7 +775,7 @@ class NotificationsThread(Thread):
                     if self.check_user_wants_notification(admin, self.notification_id, self.obj, notification_moderator_check=True):
                         self.send_instant_notification(notification_event, admin, 'moderator_alert')
         
-        if self.audience:
+        if options['can_be_email'] and self.audience:
             # create a new NotificationEvent that saves this event for digest re-generation
             # no need to worry about de-duplicating events here, the digest generation handles it
             content_type = ContentType.objects.get_for_model(self.obj.__class__)
@@ -794,7 +824,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'sender_name': escape(sender_name),
             'object_name': escape(object_name),
             'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
-            'team_name': escape(notification_event.group['name']) if notification_event.group else '(unknowngroup)',
+            'team_name': escape(notification_event.group['name']) if getattr(notification_event, 'group', None) is not None else '(unknowngroup)',
         }
         event_text = options['event_text']
         notification_text = options['notification_text'] or options['event_text']
@@ -832,6 +862,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'object_url': object_url,
             'object_text': object_text,
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
+            'alert_image_url': resolve_attributes(obj, data_attributes['alert_image_url']),
             'content_rows': content_rows,
             
             'sub_event_text': sub_event_text,
