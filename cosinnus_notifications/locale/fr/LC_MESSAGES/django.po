@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-14 19:31+0100\n"
+"POT-Creation-Date: 2020-02-02 16:09+0100\n"
 "PO-Revision-Date: 2018-09-26 12:44+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,6 +17,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 2.1.1\n"
+
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this portal."
+msgid "You are seeing this alert because you created this content."
+msgstr "Tu reçois cette notification car tu es admin de ce portail."
+
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this project or group."
+msgid "You are seeing this alert because you are following the item's project or group."
+msgstr "Tu reçois cette notification car tu es admin de ce projet ou groupe."
+
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this portal."
+msgid "You are seeing this alert because you are following this item."
+msgstr "Tu reçois cette notification car tu es admin de ce portail."
 
 msgid "Notifications"
 msgstr "Notifications"
@@ -90,6 +105,23 @@ msgstr "Utilisateur qui a causé cet événement de notification"
 
 msgid "Audience"
 msgstr "Audience"
+
+msgid "Owner of the alert"
+msgstr ""
+
+msgid "Alert Reason key"
+msgstr ""
+
+#, fuzzy
+#| msgid "User who caused this notification event"
+msgid "Last user who caused this notification event"
+msgstr "Utilisateur qui a causé cet événement de notification"
+
+msgid "Alert State"
+msgstr ""
+
+msgid "You are following this content or its Project or Group"
+msgstr ""
 
 msgid "All notifications"
 msgstr "Toutes les notifications"
