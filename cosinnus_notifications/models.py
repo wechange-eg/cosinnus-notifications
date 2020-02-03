@@ -422,7 +422,12 @@ class SerializedNotificationAlert(DashboardItem):
             'count_minus_one': max(alert.counter-1, 0),
         }
         # translate the label text only now!
-        self['text'] = _(alert.label) % string_variables
+        if alert.label is None or len(alert.label) == 0:
+            # if the text returns empty, we had a plural ngettext set to this label, need to re-retrieve it
+            alert.generate_label()
+            self['text'] = alert.label % string_variables
+        else:
+            self['text'] = _(alert.label) % string_variables
         # add a period for the alert_text sentence here
         self['text'] += '.'
         self['id'] = alert.id

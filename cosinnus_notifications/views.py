@@ -228,7 +228,7 @@ def notification_reset_view(request):
 
 class AlertsRetrievalView(BasePagedOffsetWidgetView):
 
-    default_page_size = 3
+    default_page_size = 10
     offset_model_field = 'last_event_at'
     
     # from kwargs. if given, we will only return alerts *newer* than this timestamp
