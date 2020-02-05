@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from cosinnus.conf import settings
+from cosinnus.models.group import CosinnusPortal
 
 
 logger = logging.getLogger('cosinnus')
@@ -46,6 +47,7 @@ def create_user_alert(obj, group, receiver, action_user, notification_id, reason
     # and the existing alert is a single alert or already a multi alert
     if alert.get_allowed_type() == NotificationAlert.TYPE_MULTI_USER_ALERT:
         multi_user_qs = NotificationAlert.objects.filter(
+            portal=CosinnusPortal.get_current(),
             user=alert.user,
             item_hash=alert.item_hash,
             type__in=[NotificationAlert.TYPE_SINGLE_ALERT, NotificationAlert.TYPE_MULTI_USER_ALERT])
@@ -67,6 +69,7 @@ def create_user_alert(obj, group, receiver, action_user, notification_id, reason
     if alert.get_allowed_type() == NotificationAlert.TYPE_BUNDLE_ALERT:
         a_short_time_ago = now() - timedelta(hours=3)
         bundle_qs = NotificationAlert.objects.filter(
+            portal=CosinnusPortal.get_current(),
             user=alert.user,
             last_event_at__gte=a_short_time_ago,
             bundle_hash=alert.bundle_hash,

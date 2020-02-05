@@ -750,7 +750,8 @@ class NotificationsThread(Thread):
         for receiver in self.audience:
             # check for alerts if this notification type can be an alert,
             # that the user is not a temporary email one, and that we do not alert a user for this session twice
-            if options['can_be_alert'] and receiver.id and not receiver.id in self.already_alerted_user_ids:
+            if getattr(settings, 'COSINNUS_NOTIFICATION_ALERTS_ENABLED', False) and \
+                    options['can_be_alert'] and receiver.id and not receiver.id in self.already_alerted_user_ids:
                 try:
                     alert_reason = self.check_user_wants_alert(receiver, self.notification_id, self.obj)
                     if alert_reason:
