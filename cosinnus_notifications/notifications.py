@@ -41,6 +41,7 @@ import six
 from _collections import defaultdict
 from cosinnus.utils.urls import BETTER_URL_RE
 from cosinnus_notifications.alerts import create_user_alert
+from cosinnus.utils.files import get_image_url_for_icon
 
 
 
@@ -179,6 +180,9 @@ NOTIFICATIONS_DEFAULTS = {
     'notification_text': None,
     # event text for a subdivided item under the main one, if required
     'sub_event_text': None, 
+    
+    'object_icon_url': None, # automatically set if 'object_icon' is set in data_attributes
+    'sub_object_icon_url': None, # automatically set if 'sub_object_icon' is set in data_attributes
     # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
     # see notifications.NOTIFICATION_REASONS
     'notification_reason': 'default', 
@@ -200,13 +204,20 @@ NOTIFICATIONS_DEFAULTS = {
     'data_attributes': {
         'object_name': 'title', # Main title and label of the notification object
         'object_url': 'get_absolute_url', # URL of the object
+        'object_icon': 'get_icon', # icon for the object, also sets 'object_icon_url'
         'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
         'image_url': None, # image URL for the item. default if omitted is the event creator's user avatar
         'alert_image_url': None, # if given, prefers this image/icon for alerts
         'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
+        'sub_event_text': None, # property of a sub-divided item below the main one, see doc above
         'sub_event_meta': None, # property of a sub-divided item below the main one, see doc above
         'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
+        # TODO: in sub_object notifications, swap the object_name and sub_object_text!
+        # TODO: add sub object data_attribtues[sub_object_icon]
+        # TODO: new! 
+        #'sub_object_name': None, # property of a sub-divided item below the main one, see doc above
         'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
+        'sub_object_icon': None, # icon for the sub object, also sets 'object_icon_url'
         'like_button_url': 'get_absolute_like_url', # url for the like button
         'follow_button_url': 'get_absolute_follow_url', # url for the follow button
         'action_button_url': None, # url for the action button, if options['action_button_text'] is set. can also be hardcoded 'http*' url.
@@ -618,7 +629,8 @@ class NotificationsThread(Thread):
                     
                     'origin_name': self.group['name'],
                     'origin_url': self.group.get_absolute_url() + self.options.get('origin_url_suffix', ''),
-                    'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder-small.png')),
+                    'origin_icon_url': get_image_url_for_icon(self.group.get_icon()),
+                    'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or get_image_url_for_icon(self.group.get_icon())),
                     
                     'notification_body': None, # this is a body text that can be used for group description or similar
                     
@@ -864,6 +876,9 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'object_text': object_text,
             'image_url': resolve_attributes(obj, data_attributes['image_url']),
             'alert_image_url': resolve_attributes(obj, data_attributes['alert_image_url']),
+            'object_icon': resolve_attributes(obj, data_attributes['object_icon']),
+            'sub_object_icon': resolve_attributes(obj, data_attributes['sub_object_icon']),
+            
             'content_rows': content_rows,
             
             'sub_event_text': sub_event_text,
@@ -872,7 +887,22 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'sub_object_text': sub_object_text,
             
             'string_variables': string_variables,
+            
+            # TODO: new!
+            'action_user_name': escape(sender_name),
         }
+        # generate or get object icon url
+        if options['object_icon_url']:
+            data['object_icon_url'] = options['object_icon_url']
+        elif data['object_icon']:
+            data['object_icon_url'] = get_image_url_for_icon(data['object_icon'])
+        # generate or get sub object icon url
+        if options['sub_object_icon_url']:
+            data['sub_object_icon_url'] = options['sub_object_icon_url']
+        elif data['sub_object_icon']:
+            data['sub_object_icon_url'] = get_image_url_for_icon(data['sub_object_icon'])
+        
+        
         
         # clean some attributes
         if not data['object_name']:
