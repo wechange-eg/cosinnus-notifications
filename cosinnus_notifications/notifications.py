@@ -32,7 +32,8 @@ from cosinnus.utils.permissions import check_object_read_access,\
     check_user_portal_moderator
 from django.templatetags.static import static
 from django.utils.encoding import force_text
-from cosinnus.utils.group import get_cosinnus_group_model
+from cosinnus.utils.group import get_cosinnus_group_model,\
+    get_default_user_group_slugs
 from annoying.functions import get_object_or_None
 from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.contrib.auth.models import AnonymousUser
@@ -43,6 +44,7 @@ from cosinnus.utils.urls import BETTER_URL_RE
 from cosinnus_notifications.alerts import create_user_alert
 from cosinnus.utils.files import get_image_url_for_icon
 from copy import copy
+from django.template.defaultfilters import truncatewords_html
 
 
 
@@ -167,8 +169,6 @@ NOTIFICATIONS_DEFAULTS = {
     'is_html': False,
     # the snippet template for this notification's event (only used in digest emails, not instant ones)
     'snippet_template': 'cosinnus/html_mail/summary_item.html',
-    # CSS class of the snippet template that customizes this notification by its type. usually the cosinnus app's name
-    'snippet_type': 'news',
     # the HTML email's subject. use a gettext_lazy translatable string.
     # available variables: %(sender_name)s, %(team_name)s
     'subject_text': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML,
@@ -791,9 +791,13 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         # full escape and markup conversion
         object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
         sub_object_name = textfield(resolve_attributes(obj, data_attributes['sub_object_name']))
-        sub_object_text = textfield(resolve_attributes(obj, data_attributes['sub_object_text']))
+        # cut sub_object_text after n words and always only till first linebreak
+        sub_object_text = resolve_attributes(obj, data_attributes['sub_object_text'])
+        if sub_object_text:
+            sub_object_text = sub_object_text.split('\n')[0].strip()
+            sub_object_text = truncatewords_html(textfield(sub_object_text), 20)
         
-        # 1) TODO: cut sub_object_text after n words (only after linebreaks?
+        # 1) TODO: 
         # 2) TODO: i18n  
         
         # on full-page item displays (where the main object isn't a subtexted item, like a comment),
@@ -804,7 +808,6 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             content_rows = render_func()
             
         data = {
-            'type': options['snippet_type'],
             'event_text': event_text,
             'snippet_template': options['snippet_template'],
             
@@ -832,11 +835,19 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         # group specific attributes:
         if getattr(notification_event, 'group', None) is not None:
             data.update({
-                'origin_name': notification_event.group['name'],
                 'origin_url': notification_event.group.get_absolute_url() + options.get('origin_url_suffix', ''),
-                'origin_icon_url': get_image_url_for_icon(notification_event.group.get_icon()),
-                'origin_image_url': portal_url + (notification_event.group.get_avatar_thumbnail_url() or get_image_url_for_icon(notification_event.group.get_icon())),
             })
+            # as origin, show the portal if the item is from a Forum group, otherwise show the group
+            if notification_event.group.slug in get_default_user_group_slugs():
+                data.update({    
+                    'origin_name': CosinnusPortal.get_current().name,
+                })
+            else:
+                data.update({
+                    'origin_name': notification_event.group['name'],
+                    'origin_icon_url': get_image_url_for_icon(notification_event.group.get_icon()),
+                    'origin_image_url': portal_url + (notification_event.group.get_avatar_thumbnail_url() or get_image_url_for_icon(notification_event.group.get_icon())),
+                })
         
         # generate or get object icon url
         if options['object_icon_url']:
@@ -887,15 +898,15 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                     'action_button_%d_text' % counter: _('Follow'),
                     'action_button_%d_url' % counter: resolve_attributes(obj, options['data_attributes']['follow_button_url']),
                 })
-        # if no other action buttons exist, we add a default 
-        # "View on <portal>" action button
-        else:
+        # if no other main action buttons, and just one follow OR like button exist, we add a default 
+        # "View on <portal>" action button (as action_button 2, that's fine even is button 1 isn't set)
+        if not options.get('action_button_text', None) and not data.get('action_button_2_text', None):
             data.update({
                 'show_action_buttons': True,
-                'action_button_1_text': _('View on %(portal_name)s') % {
+                'action_button_2_text': _('View on %(portal_name)s') % {
                     'portal_name': CosinnusPortal.get_current().name
                 },
-                'action_button_1_url': data['origin_url'],
+                'action_button_2_url': data['origin_url'],
             }) 
             
         # check for an action button url being specifiied
