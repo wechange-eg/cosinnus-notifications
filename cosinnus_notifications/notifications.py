@@ -627,8 +627,7 @@ class NotificationsThread(Thread):
                     'addressee': mark_safe(strip_tags(full_name(receiver))), 
                     'prefs_url': mark_safe(preference_url),
                     'topic': topic,
-                    'notification_body': None, # this is a body text that can be used for group description or similar
-                    
+                    'notification_raw_html': None, # this is raw-html pastable section
                     'notification_item_html': mark_safe(notification_item_html),
                     'notification_reason': reason,
                 }
