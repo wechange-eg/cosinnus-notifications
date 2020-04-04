@@ -624,7 +624,7 @@ class NotificationsThread(Thread):
                     'portal_image_url': portal_image_url,
                     'portal_name': portal_name,
                     'receiver': receiver, 
-                    'addressee': mark_safe(strip_tags(full_name(receiver))), 
+                    'addressee': mark_safe(strip_tags(receiver.first_name)), 
                     'prefs_url': mark_safe(preference_url),
                     'topic': topic,
                     'notification_raw_html': None, # this is raw-html pastable section

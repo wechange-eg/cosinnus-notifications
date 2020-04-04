@@ -269,7 +269,7 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         'portal_image_url': portal_image_url,
         'portal_name': portal_name,
         'receiver': receiver, 
-        'addressee': mark_safe(strip_tags(full_name(receiver))), 
+        'addressee': mark_safe(strip_tags(receiver.first_name)), 
         'topic': topic,
         'digest_body_html': mark_safe(body_html),
         'prefs_url': mark_safe(preference_url),
