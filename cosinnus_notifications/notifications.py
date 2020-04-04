@@ -615,7 +615,7 @@ class NotificationsThread(Thread):
                 
                 topic = None
                 if self.options.get('topic'):
-                    topic = self.options.get('topic') % data.get('string_variables')
+                    topic = mark_safe(self.options.get('topic') % data.get('string_variables'))
                 context = {
                     'site': site,
                     'site_name': site.name,

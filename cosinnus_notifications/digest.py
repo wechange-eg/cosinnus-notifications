@@ -259,7 +259,7 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
     site = portal.site
     domain = portal.get_domain()
     preference_url = '%s%s' % (domain, reverse('cosinnus:notifications'))
-    portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+    portal_image_url = '%s%s' % (domain, static('img/email-header.png'))
     
     context = {
         'site': site,
