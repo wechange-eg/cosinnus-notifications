@@ -8,103 +8,97 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-23 11:49+0200\n"
-"PO-Revision-Date: 2018-09-26 12:44+0200\n"
+"PO-Revision-Date: 2019-11-01 04:18+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: fr\n"
+"Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.1.1\n"
+"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
+"X-Generator: Poedit 2.0.7\n"
 
 #, fuzzy
 #| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you created this content."
-msgstr "Tu reçois cette notification car tu es admin de ce portail."
+msgstr "Primiți această notificare deoarece sunteți administratorul acestui portal."
 
 #, fuzzy
 #| msgid "You are getting this notification because you are an administrator of this project or group."
 msgid "You are seeing this alert because you are following the item's project or group."
-msgstr "Tu reçois cette notification car tu es admin de ce projet ou groupe."
+msgstr "Primiți această notificare deoarece sunteți administrator al acestui proiect sau grup."
 
 #, fuzzy
 #| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you are following this item."
-msgstr "Tu reçois cette notification car tu es admin de ce portail."
+msgstr "Primiți această notificare deoarece sunteți administratorul acestui portal."
 
 msgid "Notifications"
-msgstr "Notifications"
+msgstr "Notificare"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr "notification"
+msgstr "notificări"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr "Ton résumé quotidien pour %(portal_name)s"
+msgstr "Sistematizarea ta zilnică pentru %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr "Voici ce qui s’est passé au cours de la dernière journée !"
+msgstr "Aceasta s-a întâmplat în ultima zi!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr "Ton résumé hebdomadaire pour %(portal_name)s"
+msgstr "Sistematiza săptămânal pentru %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr "Voici ce qui s’est passé au cours de la semaine dernière !"
+msgstr "Aceasta s-a întâmplat în ultima săptămână!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr "Jamais"
+msgstr "Niciodată"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr "Immédiatement"
+msgstr "Imediat"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr "Quotidienne"
+msgstr "Zilnic"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr "Hebdomadaire"
+msgstr "Săptămânal"
 
 msgid "Notification Preference for User"
-msgstr "Préférences de notification pour l'utilisateur"
+msgstr "Preferința notificării pentru utilizator"
 
 msgid "Notification ID"
-msgstr "ID de notification"
+msgstr "ID-uri de notificare"
 
 msgid "Notification Preference"
-msgstr "Préférence de notification"
+msgstr "Preferința notificării"
 
 msgid "Notification Preferences"
-msgstr "Préférences de notification"
+msgstr "Preferințe de notificare"
 
 msgid "Portal"
-msgstr ""
+msgstr "Portal"
 
-#, fuzzy
-#| msgid "Notification ID"
 msgid "Multi Notification ID"
-msgstr "ID de notification"
+msgstr "ID-uri de notificare multi"
 
-#, fuzzy
-#| msgid "Notification Preference"
 msgid "Multi Notification Preference"
-msgstr "Préférence de notification"
+msgstr "Preferință de notificare multi"
 
-#, fuzzy
-#| msgid "Notification Preferences"
 msgid "Multi Notification Preferences"
-msgstr "Préférences de notification"
+msgstr "Preferințe de Notificare  multiple"
 
 msgid "User who caused this notification event"
-msgstr "Utilisateur qui a causé cet événement de notification"
+msgstr "Utilizator care a provocat acest eveniment de notificare"
 
 msgid "Audience"
-msgstr "Audience"
+msgstr "Audiență"
 
 msgid "Owner of the alert"
 msgstr ""
@@ -115,7 +109,7 @@ msgstr ""
 #, fuzzy
 #| msgid "User who caused this notification event"
 msgid "Last user who caused this notification event"
-msgstr "Utilisateur qui a causé cet événement de notification"
+msgstr "Utilizator care a provocat acest eveniment de notificare"
 
 msgid "Alert State"
 msgstr ""
@@ -124,110 +118,108 @@ msgid "You are following this content or its Project or Group"
 msgstr ""
 
 msgid "All notifications"
-msgstr "Toutes les notifications"
+msgstr "Toate notificările"
 
 msgid "No notifications"
-msgstr "Pas de notifications"
+msgstr "Nici o notificare"
 
-#, fuzzy
-#| msgid "I wish to receive notification emails"
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr "Je souhaite recevoir des e-mails de notification"
+msgstr "Pentru conținutul pe care îl urmăresc, doresc să primesc e-mailuri de notificare"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr "Tu reçois cette notification car tu t'es abonné à ce type d'événement dans ton projet ou groupe."
+msgstr "Primiți această notificare deoarece sunteți abonați la aceste tipuri de evenimente în proiect sau grup."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr "Tu reçois cette notification car tu es admin de ce projet ou groupe."
+msgstr "Primiți această notificare deoarece sunteți administrator al acestui proiect sau grup."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr "Tu reçois cette notification car tu es admin de ce portail."
+msgstr "Primiți această notificare deoarece sunteți administratorul acestui portal."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr "Tu reçois cet e-mail car tu t'es abonné à une notification quotidienne ou plus."
+msgstr "Primiți acest e-mail deoarece sunteți abonat la una sau mai multe notificări zilnice."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr "Tu reçois cet e-mail car tu t'es abonné à une notification hebdomadaire ou plus."
+msgstr "Primiți acest e-mail deoarece sunteți abonat la o altă notificare săptămânală."
 
 msgid "New item"
-msgstr "Nouvel item"
+msgstr "Element nou"
 
 msgid "Like"
-msgstr ""
+msgstr "Precum"
 
 msgid "Follow"
-msgstr ""
+msgstr "Urmează"
 
 #, fuzzy, python-format
 #| msgid "Your daily digest for %(portal_name)s"
 msgid "View on %(portal_name)s"
-msgstr "Ton résumé quotidien pour %(portal_name)s"
+msgstr "Sistematizarea ta zilnică pentru %(portal_name)s"
 
 msgid "Untitled"
-msgstr "Sans titre"
+msgstr "Fără titlu"
 
 msgid "Your Profile"
-msgstr "Ton profil"
+msgstr "Profilul Tău"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr "Sélectionne les notifications que tu souhaites recevoir pour chaque groupe ou projet dans lequel tu es impliqué."
+msgstr "Selectați ce notificare doriți să primiți pentru fiecare grup sau proiect în care sunteți implicat."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr "Ces notifications seront envoyée à l'adresse e-mail que tu as configurée :"
+msgstr "Aceste notificări vor fi trimise la adresa Dvs. de e-mail configurată:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr "Tu peux choisir de recevoir des notifications immédiatement ou recevoir un résumé quotidien (ou hebdomadaire)."
+msgstr "Puteți alege să primiți o notificare imediat  sau puteți primi o notă zilnică (sau săptămânal) pe e-mail."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr "Le résumé reprend toutes les notifications des groupes et projets avec le paramètre \"quotidien\" (ou \"hebdomadaire\"). Tu recevras un seul e-mail par jour (ou semaine) contenant toutes les choses intéressantes qui se sont passées."
+msgstr "Digerarea va adăuga toate notificările cu setarea ”Zilnic”(sau săptămânal”)  din toate grupurile și proiectele. Deci veți primi doar un singur e-mail pe zi (sau săptămânal) care conține tot ceea ce este interesant."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr "Les notifications que tu souhaites recevoir \"immédiatement\" te seront envoyées dès qu'elles arrivent, avec un e-mail par notification."
+msgstr "Notificarea pe care o setați ”Imediat” va fi trimisă curând după ce se vor întâmpla ,cu un e-mail de notificare."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr "N'oublie pas d'enregistrer tes paramètres quand tu as fini de les modifier !"
+msgstr "Nu uitați să vă salvați setările după ce ați terminat de editat!"
 
 msgid "more"
-msgstr "plus"
+msgstr "mai mult"
 
 msgid "I wish to receive notification emails"
-msgstr "Je souhaite recevoir des e-mails de notification"
+msgstr "Doresc să primesc e-mailuri de notificare"
 
 msgid "Moderator Status (Portal-Admins only)"
-msgstr "Statut du modérateur (Portal-Admins only)"
+msgstr "Moderator Stare (Portal-numai Administratori)"
 
 msgid "I wish to be a Moderator for this portal"
-msgstr "Je souhaite être modérateur pour ce portail"
+msgstr "Doresc să fiu Moderator pentru acest portal"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
-msgstr "En tant que modérateur, vous recevrez une notification instantanée chaque fois qu'un contenu visible publiquement est publié sur ce portail. En tant qu'administrateur du portail, vous pouvez également supprimer le contenu s'il est offensant ou critique. Pour le supprimer, visitez la page de contenu sur le site Web lorsque vous êtes connecté à ce compte."
+msgstr "Ca Moderator, veți primi o notificare instantanee ori de câte ori ORICE conținut vizibil public este publicat pe acest portal. Deoarece sunteți administrator de portal, puteți șterge conținutul, de asemenea, dacă acesta este ofensiv sau critic. Pentru a o șterge, vizitați pagina de conținut de pe site-ul web în timp ce vă conectați la acest cont."
 
 msgid "Receive notification emails in this language"
-msgstr "Recevoir les e-mails de notification dans ce langage"
+msgstr "Primiți e-mailuri de notificare în această limbă"
 
 msgid "Immediately"
-msgstr "Immédiatement"
+msgstr "Imediat"
 
 msgid "Daily"
-msgstr "Quotidien"
+msgstr "Zilnic"
 
 msgid "Weekly"
-msgstr "Hebdomadaire"
+msgstr "Săptămânal"
 
 msgid "Custom"
-msgstr "Personnalisation"
+msgstr "Personalizat"
 
 msgid "Reset to default"
-msgstr "Réinitialiser aux valeurs par défaut"
+msgstr "Resetare la valori implicite"
 
 msgid "Save"
-msgstr "Enregistrer"
+msgstr "Salvați"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr "Cela réinitialisera toutes tes préférences de notifications à leur valeur par défaut. Souhaites-tu vraiment faire ça ?"
+msgstr "Aceasta va reseta toate preferințele de notificare la setările lor implicite. Sunteți sigur că doriți să faceți asta?"
 
 msgid "Your notification preferences were updated successfully."
-msgstr "Tes préférences de notification ont été mises à jour."
+msgstr "Preferințele dvs. de notificare au fost actualizate cu succes."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr "Tes préférences de notifications ont été réinitialisées aux valeurs par défaut !"
+msgstr "Preferințele dvs. de notificare au fost resetate la valoarea implicită!"

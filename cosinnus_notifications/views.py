@@ -34,6 +34,7 @@ from cosinnus.utils.functions import is_number
 from cosinnus.utils.permissions import check_user_portal_moderator, \
     check_user_portal_admin
 from cosinnus.views.user_dashboard import BasePagedOffsetWidgetView
+from cosinnus.utils.user import get_unread_message_count_for_user
 
 
 class NotificationPreferenceView(ListView):
@@ -291,9 +292,15 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
             'newest_timestamp': self.newest_timestamp,
             'unseen_count': self.unseen_count,
         })
+        # if the query was a poll:
         if self.newer_than_timestamp:
             data.update({
                 'polled_timestamp': self.newer_than_timestamp,
+            })
+        # if the query was not a load-more request:
+        if not self.offset_timestamp:
+            data.update({
+                'unread_messages_count': get_unread_message_count_for_user(self.request.user),
             })
         return data
     

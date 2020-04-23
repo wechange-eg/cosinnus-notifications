@@ -3,96 +3,102 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-03 17:47+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2020-04-23 11:49+0200\n"
+"PO-Revision-Date: 2020-04-22 12:36+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
 
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you created this content."
-msgstr ""
+msgstr "Recibirás esta notificación porque eres administrador de este Portal."
 
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this project or group."
 msgid "You are seeing this alert because you are following the item's project or group."
-msgstr ""
+msgstr "Recibirás esta notificación porque eres administrador de este proyecto o grupo."
 
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you are following this item."
-msgstr ""
+msgstr "Recibirás esta notificación porque eres administrador de este Portal."
 
 msgid "Notifications"
-msgstr ""
+msgstr "Notificaciones"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr ""
+msgstr "notificaciones"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "Tu resumen diario para %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "¡Esto es lo que sucedió durante el último día!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "Tu resumen semanal para %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "¡Esto es lo que sucedió durante la última semana!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Nunca"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Immediatamente"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Diario"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Semanal"
 
 msgid "Notification Preference for User"
-msgstr ""
+msgstr "Preferencias de notificación para usario"
 
 msgid "Notification ID"
-msgstr ""
+msgstr "Notificación ID"
 
 msgid "Notification Preference"
-msgstr ""
+msgstr "Preferencia de notificación"
 
 msgid "Notification Preferences"
-msgstr ""
+msgstr "Preferencias de notificación"
 
 msgid "Portal"
-msgstr ""
+msgstr "Portal"
 
 msgid "Multi Notification ID"
-msgstr ""
+msgstr "Notificación Multi ID"
 
 msgid "Multi Notification Preference"
-msgstr ""
+msgstr "Preferencia de notificación multi"
 
 msgid "Multi Notification Preferences"
-msgstr ""
+msgstr "Preferencias de notificación multi"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Usuario que causó este evento de notificación"
 
 msgid "Audience"
-msgstr ""
+msgstr "Audencia"
 
 msgid "Owner of the alert"
 msgstr ""
@@ -100,8 +106,10 @@ msgstr ""
 msgid "Alert Reason key"
 msgstr ""
 
+#, fuzzy
+#| msgid "User who caused this notification event"
 msgid "Last user who caused this notification event"
-msgstr ""
+msgstr "Usuario que causó este evento de notificación"
 
 msgid "Alert State"
 msgstr ""
@@ -110,107 +118,107 @@ msgid "You are following this content or its Project or Group"
 msgstr ""
 
 msgid "All notifications"
-msgstr ""
+msgstr "Todas las notificaciones"
 
 msgid "No notifications"
-msgstr ""
+msgstr "Ningunas notificaciones"
 
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr ""
+msgstr "Para el contenido que estoy siguiendo, deseo recibir correos electrónicos de notificación"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "Recibirás esta notificación porque estás suscrito a este tipo de eventos en tu proyecto o grupo."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "Recibirás esta notificación porque eres administrador de este proyecto o grupo."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "Recibirás esta notificación porque eres administrador de este Portal."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "Recibirás este correo electrónico porque estás suscrito a una o más notificaciones diarias."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "Recibirás este correo electrónico porque estás suscrito a una o más notificaciones semanales."
 
 msgid "New item"
-msgstr ""
+msgstr "Item nuevo"
 
 msgid "Like"
-msgstr ""
+msgstr "Me gusta"
 
 msgid "Follow"
-msgstr ""
+msgstr "Seguir"
 
 #, python-format
 msgid "View on %(portal_name)s"
 msgstr ""
 
 msgid "Untitled"
-msgstr ""
+msgstr "Sin título"
 
 msgid "Your Profile"
-msgstr ""
+msgstr "Tu perfil"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr ""
+msgstr "Selecciona las notificaciones que deseas recibir para cada grupo o proyecto en el que participas."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr ""
+msgstr "Estas notificaciones se enviarán a tu dirección de correo electrónico configurada:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "Puedes elegir para recibir notificaciones tan pronto como sucedan, o puedes recibir un resumen diario (o semanal) por correo electrónico ."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "El resumen agregará todas las notificaciones con la configuración \"Diaria\" (o \"Semanal\") de todos los grupos y proyectos. Por lo tanto, recibirás un solo correo electrónico por día (o semana) que contiene todo lo interesante que sucedió."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "Las notificaciones que establezcas en \"Inmediatamente\" se le enviarán por correo electrónico tan pronto como ocurran, con un correo electrónico por notificación."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "¡No olvides guardar tu configuración una vez que hayas terminado de editarla!"
 
 msgid "more"
-msgstr ""
+msgstr "más"
 
 msgid "I wish to receive notification emails"
-msgstr ""
+msgstr "Deseo recibir correos electrónicos de notificación"
 
 msgid "Moderator Status (Portal-Admins only)"
-msgstr ""
+msgstr "Estado del moderador (solo administradores de portal)"
 
 msgid "I wish to be a Moderator for this portal"
-msgstr ""
+msgstr "Deseo ser moderador de este portal"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
-msgstr ""
+msgstr "Como moderador, recibirás una notificación instantánea siempre cuando CUALQUIER contenido visible al público se publique en este portal. Como eres administrador del portal, también puedes eliminar el contenido si es ofensivo o crítico. Para eliminarlo, visita la página de contenido en el sitio web mientras estás conectado a esta cuenta."
 
 msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Recibir correos electrónicos de notificaciones en este lenguaje"
 
 msgid "Immediately"
-msgstr ""
+msgstr "Immediatamente"
 
 msgid "Daily"
-msgstr ""
+msgstr "Diario"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Semanal"
 
 msgid "Custom"
-msgstr ""
+msgstr "Personalizado"
 
 msgid "Reset to default"
-msgstr ""
+msgstr "Restablecer a los predeterminados"
 
 msgid "Save"
-msgstr ""
+msgstr "Guardar"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr ""
+msgstr "Esto restablecerá todas tus preferencias de notificación a su configuración predeterminada. ¿Estás seguro de que deseas hacer eso?"
 
 msgid "Your notification preferences were updated successfully."
-msgstr ""
+msgstr "Tus preferencias de notificación se actualizaron correctamente."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr ""
+msgstr "¡Tus preferencias de notificaciones se restablecieron a las predeterminadas!"
