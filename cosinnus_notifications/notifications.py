@@ -39,8 +39,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 import six
 from _collections import defaultdict
-from cosinnus.utils.urls import BETTER_URL_RE
 from cosinnus_notifications.alerts import create_user_alert
+from cosinnus.utils.html import replace_non_portal_urls
 
 
 
@@ -901,11 +901,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         item_html = render_to_string(options['snippet_template'], context=data)
         
         # replace all external URLs with the URL to the item itself to prevent possible spam
-        for m in reversed([it for it in BETTER_URL_RE.finditer(item_html)]):
-            matched_url = m.group()
-            if not matched_url.startswith(portal_url):
-                item_html = item_html[:m.start()] + object_url + item_html[m.end():]
-        
+        item_html = replace_non_portal_urls(item_html, object_url, portal_url=portal_url)
         
         if return_data:
             return item_html, data
