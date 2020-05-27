@@ -3,213 +3,215 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-27 14:01+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2020-05-05 06:15+0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: az\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
 
 msgid "You are seeing this alert because you created this content."
-msgstr ""
+msgstr "Bu məzmunu yaratdığınız üçün bu xəbərdarlığı görürsünüz."
 
 msgid "You are seeing this alert because you are following the item's project or group."
-msgstr ""
+msgstr "Elementin layihəsini və ya qrupunu izlədiyiniz üçün bu xəbərdarlığı görürsünüz."
 
 msgid "You are seeing this alert because you are following this item."
-msgstr ""
+msgstr "You are seeing this alert because you are following this item."
 
 msgid "Notifications"
-msgstr ""
+msgstr "Bildirişlər"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr ""
+msgstr "bildirişlər"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "%(portal_name)s portalı üçün gündəlik xülasə"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "Son gün ərzində nələr oldu!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "%(portal_name)s üçün həftəlik xülasə"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "Son həftə ərzində nələr oldu!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Heç vaxt"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Dərhal"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Gündəlik"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Həftəlik"
 
 msgid "Notification Preference for User"
-msgstr ""
+msgstr "İstifadəçi üçün bildiriş seçimi"
 
 msgid "Notification ID"
-msgstr ""
+msgstr "Bildiriş Kimliyi"
 
 msgid "Notification Preference"
-msgstr ""
+msgstr "Bildiriş Üstünlüyü"
 
 msgid "Notification Preferences"
-msgstr ""
+msgstr "Bildiriş Üstünlükləri"
 
 msgid "Portal"
-msgstr ""
+msgstr "Portal"
 
 msgid "Multi Notification ID"
-msgstr ""
+msgstr "Multi Bildiriş Kimliyi"
 
 msgid "Multi Notification Preference"
-msgstr ""
+msgstr "Multi Bildiriş Üstünlüyü"
 
 msgid "Multi Notification Preferences"
-msgstr ""
+msgstr "Multi Bildiriş Üstünlükləri"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Bu bildiriş hadisəsinə səbəb olan istifadəçi"
 
 msgid "Audience"
-msgstr ""
+msgstr "Tamaşaçılar"
 
 msgid "Owner of the alert"
-msgstr ""
+msgstr "Xəbərdarlıq sahibi"
 
 msgid "Alert Reason key"
-msgstr ""
+msgstr "Xəbəradq səbəb açarı"
 
 msgid "Last user who caused this notification event"
-msgstr ""
+msgstr "Bu bildiriş tədbirinə səbəb olan son istifadəçi"
 
 msgid "Alert State"
-msgstr ""
+msgstr "Xəbərdarlıq Dövləti"
 
 msgid "You are following this content or its Project or Group"
-msgstr ""
+msgstr "Bu məzmunu və ya onun Layihəsini və ya Qrupunu izləyirsiniz"
 
 msgid "All notifications"
-msgstr ""
+msgstr "Bütün bildirişlər"
 
 msgid "No notifications"
-msgstr ""
+msgstr "Bildiriş yoxdur"
 
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr ""
+msgstr "İzlədiyim məzmun üçün bildiriş e-poçtlarını almaq istərdim"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "Layihənizdə və ya qrupunuzda bu cür tədbirlərə abunə olduğunuz üçün bu bildiriş alırsınız."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "Bu layihə və ya qrupun admini olduğunuz üçün bu bildiriş alırsınız."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "Bu portalın admini olduğunuz üçün bu bildiriş alırsınız."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "Gündəlik bir və ya daha çox bildirişə abunə olduğunuz üçün bu e-poçtu alırsınız."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "Həftəlik bir və ya daha çox bildirişə abunə olduğunuz üçün bu e-poçtu alırsınız."
 
 msgid "New item"
-msgstr ""
+msgstr "Yeni maddə"
 
 msgid "Like"
-msgstr ""
+msgstr "Bəyənin"
 
 msgid "Follow"
-msgstr ""
+msgstr "İzləyin"
 
-#, python-format
+#, fuzzy, python-format
+#| msgid "Your daily digest for %(portal_name)s"
 msgid "View on %(portal_name)s"
-msgstr ""
+msgstr "%(portal_name)s portalı üçün gündəlik xülasə"
 
 msgid "Untitled"
-msgstr ""
+msgstr "Başlıqsız"
 
 msgid "Your Profile"
-msgstr ""
+msgstr "Sizin profiliniz"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr ""
+msgstr "İştirak etdiyiniz hər qrup və ya layihə üçün hansı bildirişləri almaq istədiyinizi seçin."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr ""
+msgstr "Bu bildirişlər konfiqurasiya edilmiş e-poçt ünvanınıza göndəriləcək:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "Bildirişləri baş verən kimi qəbul etməyi və ya gündəlik (və ya həftəlik) bir e-poçt həzmini ala bilərsiniz."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "Xülasə bütün bildirişləri bütün qruplardan və layihələrdən \"Gündəlik\" (və ya \"Həftəlik\") ilə birləşdirəcəkdir. Beləliklə, hər gün xoşbəxt olan hər şeyi ehtiva edən yalnız bir e-poçt alacaqsınız."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "\"Dərhal\" qoyduğunuz bildirişlər, baş verən kimi sizə bildiriş başına bir e-poçtla göndəriləcəkdir."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "Parametrlərinizi düzəltdikdən sonra yadda saxlamağı unutmayın!"
 
 msgid "more"
-msgstr ""
+msgstr "daha çox"
 
 msgid "I wish to receive notification emails"
-msgstr ""
+msgstr "Bildiriş e-poçtlarını almaq istərdim"
 
 msgid "Moderator Status (Portal-Admins only)"
-msgstr ""
+msgstr "Moderator Vəziyyəti (Yalnız Portal-Adminləri)"
 
 msgid "I wish to be a Moderator for this portal"
-msgstr ""
+msgstr "Bu portal üçün Moderator olmaq istəyirəm"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
-msgstr ""
+msgstr "Moderator olaraq, HƏR ŞEY açıq görünən məzmun bu portalda yerləşdirildikdə dərhal bildiriş alacaqsınız. Bir portal inzibatçısı olduğunuz üçün təhqiredici və ya tənqidi olduqda məzmunu da silə bilərsiniz. Silmək üçün bu hesaba daxil olarkən veb saytdakı məzmun səhifəsinə daxil olun."
 
 msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Bu dildə bildiriş e-poçtları alın"
 
 msgid "Immediately"
-msgstr ""
+msgstr "Dərhal"
 
 msgid "Daily"
-msgstr ""
+msgstr "Gündəlik"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Həftəlik"
 
 msgid "Custom"
-msgstr "Custom settings"
+msgstr "Xüsusi"
 
 msgid "Reset to default"
-msgstr ""
+msgstr "Defolt olaraq yenidən qurun"
 
 msgid "Save"
-msgstr ""
+msgstr "Yaddaşda saxlayın"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr ""
+msgstr "Bu, bütün bildiriş seçimlərinizi standart parametrlərinə yenidən quracaqdır. Bunu etmək istədiyinizə əminsinizmi?"
 
 msgid "Your notification preferences were updated successfully."
-msgstr ""
+msgstr "Bildiriş seçimləriniz uğurla yeniləndi."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr ""
+msgstr "Bildiriş seçimləriniz defolt olaraq yenidən quruldu!"
