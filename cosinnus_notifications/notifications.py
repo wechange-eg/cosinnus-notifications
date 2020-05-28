@@ -209,7 +209,7 @@ NOTIFICATIONS_DEFAULTS = {
         'object_url': 'get_absolute_url', # URL of the object
         'object_icon': 'get_icon', # icon for the object, also sets 'object_icon_url'
         'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
-        'image_url': None, # image URL for the item. default if omitted is the event creator's user avatar
+        'image_url': None, # image URL for the item. default if omitted is None. the user creator's avatar can be found under user_image_url
         'alert_image_url': None, # if given, prefers this image/icon for alerts
         'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
         
@@ -219,6 +219,7 @@ NOTIFICATIONS_DEFAULTS = {
         # TODO: add `display_object_name: False` if the object name should not appear (usually for comments)
         'sub_object_name': None, # the name of an additional reference item above the main one
         'sub_object_text': None, # the text of an additional reference item above the main one
+        'sub_object_url': None, # url of the reference item. if none is given, main url is used
         'sub_object_icon': None, # icon for the sub object, also sets 'sub_object_icon_url'
         'like_button_url': 'get_absolute_like_url', # url for the like button
         'follow_button_url': 'get_absolute_follow_url', # url for the follow button
@@ -795,6 +796,9 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         if sub_object_text:
             sub_object_text = sub_object_text.split('\n')[0].strip()
             sub_object_text = truncatewords_html(textfield(sub_object_text), 20)
+        sub_object_url = resolve_attributes(obj, data_attributes['sub_object_url'])
+        if not sub_object_url:
+            sub_object_url = object_url
         
         # 1) TODO: 
         # 2) TODO: i18n  
@@ -805,16 +809,24 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         render_func = getattr(obj, "render_additional_notification_content_rows", None)
         if callable(render_func):
             content_rows = render_func()
+        
+        event_time = None
+        if not event_time and getattr(notification_event, 'date', None):
+            event_time = notification_event.date
+        elif not event_time and getattr(obj, 'created', None):
+            event_time = obj.created
             
         data = {
             'event_text': event_text,
             'snippet_template': options['snippet_template'],
             
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
+            'event_time': event_time,
             'object_name': object_name,
             'object_url': object_url,
             'object_text': object_text,
-            'image_url': resolve_attributes(obj, data_attributes['image_url']),
+            'user_image_url': portal_url + (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe-small.png')),
+            'image_url': resolve_attributes(obj, data_attributes['image_url']), # TODO: attached image is unused in templates right now
             'alert_image_url': resolve_attributes(obj, data_attributes['alert_image_url']),
             'object_icon': resolve_attributes(obj, data_attributes['object_icon']),
             'sub_object_icon': resolve_attributes(obj, data_attributes['sub_object_icon']),
@@ -823,6 +835,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             
             'sub_object_name': sub_object_name,
             'sub_object_text': sub_object_text,
+            'sub_object_url': sub_object_url,
             
             'display_object_name': options['display_object_name'],
             
@@ -847,6 +860,10 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                     'origin_icon_url': get_image_url_for_icon(notification_event.group.get_icon()),
                     'origin_image_url': portal_url + (notification_event.group.get_avatar_thumbnail_url() or get_image_url_for_icon(notification_event.group.get_icon())),
                 })
+                
+        # add user profile url
+        if notification_event.user and notification_event.user.cosinnus_profile:
+            data['action_user_url'] = notification_event.user.cosinnus_profile.get_absolute_url()
         
         # generate or get object icon url
         if options['object_icon_url']:
@@ -936,10 +953,6 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         if only_compile_alert_data:
             return data
             
-        # default for image_url is the notifcation event's causer
-        if not data['image_url']:
-            data['image_url'] = portal_url + \
-                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe-small.png'))
         # ensure URLs are absolute
         for url_field in ['image_url', 'object_url', 'origin_icon_url', 'object_icon_url', 'sub_object_icon_url']:
             url = data.get(url_field, None)

@@ -201,7 +201,7 @@ def send_digest_for_current_portal(digest_setting):
                     group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
                     group_template_context = {
                         'group_body_html': mark_safe(group_body_html),
-                        'image_url': CosinnusPortal.get_current().get_domain() + group.get_avatar_thumbnail_url(),
+                        'group_image_url': CosinnusPortal.get_current().get_domain() + group.get_avatar_thumbnail_url(),
                         'group_url': group.get_absolute_url(),
                         'group_name': group['name'],
                     }
