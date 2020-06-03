@@ -7,16 +7,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-25 12:12+0200\n"
+"POT-Creation-Date: 2020-05-27 14:01+0200\n"
 "PO-Revision-Date: 2020-04-06 09:22+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: kk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 2.3\n"
+
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this portal."
+msgid "You are seeing this alert because you created this content."
+msgstr "Сіз осы хабарландыруды осы порталдың әкімшісі болғандықтан аласыз."
+
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this project or group."
+msgid "You are seeing this alert because you are following the item's project or group."
+msgstr "Сіз осы жобаны немесе топтың әкімшісісіз болғандықтан бұл ескертуді аласыз."
+
+#, fuzzy
+#| msgid "You are getting this notification because you are an administrator of this portal."
+msgid "You are seeing this alert because you are following this item."
+msgstr "Сіз осы хабарландыруды осы порталдың әкімшісі болғандықтан аласыз."
 
 msgid "Notifications"
 msgstr "Хабарламалар"
@@ -85,6 +100,23 @@ msgstr "Бұл хабарландыруға қоңырау шалған пайд
 msgid "Audience"
 msgstr "Көрермендер"
 
+msgid "Owner of the alert"
+msgstr ""
+
+msgid "Alert Reason key"
+msgstr ""
+
+#, fuzzy
+#| msgid "User who caused this notification event"
+msgid "Last user who caused this notification event"
+msgstr "Бұл хабарландыруға қоңырау шалған пайдаланушы"
+
+msgid "Alert State"
+msgstr ""
+
+msgid "You are following this content or its Project or Group"
+msgstr ""
+
 msgid "All notifications"
 msgstr "Барлық хабарландырулар"
 
@@ -117,6 +149,11 @@ msgstr "Маған ұнайды"
 
 msgid "Follow"
 msgstr "Бақылау"
+
+#, fuzzy, python-format
+#| msgid "Your daily digest for %(portal_name)s"
+msgid "View on %(portal_name)s"
+msgstr "Сіздің %(portal_name)s үшін күнделікті дайджестіңіз"
 
 msgid "Untitled"
 msgstr "Атаусыз"

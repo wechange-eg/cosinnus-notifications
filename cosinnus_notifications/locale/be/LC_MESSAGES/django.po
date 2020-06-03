@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-22 13:06+0200\n"
+"POT-Creation-Date: 2020-05-27 14:01+0200\n"
 "PO-Revision-Date: 2019-05-07 13:19+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -149,6 +149,11 @@ msgstr "Упадабаць"
 
 msgid "Follow"
 msgstr "Сачыць"
+
+#, fuzzy, python-format
+#| msgid "Your daily digest for %(portal_name)s"
+msgid "View on %(portal_name)s"
+msgstr "Ваша штодзённая зводка навін для %(portal_name)s"
 
 msgid "Untitled"
 msgstr "Без назвы"

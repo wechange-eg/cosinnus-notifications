@@ -201,8 +201,7 @@ def send_digest_for_current_portal(digest_setting):
                     group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
                     group_template_context = {
                         'group_body_html': mark_safe(group_body_html),
-                        'image_url': CosinnusPortal.get_current().get_domain() + \
-                            (group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder.png')),
+                        'group_image_url': CosinnusPortal.get_current().get_domain() + group.get_avatar_thumbnail_url(),
                         'group_url': group.get_absolute_url(),
                         'group_name': group['name'],
                     }
@@ -260,7 +259,7 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
     site = portal.site
     domain = portal.get_domain()
     preference_url = '%s%s' % (domain, reverse('cosinnus:notifications'))
-    portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+    portal_image_url = '%s%s' % (domain, static('img/email-header.png'))
     
     context = {
         'site': site,
@@ -270,7 +269,7 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         'portal_image_url': portal_image_url,
         'portal_name': portal_name,
         'receiver': receiver, 
-        'addressee': mark_safe(strip_tags(full_name(receiver))), 
+        'addressee': mark_safe(strip_tags(receiver.first_name)), 
         'topic': topic,
         'digest_body_html': mark_safe(body_html),
         'prefs_url': mark_safe(preference_url),

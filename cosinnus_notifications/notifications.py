@@ -32,7 +32,8 @@ from cosinnus.utils.permissions import check_object_read_access,\
     check_user_portal_moderator
 from django.templatetags.static import static
 from django.utils.encoding import force_text
-from cosinnus.utils.group import get_cosinnus_group_model
+from cosinnus.utils.group import get_cosinnus_group_model,\
+    get_default_user_group_slugs
 from annoying.functions import get_object_or_None
 from cosinnus.models.profile import GlobalUserNotificationSetting
 from django.contrib.auth.models import AnonymousUser
@@ -40,6 +41,9 @@ from django.contrib.auth import get_user_model
 import six
 from _collections import defaultdict
 from cosinnus_notifications.alerts import create_user_alert
+from cosinnus.utils.files import get_image_url_for_icon
+from copy import copy
+from django.template.defaultfilters import truncatewords_html
 from cosinnus.utils.html import replace_non_portal_urls
 
 
@@ -165,23 +169,26 @@ NOTIFICATIONS_DEFAULTS = {
     'is_html': False,
     # the snippet template for this notification's event (only used in digest emails, not instant ones)
     'snippet_template': 'cosinnus/html_mail/summary_item.html',
-    # CSS class of the snippet template that customizes this notification by its type. usually the cosinnus app's name
-    'snippet_type': 'news',
     # the HTML email's subject. use a gettext_lazy translatable string.
     # available variables: %(sender_name)s, %(team_name)s
     'subject_text': REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML,
     # little explanatory text of what happened here. (e.g. "new document", "upcoming event") 
     # this can some string substitution arguments, e.g. ``new post by %(sender_name)s``
     'event_text': _('New item'),
-    # the explanatory text on a SINGLE notification of what happened. this should be a little more
-    # elaborate than ``event_text`` and should usually be a full sentence (without the ending full stop).
-    # default: if None or omitted, will use the contents of ``event_text``
-    'notification_text': None,
-    # event text for a subdivided item under the main one, if required
-    'sub_event_text': None, 
+    # the introductory text at the top of a single notification, apart from the notificatin item
+    # includes an address "Hello (recipient),"
+    # if None, the entire top intro section of the notification is not shown
+    'topic': None,
+    
+    'object_icon_url': None, # automatically set if 'object_icon' is set in data_attributes
+    'sub_object_icon_url': None, # automatically set if 'sub_object_icon' is set in data_attributes
     # Little text on the bottom of the mail explaining why the user received it. (only in instant mails)
     # see notifications.NOTIFICATION_REASONS
     'notification_reason': 'default', 
+    
+    # should the data_attributes['object_name'] be displayed in the email?
+    # (it has to be supplied always, but it doesn't have to be shown)
+    'display_object_name': True,
     # should the like button be shown?
     'show_like_button': False,
     # should the follow button be shown?
@@ -200,13 +207,20 @@ NOTIFICATIONS_DEFAULTS = {
     'data_attributes': {
         'object_name': 'title', # Main title and label of the notification object
         'object_url': 'get_absolute_url', # URL of the object
+        'object_icon': 'get_icon', # icon for the object, also sets 'object_icon_url'
         'object_text': None, # further excerpt text of the object, for example for Event descriptions. if None: ignored
-        'image_url': None, # image URL for the item. default if omitted is the event creator's user avatar
+        'image_url': None, # image URL for the item. default if omitted is None. the user creator's avatar can be found under user_image_url
         'alert_image_url': None, # if given, prefers this image/icon for alerts
         'event_meta': None, # a small addendum to the grey event text where object data like datetimes can be displayed
-        'sub_event_meta': None, # property of a sub-divided item below the main one, see doc above
-        'sub_image_url': None, # property of a sub-divided item below the main one, see doc above
-        'sub_object_text': None, # property of a sub-divided item below the main one, see doc above
+        
+        # TODO: in sub_object notifications, swap the `object_name` and `sub_object_text` and add a new `sub_object_icon`!
+        # TODO: `event_text` now has to contain %(sender_name)s
+        # TODO: `notification_text` has been replaced by `topic`, but only show this if you want the intro section!
+        # TODO: add `display_object_name: False` if the object name should not appear (usually for comments)
+        'sub_object_name': None, # the name of an additional reference item above the main one
+        'sub_object_text': None, # the text of an additional reference item above the main one
+        'sub_object_url': None, # url of the reference item. if none is given, main url is used
+        'sub_object_icon': None, # icon for the sub object, also sets 'sub_object_icon_url'
         'like_button_url': 'get_absolute_like_url', # url for the like button
         'follow_button_url': 'get_absolute_follow_url', # url for the follow button
         'action_button_url': None, # url for the action button, if options['action_button_text'] is set. can also be hardcoded 'http*' url.
@@ -595,13 +609,14 @@ class NotificationsThread(Thread):
                     reason = NOTIFICATION_REASONS[reason_key]
                 else:
                     reason = NOTIFICATION_REASONS[self.options.get('notification_reason')] 
-                portal_image_url = '%s%s' % (domain, static('img/logo-icon.png'))
+                portal_image_url = '%s%s' % (domain, static('img/email-header.png'))
                 
                 # render the notification item (and get back some data from the event)
                 notification_item_html, data = render_digest_item_for_notification_event(notification_event, return_data=True)
-                topic = data.get('notification_text', None) or data.get('event_text')
-                subject = _unescape(self.options.get('subject_text') % data.get('string_variables'))
                 
+                topic = None
+                if self.options.get('topic'):
+                    topic = mark_safe(self.options.get('topic') % data.get('string_variables'))
                 context = {
                     'site': site,
                     'site_name': site.name,
@@ -610,81 +625,17 @@ class NotificationsThread(Thread):
                     'portal_image_url': portal_image_url,
                     'portal_name': portal_name,
                     'receiver': receiver, 
-                    'addressee': mark_safe(strip_tags(full_name(receiver))), 
-                    'topic': topic,
+                    'addressee': mark_safe(strip_tags(receiver.first_name)) if not type(receiver) is AnonymousUser else None,
                     'prefs_url': mark_safe(preference_url),
-                    
-                    'notification_reason': reason,
-                    
-                    'origin_name': self.group['name'],
-                    'origin_url': self.group.get_absolute_url() + self.options.get('origin_url_suffix', ''),
-                    'origin_image_url': domain + (self.group.get_avatar_thumbnail_url() or static('images/group-avatar-placeholder-small.png')),
-                    
-                    'notification_body': None, # this is a body text that can be used for group description or similar
-                    
+                    'topic': topic,
+                    'notification_raw_html': None, # this is raw-html pastable section
                     'notification_item_html': mark_safe(notification_item_html),
+                    'notification_reason': reason,
                 }
                 # add object name to outer template for preview text
                 if data.get('object_name', None):
                     context['preview_summary'] = data.get('object_name')
-                
-                # check for an action button url being specifiied. mutually exclusive with like/follow buttons for now.
-                if self.options.get('action_button_text', None):
-                    action_button_url = self.options['data_attributes']['action_button_url']
-                    if action_button_url is None:
-                        # default action url is the original url (main url for the notification, plus suffix if set)
-                        action_button_url = context['origin_url']
-                    elif action_button_url.startswith('http'):
-                        # we accept a hardcoded url
-                        pass
-                    else:
-                        obj = getattr(notification_event, '_target_object', notification_event.target_object)
-                        action_button_url = resolve_attributes(obj, action_button_url)
-                        
-                    context.update({
-                        'show_action_buttons': True,
-                        'action_button_1_text': self.options.get('action_button_text'),
-                        'action_button_1_url': action_button_url,
-                    })
-                # add like/follow buttons if specified in notification event options, can not show up
-                # if any other action buttons exist
-                elif self.options.get('show_like_button', False) or self.options.get('show_follow_button', False):
-                    obj = getattr(notification_event, '_target_object', notification_event.target_object)
-                    
-                    counter = 1
-                    context.update({
-                        'show_action_buttons': True,
-                    })
-                    if self.options.get('show_like_button', False):
-                        context.update({
-                            'action_button_%d_text' % counter: _('Like'),
-                            'action_button_%d_url' % counter: resolve_attributes(obj, self.options['data_attributes']['like_button_url']),
-                        })
-                        counter += 1
-                    if self.options.get('show_follow_button', False):
-                        context.update({
-                            'action_button_%d_text' % counter: _('Follow'),
-                            'action_button_%d_url' % counter: resolve_attributes(obj, self.options['data_attributes']['follow_button_url']),
-                        })
-                        
-                # check for an action button url being specifiied
-                if self.options.get('action_button_alternate_text', None):
-                    action_button_alternate_url = self.options['data_attributes']['action_button_alternate_url']
-                    if action_button_alternate_url is None:
-                        # default action url is the original url (main url for the notification, plus suffix if set)
-                        action_button_alternate_url = context['origin_url']
-                    elif action_button_alternate_url.startswith('http'):
-                        # we accept a hardcoded url
-                        pass
-                    else:
-                        obj = getattr(notification_event, '_target_object', notification_event.target_object)
-                        action_button_alternate_url = resolve_attributes(obj, action_button_alternate_url)
-                        
-                    context.update({
-                        'show_action_buttons': True,
-                        'action_button_alternate_text': self.options.get('action_button_alternate_text'),
-                        'action_button_alternate_url': action_button_alternate_url,
-                    })
+                subject = _unescape(self.options.get('subject_text') % data.get('string_variables'))
             
             else:
                 
@@ -797,7 +748,6 @@ class NotificationsThread(Thread):
 
 def render_digest_item_for_notification_event(notification_event, return_data=False, only_compile_alert_data=False):
     """ Renders the HTML of a single notification event for a receiving user """
-    
     try:
         obj = getattr(notification_event, '_target_object', notification_event.target_object)
         options = notifications[notification_event.notification_id]
@@ -822,57 +772,177 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         
         object_name = resolve_attributes(obj, data_attributes['object_name'], 'title')
         string_variables = {
-            'sender_name': escape(sender_name),
-            'object_name': escape(object_name),
+            'sender_name': escape(sender_name) if sender_name else '',
+            'object_name': escape(object_name) if object_name else '',
             'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
             'team_name': escape(notification_event.group['name']) if getattr(notification_event, 'group', None) is not None else '(unknowngroup)',
         }
         event_text = options['event_text']
-        notification_text = options['notification_text'] or options['event_text']
-        sub_event_text = options['sub_event_text']
         
-        event_text = mark_safe((event_text % string_variables)) if event_text else None
-        notification_text = mark_safe((notification_text % string_variables)) if notification_text else None
-        sub_event_text = mark_safe((sub_event_text % string_variables)) if sub_event_text else None
+        # make the 'sender_name' variable in event_text bold
+        if event_text is not None:
+            bolded_sender_name = copy(string_variables)
+            bolded_sender_name['sender_name'] = '<b>%s</b>' % escape(sender_name)
+            event_text = mark_safe(event_text % bolded_sender_name)
         
-        sub_image_url = resolve_attributes(obj, data_attributes['sub_image_url'])
         object_url = resolve_attributes(obj, data_attributes['object_url'], 'get_absolute_url')
         portal_url = CosinnusPortal.get_current().get_domain()
         
         # full escape and markup conversion
         object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
-        sub_object_text = textfield(resolve_attributes(obj, data_attributes['sub_object_text']))
+        sub_object_name = textfield(resolve_attributes(obj, data_attributes['sub_object_name']))
+        # cut sub_object_text after n words and always only till first linebreak
+        sub_object_text = resolve_attributes(obj, data_attributes['sub_object_text'])
+        if sub_object_text:
+            sub_object_text = sub_object_text.split('\n')[0].strip()
+            sub_object_text = truncatewords_html(textfield(sub_object_text), 20)
+        sub_object_url = resolve_attributes(obj, data_attributes['sub_object_url'])
+        if not sub_object_url:
+            sub_object_url = object_url
         
+        # 1) TODO: 
+        # 2) TODO: i18n  
+        
+        # on full-page item displays (where the main object isn't a subtexted item, like a comment),
+        # we display additional data for that item, if defined in the Model's `render_additional_notification_content_rows()`
         content_rows = []
-        if not (sub_event_text and sub_image_url):
-            # on full-page item displays (where the main object isn't a subtexted item, like a comment),
-            # we display additional data for that item, if defined in the Model's `render_additional_notification_content_rows()`
-            render_func = getattr(obj, "render_additional_notification_content_rows", None)
-            if callable(render_func):
-                content_rows = render_func()
-            
+        render_func = getattr(obj, "render_additional_notification_content_rows", None)
+        if callable(render_func):
+            content_rows = render_func()
+        
+        event_time = None
+        if not event_time and getattr(notification_event, 'date', None):
+            event_time = notification_event.date
+        elif not event_time and getattr(obj, 'created', None):
+            event_time = obj.created
             
         data = {
-            'type': options['snippet_type'],
             'event_text': event_text,
-            'notification_text': notification_text,
             'snippet_template': options['snippet_template'],
             
             'event_meta': resolve_attributes(obj, data_attributes['event_meta']),
+            'event_time': event_time,
             'object_name': object_name,
             'object_url': object_url,
             'object_text': object_text,
-            'image_url': resolve_attributes(obj, data_attributes['image_url']),
+            'user_image_url': portal_url + (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe-small.png')),
+            'image_url': resolve_attributes(obj, data_attributes['image_url']), # TODO: attached image is unused in templates right now
             'alert_image_url': resolve_attributes(obj, data_attributes['alert_image_url']),
+            'object_icon': resolve_attributes(obj, data_attributes['object_icon']),
+            'sub_object_icon': resolve_attributes(obj, data_attributes['sub_object_icon']),
+            
             'content_rows': content_rows,
             
-            'sub_event_text': sub_event_text,
-            'sub_event_meta': resolve_attributes(obj, data_attributes['sub_event_meta']),
-            'sub_image_url': sub_image_url,
+            'sub_object_name': sub_object_name,
             'sub_object_text': sub_object_text,
+            'sub_object_url': sub_object_url,
+            
+            'display_object_name': options['display_object_name'],
             
             'string_variables': string_variables,
+            
+            # TODO: new! only usable after we split the %(sender_name)s out from 'event_text'
+            #'action_user_name': escape(sender_name),
         }
+        # group specific attributes:
+        if getattr(notification_event, 'group', None) is not None:
+            data.update({
+                'origin_url': notification_event.group.get_absolute_url() + options.get('origin_url_suffix', ''),
+            })
+            # as origin, show the portal if the item is from a Forum group, otherwise show the group
+            if notification_event.group.slug in get_default_user_group_slugs():
+                data.update({    
+                    'origin_name': CosinnusPortal.get_current().name,
+                })
+            else:
+                data.update({
+                    'origin_name': notification_event.group['name'],
+                    'origin_icon_url': get_image_url_for_icon(notification_event.group.get_icon()),
+                    'origin_image_url': portal_url + (notification_event.group.get_avatar_thumbnail_url() or get_image_url_for_icon(notification_event.group.get_icon())),
+                })
+                
+        # add user profile url
+        if notification_event.user and notification_event.user.cosinnus_profile:
+            data['action_user_url'] = notification_event.user.cosinnus_profile.get_absolute_url()
+        
+        # generate or get object icon url
+        if options['object_icon_url']:
+            data['object_icon_url'] = options['object_icon_url']
+        elif data['object_icon']:
+            data['object_icon_url'] = get_image_url_for_icon(data['object_icon'])
+        # generate or get sub object icon url
+        if options['sub_object_icon_url']:
+            data['sub_object_icon_url'] = options['sub_object_icon_url']
+        elif data['sub_object_icon']:
+            data['sub_object_icon_url'] = get_image_url_for_icon(data['sub_object_icon'])
+        
+        
+        # check for an action button url being specifiied. mutually exclusive with like/follow buttons for now.
+        if options.get('action_button_text', None):
+            action_button_url = options['data_attributes']['action_button_url']
+            if action_button_url is None:
+                # default action url is the original url (main url for the notification, plus suffix if set)
+                action_button_url = data['origin_url']
+            elif action_button_url.startswith('http'):
+                # we accept a hardcoded url
+                pass
+            else:
+                obj = getattr(notification_event, '_target_object', notification_event.target_object)
+                action_button_url = resolve_attributes(obj, action_button_url)
+            data.update({
+                'show_action_buttons': True,
+                'action_button_1_text': options.get('action_button_text'),
+                'action_button_1_url': action_button_url,
+            })
+        # add like/follow buttons if specified in notification event options, can not show up
+        # if any other action buttons exist
+        elif options.get('show_like_button', False) or options.get('show_follow_button', False):
+            obj = getattr(notification_event, '_target_object', notification_event.target_object)
+            
+            counter = 1
+            data.update({
+                'show_action_buttons': True,
+            })
+            if options.get('show_like_button', False):
+                data.update({
+                    'action_button_%d_text' % counter: _('Like'),
+                    'action_button_%d_url' % counter: resolve_attributes(obj, options['data_attributes']['like_button_url']),
+                })
+                counter += 1
+            if options.get('show_follow_button', False):
+                data.update({
+                    'action_button_%d_text' % counter: _('Follow'),
+                    'action_button_%d_url' % counter: resolve_attributes(obj, options['data_attributes']['follow_button_url']),
+                })
+        # if no other main action buttons, and just one follow OR like button exist, we add a default 
+        # "View on <portal>" action button (as action_button 2, that's fine even is button 1 isn't set)
+        if not options.get('action_button_text', None) and not data.get('action_button_2_text', None):
+            data.update({
+                'show_action_buttons': True,
+                'action_button_2_text': _('View on %(portal_name)s') % {
+                    'portal_name': CosinnusPortal.get_current().name
+                },
+                'action_button_2_url': data['origin_url'],
+            }) 
+            
+        # check for an action button url being specifiied
+        if options.get('action_button_alternate_text', None):
+            action_button_alternate_url = options['data_attributes']['action_button_alternate_url']
+            if action_button_alternate_url is None:
+                # default action url is the original url (main url for the notification, plus suffix if set)
+                action_button_alternate_url = data['origin_url']
+            elif action_button_alternate_url.startswith('http'):
+                # we accept a hardcoded url
+                pass
+            else:
+                obj = getattr(notification_event, '_target_object', notification_event.target_object)
+                action_button_alternate_url = resolve_attributes(obj, action_button_alternate_url)
+                
+            data.update({
+                'show_action_buttons': True,
+                'action_button_alternate_text': options.get('action_button_alternate_text'),
+                'action_button_alternate_url': action_button_alternate_url,
+            })
         
         # clean some attributes
         if not data['object_name']:
@@ -883,13 +953,9 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         if only_compile_alert_data:
             return data
             
-        # default for image_url is the notifcation event's causer
-        if not data['image_url']:
-            data['image_url'] = portal_url + \
-                 (notification_event.user.cosinnus_profile.get_avatar_thumbnail_url() or static('images/jane-doe-small.png'))
         # ensure URLs are absolute
-        for url_field in ['image_url', 'object_url', 'sub_image_url']:
-            url = data[url_field]
+        for url_field in ['image_url', 'object_url', 'origin_icon_url', 'object_icon_url', 'sub_object_icon_url']:
+            url = data.get(url_field, None)
             if url and not url.startswith('http'):
                 data[url_field] = portal_url + data[url_field]
         

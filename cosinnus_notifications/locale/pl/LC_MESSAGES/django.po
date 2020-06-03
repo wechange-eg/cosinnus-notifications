@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-22 13:06+0200\n"
-"PO-Revision-Date: 2018-08-31 13:12+0200\n"
+"POT-Creation-Date: 2020-05-27 14:01+0200\n"
+"PO-Revision-Date: 2020-04-23 11:49+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.4\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #, fuzzy
 #| msgid "You are getting this notification because you are an administrator of this portal."
@@ -157,6 +157,11 @@ msgstr ""
 msgid "Follow"
 msgstr ""
 
+#, fuzzy, python-format
+#| msgid "Your daily digest for %(portal_name)s"
+msgid "View on %(portal_name)s"
+msgstr "Twój dzienny przegląd %(portal_name)s"
+
 msgid "Untitled"
 msgstr "Bez tytułu"
 
@@ -225,8 +230,3 @@ msgstr "Twoje ustawienia powiadomień zostały zaktualizowane pomyślnie."
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "Twoje ustawienia powiadomień zostały wyzerowane do ustawień domyślnych!"
-
-#, fuzzy
-#~| msgid "Your daily digest for %(portal_name)s"
-#~ msgid "View on %(portal_name)s"
-#~ msgstr "Twój dzienny przegląd %(portal_name)s"
