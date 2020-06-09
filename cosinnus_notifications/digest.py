@@ -134,15 +134,19 @@ def send_digest_for_current_portal(digest_setting):
                 pref_group_ids = list(set([pref.group for pref in prefs]))
                 # so filter for these groups
                 events = events.filter(group_id__in=pref_group_ids)
-            
+                
             # add multi pref events that the user wants to see to regular events
             if multi_prefs:
                 multi_pref_notification_ids = []
                 for multi_pref in multi_prefs:
                     multi_pref_notification_ids.extend(get_multi_preference_notification_ids(multi_pref))
-                multi_pref_events = timescope_notification_events.filter(notification_id__in=multi_pref_notification_ids)
+                # filter all notification events to fit multi prefs andbe in the current portal
+                multi_pref_events = timescope_notification_events.filter(
+                    notification_id__in=multi_pref_notification_ids,
+                    group_id__in=portal_group_ids
+                )
                 events = events | multi_pref_events
-            
+                
             if events.count() == 0:
                 continue
             
