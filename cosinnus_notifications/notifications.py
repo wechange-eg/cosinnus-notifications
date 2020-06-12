@@ -43,7 +43,8 @@ from _collections import defaultdict
 from cosinnus_notifications.alerts import create_user_alert
 from cosinnus.utils.files import get_image_url_for_icon
 from copy import copy
-from django.template.defaultfilters import truncatewords_html
+from django.template.defaultfilters import truncatewords_html,\
+    truncatechars_html
 from cosinnus.utils.html import replace_non_portal_urls
 
 
@@ -790,11 +791,14 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         
         # full escape and markup conversion
         object_text = textfield(resolve_attributes(obj, data_attributes['object_text']))
-        sub_object_name = textfield(resolve_attributes(obj, data_attributes['sub_object_name']))
-        # cut sub_object_text after n words and always only till first linebreak
+        sub_object_name = resolve_attributes(obj, data_attributes['sub_object_name'])
+        # use only single lines for sub object titles and cut after n chars
+        if sub_object_name:
+            sub_object_name = sub_object_name.split('\n')[0].strip()
+            sub_object_name = truncatechars_html(textfield(sub_object_name), 40)
+        # cut sub_object_text after n words
         sub_object_text = resolve_attributes(obj, data_attributes['sub_object_text'])
         if sub_object_text:
-            sub_object_text = sub_object_text.split('\n')[0].strip()
             sub_object_text = truncatewords_html(textfield(sub_object_text), 20)
         sub_object_url = resolve_attributes(obj, data_attributes['sub_object_url'])
         if not sub_object_url:
