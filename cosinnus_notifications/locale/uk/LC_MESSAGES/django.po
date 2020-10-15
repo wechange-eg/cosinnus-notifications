@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-10-06 16:06+0200\n"
-"PO-Revision-Date: 2018-12-12 14:07+0100\n"
+"PO-Revision-Date: 2020-10-14 09:38+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: uk_UA\n"
@@ -16,22 +16,16 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 2.4.1\n"
 
-#, fuzzy
-#| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you created this content."
-msgstr "Ви отримали це сповіщення, тому що Ви є адміністратором цього порталу."
+msgstr "Ви бачите це сповіщення, оскільки ви створили цей контент."
 
-#, fuzzy
-#| msgid "You are getting this notification because you are an administrator of this project or group."
 msgid "You are seeing this alert because you are following the item's project or group."
-msgstr "Ви отримали це сповіщення, тому що Ви є адміністратором цього проекту чи групи."
+msgstr "Ви бачите це сповіщення, оскільки Ви стежите за відповідним проєктом або групою."
 
-#, fuzzy
-#| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you are following this item."
-msgstr "Ви отримали це сповіщення, тому що Ви є адміністратором цього порталу."
+msgstr "Ви бачите це сповіщення, оскільки Ви стежите за цим елементом."
 
 msgid "Notifications"
 msgstr "Сповіщення"
@@ -101,21 +95,19 @@ msgid "Audience"
 msgstr "Аудиторія"
 
 msgid "Owner of the alert"
-msgstr ""
+msgstr "Власник попередження"
 
 msgid "Alert Reason key"
-msgstr ""
+msgstr "Кнопка причини попередження"
 
-#, fuzzy
-#| msgid "User who caused this notification event"
 msgid "Last user who caused this notification event"
-msgstr "Користувач, який створив подію"
+msgstr "Останній користувач, який спричинив це сповіщення заходу"
 
 msgid "Alert State"
-msgstr ""
+msgstr "Стан попередження"
 
 msgid "You are following this content or its Project or Group"
-msgstr ""
+msgstr "Ви стежите за цим контентом або його проєктом чи групою"
 
 msgid "All notifications"
 msgstr "Усі сповіщення"
@@ -150,10 +142,9 @@ msgstr "Вподобати"
 msgid "Follow"
 msgstr "Відстежувати"
 
-#, fuzzy, python-format
-#| msgid "Your daily digest for %(portal_name)s"
+#, python-format
 msgid "View on %(portal_name)s"
-msgstr "Ваш щоденний звіт на %(portal_name)s"
+msgstr "Переглянути на %(portal_name)s"
 
 msgid "Untitled"
 msgstr "Без назви"
