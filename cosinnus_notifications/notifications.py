@@ -886,7 +886,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             action_button_url = options['data_attributes']['action_button_url']
             if action_button_url is None:
                 # default action url is the original url (main url for the notification, plus suffix if set)
-                action_button_url = data['origin_url']
+                action_button_url = data.get('origin_url')
             elif action_button_url.startswith('http'):
                 # we accept a hardcoded url
                 pass
@@ -926,7 +926,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                 'action_button_2_text': _('View on %(portal_name)s') % {
                     'portal_name': CosinnusPortal.get_current().name
                 },
-                'action_button_2_url': data['origin_url'],
+                'action_button_2_url': data.get('origin_url'),
             }) 
             
         # check for an action button url being specifiied
@@ -934,7 +934,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             action_button_alternate_url = options['data_attributes']['action_button_alternate_url']
             if action_button_alternate_url is None:
                 # default action url is the original url (main url for the notification, plus suffix if set)
-                action_button_alternate_url = data['origin_url']
+                action_button_alternate_url = data.get('origin_url')
             elif action_button_alternate_url.startswith('http'):
                 # we accept a hardcoded url
                 pass
