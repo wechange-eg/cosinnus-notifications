@@ -684,15 +684,17 @@ class NotificationsThread(Thread):
         
     def inner_run(self):
         # set group, inferred from object
-        if type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
+        if hasattr(self.obj, 'notification_target_group'):
+            self.group = self.obj.notification_target_group  
+        elif type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
             self.group = self.obj
         elif issubclass(self.obj.__class__, BaseTaggableObjectModel):
-            self.group = self.obj.group
+            self.group = self.obj.group  
         elif hasattr(self.obj, 'group'):
             self.group = self.obj.group
         else:
             raise ImproperlyConfigured('A signal for a notification was received, but the supplied object\'s group could not be determined. \
-                If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``group`` attribute onto it.')
+                If your object is not a CosinnusGroup or a BaseTaggableObject, you can fix this by patching a ``notification_target_group`` attribute onto it.')
         
         # we wrap the info in a (non-persisted) NotificationEvent to be compatible with the rendering method
         notification_event = NotificationEvent(group=self.group, user=self.user, notification_id=self.notification_id, target_object=self.obj)
