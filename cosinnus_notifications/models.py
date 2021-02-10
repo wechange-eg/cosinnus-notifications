@@ -333,7 +333,7 @@ class NotificationAlert(models.Model):
             Note the trailing slash` """
         data = {
             'portal_id': CosinnusPortal.get_current().id,
-            'group_id': self.target_object.group.id if hasattr(self.target_object, 'group') else 'None',
+            'group_id': self.group or (self.target_object.group.id if hasattr(self.target_object, 'group') else 'None'),
             'item_model': self.target_object._meta.model_name,
             'notification_id': self.notification_id,
         }
