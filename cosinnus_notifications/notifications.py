@@ -880,7 +880,6 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         elif data['sub_object_icon']:
             data['sub_object_icon_url'] = get_image_url_for_icon(data['sub_object_icon'])
         
-        
         # check for an action button url being specifiied. mutually exclusive with like/follow buttons for now.
         if options.get('action_button_text', None):
             action_button_url = options['data_attributes']['action_button_url']
@@ -926,7 +925,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
                 'action_button_2_text': _('View on %(portal_name)s') % {
                     'portal_name': CosinnusPortal.get_current().name
                 },
-                'action_button_2_url': data.get('origin_url'),
+                'action_button_2_url': data.get('object_url'),
             }) 
             
         # check for an action button url being specifiied
