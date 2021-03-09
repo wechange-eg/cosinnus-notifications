@@ -487,13 +487,7 @@ class NotificationsThread(Thread):
                     return True
             # for this special check, we cancel the rest here, because only the moderation check counts
             return False
-        
-        # global settings check, blanketing the finer grained checks
-        global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
-        if global_setting in [GlobalUserNotificationSetting.SETTING_NEVER, 
-                GlobalUserNotificationSetting.SETTING_DAILY, GlobalUserNotificationSetting.SETTING_WEEKLY]:
-            # user either wants no notification or a digest (the event for which is saved elsewhere)
-            return False
+       
         # check the specific multi-preference if this notification belongs to it
         multi_preference_set = notifications[notification_id].get('multi_preference_set', None)
         if multi_preference_set:
@@ -502,6 +496,13 @@ class NotificationsThread(Thread):
             else:
                 # we actually return False here, because this setting is on a different category than the other notifications
                 return False
+        
+        # global settings check, blanketing the finer grained checks
+        global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
+        if global_setting in [GlobalUserNotificationSetting.SETTING_NEVER, 
+                GlobalUserNotificationSetting.SETTING_DAILY, GlobalUserNotificationSetting.SETTING_WEEKLY]:
+            # user either wants no notification or a digest (the event for which is saved elsewhere)
+            return False
         
         if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
             return True
