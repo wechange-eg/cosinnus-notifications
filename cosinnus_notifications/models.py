@@ -112,7 +112,7 @@ class UserMultiNotificationPreference(BaseUserNotificationPreference):
     def __str__(self):
         return "<User multi notification preference: %(user)s, multi_notification_id: %(multi_notification_id)s, setting: %(setting)d>" % {
             'user': self.user,
-            'notification_id': self.notification_id,
+            'multi_notification_id': self.multi_notification_id,
             'setting': self.setting,
         }
         

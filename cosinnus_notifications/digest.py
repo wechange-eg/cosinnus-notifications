@@ -85,11 +85,15 @@ def send_digest_for_current_portal(digest_setting):
         # check global blanket settings
         global_wanted = False # flag to allow all events
         global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
-        if global_setting == GlobalUserNotificationSetting.SETTING_NOW:
+        
+        # check if global blanketing settings allow for sending this digest to the user
+        if global_setting != digest_setting and global_setting != GlobalUserNotificationSetting.SETTING_GROUP_INDIVIDUAL:
             if not multi_prefs:
-                continue # users who get all emails now never want a digest
+                # users who don't have the global setting AND the multi pref setting set to this digest never get an email
+                continue 
             else:
-                only_multi_prefs_wanted = True # except they may want notification events for things they follow
+                # user still has a multi pref setting for this digest_setting, so go on and check
+                only_multi_prefs_wanted = True 
         
         if (digest_setting == UserNotificationPreference.SETTING_DAILY and global_setting == GlobalUserNotificationSetting.SETTING_DAILY) \
                 or (digest_setting == UserNotificationPreference.SETTING_WEEKLY and global_setting == GlobalUserNotificationSetting.SETTING_WEEKLY):
@@ -112,6 +116,7 @@ def send_digest_for_current_portal(digest_setting):
             if global_wanted:
                 events = events.filter(group_id__in=portal_group_ids)
             elif only_multi_prefs_wanted:
+                # set the regular group events to none; mix in multi pref events later
                 events = NotificationEvent.objects.none()
             else:
                 # these groups will never get digest notifications because they have a blanketing NONE setting or 
