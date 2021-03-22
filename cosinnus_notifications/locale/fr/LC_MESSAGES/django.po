@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 17:55+0100\n"
-"PO-Revision-Date: 2018-09-26 12:44+0200\n"
+"POT-Creation-Date: 2021-02-23 18:24+0100\n"
+"PO-Revision-Date: 2021-03-16 06:59+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -16,22 +16,16 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.1.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
-#, fuzzy
-#| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you created this content."
-msgstr "Tu reçois cette notification car tu es admin de ce portail."
+msgstr "Tu vois cette alerte parce que tu as créé ce contenu."
 
-#, fuzzy
-#| msgid "You are getting this notification because you are an administrator of this project or group."
 msgid "You are seeing this alert because you are following the item's project or group."
-msgstr "Tu reçois cette notification car tu es admin de ce projet ou groupe."
+msgstr "Tu vois cette alerte parce que tu suis le projet ou le groupe de l’élément."
 
-#, fuzzy
-#| msgid "You are getting this notification because you are an administrator of this portal."
 msgid "You are seeing this alert because you are following this item."
-msgstr "Tu reçois cette notification car tu es admin de ce portail."
+msgstr "Tu vois cette alerte parce que tu suis cet élément."
 
 msgid "Notifications"
 msgstr "Notifications"
@@ -83,22 +77,16 @@ msgid "Notification Preferences"
 msgstr "Préférences de notification"
 
 msgid "Portal"
-msgstr ""
+msgstr "Portail"
 
-#, fuzzy
-#| msgid "Notification ID"
 msgid "Multi Notification ID"
-msgstr "ID de notification"
+msgstr "ID de notification multiple"
 
-#, fuzzy
-#| msgid "Notification Preference"
 msgid "Multi Notification Preference"
-msgstr "Préférence de notification"
+msgstr "Préférence de notification multiple"
 
-#, fuzzy
-#| msgid "Notification Preferences"
 msgid "Multi Notification Preferences"
-msgstr "Préférences de notification"
+msgstr "Préférences de notification multiple"
 
 msgid "User who caused this notification event"
 msgstr "Utilisateur qui a causé cet événement de notification"
@@ -107,21 +95,19 @@ msgid "Audience"
 msgstr "Audience"
 
 msgid "Owner of the alert"
-msgstr ""
+msgstr "Propriétaire de l’alerte"
 
 msgid "Alert Reason key"
-msgstr ""
+msgstr "Clé de raison d’alerte"
 
-#, fuzzy
-#| msgid "User who caused this notification event"
 msgid "Last user who caused this notification event"
-msgstr "Utilisateur qui a causé cet événement de notification"
+msgstr "Dernier utilisateur à avoir causé cet événement de notification"
 
 msgid "Alert State"
-msgstr ""
+msgstr "État d’alerte"
 
 msgid "You are following this content or its Project or Group"
-msgstr ""
+msgstr "Tu suis ce contenu ou son Projet ou Groupe"
 
 msgid "All notifications"
 msgstr "Toutes les notifications"
@@ -129,10 +115,8 @@ msgstr "Toutes les notifications"
 msgid "No notifications"
 msgstr "Pas de notifications"
 
-#, fuzzy
-#| msgid "I wish to receive notification emails"
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr "Je souhaite recevoir des e-mails de notification"
+msgstr "Pour le contenu que je suis, je souhaite recevoir des e-mails de notification"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
 msgstr "Tu reçois cette notification car tu t'es abonné à ce type d'événement dans ton projet ou groupe."
@@ -153,15 +137,14 @@ msgid "New item"
 msgstr "Nouvel item"
 
 msgid "Like"
-msgstr ""
+msgstr "Aimer"
 
 msgid "Follow"
-msgstr ""
+msgstr "S'abonner"
 
-#, fuzzy, python-format
-#| msgid "Your daily digest for %(portal_name)s"
+#, python-format
 msgid "View on %(portal_name)s"
-msgstr "Ton résumé quotidien pour %(portal_name)s"
+msgstr "Afficher sur %(portal_name)s"
 
 msgid "Untitled"
 msgstr "Sans titre"
