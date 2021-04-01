@@ -77,13 +77,29 @@ class NotificationPreferenceView(ListView):
                     membership.is_moderator = is_moderator
                     membership.save()
             
+            setting_obj = GlobalUserNotificationSetting.objects.get_object_for_user(request.user)
+            
             # save global notification setting
             global_setting = int(request.POST.get('global_setting', '-1'))
             if global_setting >= 0 and global_setting in (sett for sett, label in GlobalUserNotificationSetting.SETTING_CHOICES):
-                setting_obj = GlobalUserNotificationSetting.objects.get_object_for_user(request.user)
                 setting_obj.setting = global_setting
-                setting_obj.save()
                 
+                # save rocketchat notification setting
+                if global_setting == GlobalUserNotificationSetting.SETTING_NEVER:
+                    # on a global "never", we always set the rocketchat setting to "off"
+                    setting_obj.rocketchat_setting = GlobalUserNotificationSetting.ROCKETCHAT_SETTING_OFF
+                else:
+                    rocketchat_setting = int(request.POST.get('rocketchat_setting', '-1'))
+                    if rocketchat_setting >= 0 and rocketchat_setting in (sett for sett, label in GlobalUserNotificationSetting.ROCKETCHAT_SETTING_CHOICES):
+                        setting_obj.rocketchat_setting = rocketchat_setting
+                setting_obj.save()
+            
+            """ TODO: 
+                * triggers for rocketchat saving 
+                * initial setting on user rocketchat account creation, by their setting or portal default setting
+                * manage.py command to sync settings later on
+            """    
+            
             # save all multi preference choices
             for multi_notification_id, __ in MULTI_NOTIFICATION_IDS.items():
                 multi_choice = int(request.POST.get('multi_pref__%s' % multi_notification_id, '-1'))
@@ -184,6 +200,9 @@ class NotificationPreferenceView(ListView):
         global_setting_choices = GlobalUserNotificationSetting.SETTING_CHOICES
         global_setting_selected = GlobalUserNotificationSetting.objects.get_for_user(self.request.user) 
         
+        rocketchat_setting_choices = GlobalUserNotificationSetting.ROCKETCHAT_SETTING_CHOICES
+        rocketchat_setting_selected = GlobalUserNotificationSetting.objects.get_rocketchat_setting_for_user(self.request.user) 
+        
         multi_notification_preferences = []
         for multi_notification_id, __ in MULTI_NOTIFICATION_IDS.items():
             multi_notification_preferences.append({
@@ -204,6 +223,8 @@ class NotificationPreferenceView(ListView):
             'language_selected': self.request.user.cosinnus_profile.language,
             'global_setting_choices': global_setting_choices,
             'global_setting_selected': global_setting_selected,
+            'rocketchat_setting_choices': rocketchat_setting_choices,
+            'rocketchat_setting_selected': rocketchat_setting_selected,
             'multi_notification_preferences': multi_notification_preferences,
             'notification_choices': UserNotificationPreference.SETTING_CHOICES,
         })
