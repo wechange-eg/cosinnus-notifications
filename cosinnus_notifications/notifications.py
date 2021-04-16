@@ -46,6 +46,7 @@ from copy import copy
 from django.template.defaultfilters import truncatewords_html,\
     truncatechars_html
 from cosinnus.utils.html import replace_non_portal_urls
+from cosinnus.models.group_extra import CosinnusProject, CosinnusSociety
 
 
 
@@ -388,6 +389,10 @@ class NotificationsThread(Thread):
         Example: If I follow my own News Post and somebody comments on it, I will only receive the
             'somebody commented on your post', and not also the 'a comment on a post you follow' notification.
          """
+    NOTIFICATION_CONTENT_GROUP_TYPES = [
+        CosinnusProject.GROUP_MODEL_TYPE,
+        CosinnusSociety.GROUP_MODEL_TYPE,
+    ]
     
     # a complete set of arguments for a next run of this thread. not cleared during sessions
     next_session_args = []
@@ -690,6 +695,9 @@ class NotificationsThread(Thread):
         elif type(self.obj) is CosinnusGroup or issubclass(self.obj.__class__, CosinnusGroup):
             self.group = self.obj
         elif issubclass(self.obj.__class__, BaseTaggableObjectModel):
+            # for content inside groups, notifications only go out for projects and groups, never for conferences!
+            if not self.obj.group.type in self.NOTIFICATION_CONTENT_GROUP_TYPES:
+                return
             self.group = self.obj.group  
         elif hasattr(self.obj, 'group'):
             self.group = self.obj.group
