@@ -64,33 +64,56 @@
             </div>
         </div>
         
-        {% if user|is_portal_admin %}
-            <div class="content-box large-space">
-	            <div class="row">
-	                <div class="col-md-12"><!-- right column -->
-	                    <div class="row"> 
-	                        <div class="col-md-4">
-	                            <legend style="margin: 0;">{% trans "Moderator Status (Portal-Admins only)" %}:</legend>
-	                        </div>
-	                        <div class="col-md-8">
-	                            <div class="cosinnus-field">
-	                                <div class="cosinnus-field-input regular-field checkbox-field">
-									    <input id="moderator_check" name="is_moderator" type="checkbox" {% if is_moderator %}checked{% endif %}>
-									    <label for="moderator_check">{% trans "I wish to be a Moderator for this portal" %}</label>
-							        </div>
-						        </div>
-	                        </div>
-	                    </div>
-	                    <p class=" alert alert-warning">
-	                       <i class="fa fa-info-circle fa-3x"></i>
-	                       {% trans "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account." %}
-	                    </p>
-	                </div>
-	            </div>
-	        </div>
-        {% endif %}
         
         <div id="normal_settings_frame">
+            {% if SETTINGS.COSINNUS_ROCKET_ENABLED %}
+	            <div class="content-box large-space">
+		            <div class="row">
+		                <div class="col-md-12"><!-- right column -->
+		                    <div class="row"> 
+		                    
+		                        <div class="col-md-4">
+		                            <legend style="margin: 0;">{% trans "I wish to receive RocketChat notification emails" %}:</legend>
+		                        </div>
+		                        <div class="col-md-8">
+		                            <p class="no-horizontal-padding no-vertical-padding">
+		                                <select id="id_rocketchat_setting" name="rocketchat_setting" class="form-control">
+		                                    {% for choice, label in rocketchat_setting_choices %}
+		                                        <option {% if rocketchat_setting_selected == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+		                                    {% endfor %}
+		                                </select>
+		                            </p>
+		                        </div>
+		                    </div>
+		                </div>
+		            </div>
+		        </div>
+	        {% endif %}
+        
+            <div class="content-box large-space">
+                {% for multi_notification_preference in multi_notification_preferences %}
+                    <div class="row">
+                        <div class="col-md-12"><!-- right column -->
+                            <div class="row"> 
+                            
+                                <div class="col-md-4">
+                                    <legend style="margin: 0;">{{ multi_notification_preference.multi_notification_label }}:</legend>
+                                </div>
+                                <div class="col-md-8">
+                                    <p class="no-horizontal-padding no-vertical-padding">
+                                        <select id="id_multi_pref__{{ multi_notification_preference.multi_notification_id }}" name="multi_pref__{{ multi_notification_preference.multi_notification_id }}" class="form-control">
+                                            {% for choice, label in multi_notification_preference.multi_preference_choices %}
+                                                <option {% if multi_notification_preference.multi_preference_setting == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
 	        <div class="content-box large-space">
 	            <div class="row">
 	                <div class="col-md-12"><!-- right column -->
@@ -112,31 +135,34 @@
 	                </div>
 	            </div>
 	        </div>
-	        
-	        <div class="content-box large-space">
-	            {% for multi_notification_preference in multi_notification_preferences %}
-	                <div class="row">
-	                    <div class="col-md-12"><!-- right column -->
-	                        <div class="row"> 
-	                        
-	                            <div class="col-md-4">
-	                                <legend style="margin: 0;">{{ multi_notification_preference.multi_notification_label }}:</legend>
-	                            </div>
-	                            <div class="col-md-8">
-	                                <p class="no-horizontal-padding no-vertical-padding">
-	                                    <select id="id_multi_pref__{{ multi_notification_preference.multi_notification_id }}" name="multi_pref__{{ multi_notification_preference.multi_notification_id }}" class="form-control">
-	                                        {% for choice, label in multi_notification_preference.multi_preference_choices %}
-	                                            <option {% if multi_notification_preference.multi_preference_setting == choice %}selected{% endif %} value="{{ choice }}">{{ label }}</option>
-	                                        {% endfor %}
-	                                    </select>
-	                                </p>
-	                            </div>
-	                        </div>
-	                    </div>
-	                </div>
-	            {% endfor %}
-	        </div>
         </div>
+        
+        
+        {% if user|is_portal_admin %}
+            <div class="content-box large-space">
+                <div class="row">
+                    <div class="col-md-12"><!-- right column -->
+                        <div class="row"> 
+                            <div class="col-md-4">
+                                <legend style="margin: 0;">{% trans "Moderator Status (Portal-Admins only)" %}:</legend>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="cosinnus-field">
+                                    <div class="cosinnus-field-input regular-field checkbox-field">
+                                        <input id="moderator_check" name="is_moderator" type="checkbox" {% if is_moderator %}checked{% endif %}>
+                                        <label for="moderator_check">{% trans "I wish to be a Moderator for this portal" %}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class=" alert alert-warning">
+                           <i class="fa fa-info-circle fa-3x"></i>
+                           {% trans "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     
 		<!-- a box with semi transparent background -->
 	    <div id="custom_settings_frame" class="content-box" style="display: none;"> {# toggled visible on load by JS, depending on global setting #}
