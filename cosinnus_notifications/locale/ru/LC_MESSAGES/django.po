@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wechange RU\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-04-22 12:51+0200\n"
 "PO-Revision-Date: 2020-10-11 17:23+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -175,6 +175,14 @@ msgstr "больше"
 msgid "I wish to receive notification emails"
 msgstr "Я хочу получать электронные письма-уведомления"
 
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "I wish to receive RocketChat notification emails"
+msgstr "Я хочу получать электронные письма-уведомления"
+
+msgid "Receive notification emails in this language"
+msgstr "Электронные письма-уведомления получать на этом языке"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "Статус модератора (только для администраторов портала)"
 
@@ -183,9 +191,6 @@ msgstr "Я хочу быть модератором этого портала"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "В качестве модератора Вы будете получать мгновенное уведомление, когда на этом портале будет публиковаться ЛЮБОЙ публично видимый контент. Поскольку Вы являетесь администратором портала, вы также можете удалить контент, если он оскорбителен или представляет опасность. Чтобы удалить его, перейдите на страницу содержимого на веб-сайте, предварительно войдя в эту учетную запись."
-
-msgid "Receive notification emails in this language"
-msgstr "Электронные письма-уведомления получать на этом языке"
 
 msgid "Immediately"
 msgstr "Немедленно"
@@ -210,6 +215,9 @@ msgstr "Вы действительно хотите сбросить Ваши �
 
 msgid "Your notification preferences were updated successfully."
 msgstr "Ваши настройки уведомлений обновлены."
+
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "Настройки уведомлений возвращены к стартовым!"

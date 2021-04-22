@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-04-22 12:51+0200\n"
 "PO-Revision-Date: 2021-03-08 00:47+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -176,6 +176,14 @@ msgstr "اكثر"
 msgid "I wish to receive notification emails"
 msgstr "أتمنى أن أتلقى اشعارات بالبريد الإلكتروني"
 
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "I wish to receive RocketChat notification emails"
+msgstr "أتمنى أن أتلقى اشعارات بالبريد الإلكتروني"
+
+msgid "Receive notification emails in this language"
+msgstr "تلقي رسائل اشعارات البريد الإلكتروني بهذه اللغة"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "حالة الوسيط (مسؤلين البوابة الإلكترونية فقط)"
 
@@ -184,9 +192,6 @@ msgstr "أتمنى أن أكون وسيطًا لهذه البوابة"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "بصفتك وسيطًا ، ستتلقى إشعارًا فوريًا كلما تم نشر أي محتوى مرئي للعامة على هذه البوابة. نظرًا لأنك مسؤول البوابة الإلكترونية ، يمكنك أيضًا حذف المحتوى إذا كان مسيئًا أو حرجًا. لحذفه، قم بزيارة  صفحة المحتوى على الموقع أثناء تسجيل الدخول إلى هذا الحساب."
-
-msgid "Receive notification emails in this language"
-msgstr "تلقي رسائل اشعارات البريد الإلكتروني بهذه اللغة"
 
 msgid "Immediately"
 msgstr "فورا"
@@ -211,6 +216,9 @@ msgstr "هذا سيؤدي إلى إعادة تعيين جميع تفضيلات �
 
 msgid "Your notification preferences were updated successfully."
 msgstr "تم تحديث تفضيلات اشعاراتك الخاصة بك بنجاح."
+
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "تم إعادة تعيين تفضيلات اشعاراتك إلى الافتراضي!"

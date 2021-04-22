@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-04-22 12:51+0200\n"
 "PO-Revision-Date: 2020-04-07 12:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -177,6 +177,14 @@ msgstr "მეტი"
 msgid "I wish to receive notification emails"
 msgstr "მსურს მივიღო შეტყობინებების ელ-ფოსტა"
 
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "I wish to receive RocketChat notification emails"
+msgstr "მსურს მივიღო შეტყობინებების ელ-ფოსტა"
+
+msgid "Receive notification emails in this language"
+msgstr "მიიღეთ შეტყობინებები ამ ენაზე"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "მოდერატორის სტატუსი (მხოლოდ პორტალის ადმინისტრატორებისთვის)"
 
@@ -185,9 +193,6 @@ msgstr "მსურს გავხდე ამ პორტალის მ�
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "როგორც მოდერატორი, თქვენ მიიღებთ მყისიერ შეტყობინებას ყოველთვის, როცა ნებისმიერი საჯაროდ ხილული კონტენტი დაიდება პორტალზე. როგორც, პორტალის ადმინისტრატორი თქვენ შეგიძლიათ წაშალოთ შეურაცხმყოფელი ან კრიტიკული კონტენტები. წასაშლელად, გთხოვთ ეწვიოთ კონტენტის გვერდს ვებ-საიტზე, სანამ მოახდენთ ანგარიშში შესვლას."
-
-msgid "Receive notification emails in this language"
-msgstr "მიიღეთ შეტყობინებები ამ ენაზე"
 
 msgid "Immediately"
 msgstr "დაუყონებლივ"
@@ -212,6 +217,9 @@ msgstr "ეს დააბრუნებს თქვენს უპირა
 
 msgid "Your notification preferences were updated successfully."
 msgstr "თქვენი უპირატესი შეტყობინებები წარმატებით იქნა განახლებული."
+
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "თქვენი უპირატესი შეტყობინებები დაბრუნდა ნაგულისხმევზე!"

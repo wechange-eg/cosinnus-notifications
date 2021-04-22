@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-04-22 12:51+0200\n"
 "PO-Revision-Date: 2020-10-14 09:38+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -176,6 +176,14 @@ msgstr "більше"
 msgid "I wish to receive notification emails"
 msgstr "Я хочу отримувати електронні листи-сповіщення"
 
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "I wish to receive RocketChat notification emails"
+msgstr "Я хочу отримувати електронні листи-сповіщення"
+
+msgid "Receive notification emails in this language"
+msgstr "Електронні листи-сповіщення отримувати цією мовою"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "Статус модератора (тільки адміністратори порталу)"
 
@@ -184,9 +192,6 @@ msgstr "Я хочу бути модератором цього порталу"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "Як модератор ви будете отримувати негайні сповіщення якщо будь-який публічно видимий контент буде опубліковано на цьому порталі. Оскільки Ви є адміністратором, ви можете видалити контент, якщо він є принизливим чи містить критику. Для видалення відвідайте сторінку контунту на сайті, зайшовши під цим акаунтом."
-
-msgid "Receive notification emails in this language"
-msgstr "Електронні листи-сповіщення отримувати цією мовою"
 
 msgid "Immediately"
 msgstr "Негайно"
@@ -211,6 +216,9 @@ msgstr "Це змінить усі ваші налаштування спові�
 
 msgid "Your notification preferences were updated successfully."
 msgstr "Ваші нові налаштування сповіщення були успішно збережені."
+
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "Ваші налаштування сповіщення було змінено на стандартні!"

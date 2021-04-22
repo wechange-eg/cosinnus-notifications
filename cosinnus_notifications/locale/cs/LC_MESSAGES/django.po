@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-04-22 12:51+0200\n"
 "PO-Revision-Date: 2020-09-23 18:41+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -176,6 +176,14 @@ msgstr "další"
 msgid "I wish to receive notification emails"
 msgstr "Chci dostávat e-maily s oznámeními"
 
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "I wish to receive RocketChat notification emails"
+msgstr "Chci dostávat e-maily s oznámeními"
+
+msgid "Receive notification emails in this language"
+msgstr "Dostávat e-maily s oznámeními v tomto jazyce"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "Stav moderátora (pouze správci portálu)"
 
@@ -184,9 +192,6 @@ msgstr "Chtěl bych být moderátorem tohoto portálu"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "Jako moderátor obdržíte okamžité oznámení, kdykoli se na tomto portálu zveřejní JAKÝKOLI veřejně viditelný obsah. Jelikož jste správcem portálu, můžete také odstranit obsah, pokud je urážlivý nebo kritický. Chcete-li jej smazat, přihlaste se k tomuto účtu na stránce s obsahem na webu."
-
-msgid "Receive notification emails in this language"
-msgstr "Dostávat e-maily s oznámeními v tomto jazyce"
 
 msgid "Immediately"
 msgstr "Okamžitě"
@@ -211,6 +216,9 @@ msgstr "Tím se obnoví výchozí nastavení všech vašich předvoleb oznámen�
 
 msgid "Your notification preferences were updated successfully."
 msgstr "Vaše předvolby oznámení byly úspěšně aktualizovány."
+
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "Vaše předvolby oznámení byly obnoveny na výchozí nastavení!"

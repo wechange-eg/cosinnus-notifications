@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-04-22 12:51+0200\n"
 "PO-Revision-Date: 2021-03-09 00:26+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -176,6 +176,14 @@ msgstr "עוד"
 msgid "I wish to receive notification emails"
 msgstr "ברצוני לקבל התראות דרך הדוא\"ל"
 
+#, fuzzy
+#| msgid "I wish to receive notification emails"
+msgid "I wish to receive RocketChat notification emails"
+msgstr "ברצוני לקבל התראות דרך הדוא\"ל"
+
+msgid "Receive notification emails in this language"
+msgstr "קבלו התראות תיבת דואר נכנס בשפה זו"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "מצב מנחה (מנהלי פורטל בלבד)"
 
@@ -184,9 +192,6 @@ msgstr "אני רוצה להיות מנחה של פורטל זה"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "כמנחה, תקבלו הודעה מיידית בכל פעם שתוכן גלוי לציבור יפורסם בפורטל. מכיוון שאתם מנהלי מערכת באפשרותכם למחוק את התוכן אם הוא מזוהה כפוגעני או קריטי. על מנת למחוק, בקרו בדף התוכן באתר כאשר אתם מחוברים לחשבון זה."
-
-msgid "Receive notification emails in this language"
-msgstr "קבלו התראות תיבת דואר נכנס בשפה זו"
 
 msgid "Immediately"
 msgstr "מיידית"
@@ -211,6 +216,9 @@ msgstr "פעולה זו תאתחל את כל ההתראות שלכם להגדר�
 
 msgid "Your notification preferences were updated successfully."
 msgstr "העדפות ההתראה שלך עודכנו בהצלחה."
+
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "העדפות ההתראה שלך אותחלו לברירת מחדל!"
