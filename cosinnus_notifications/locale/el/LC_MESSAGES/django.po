@@ -3,220 +3,214 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-22 12:51+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"PO-Revision-Date: 2021-04-26 14:17+0300\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.2\n"
 
 msgid "You are seeing this alert because you created this content."
-msgstr ""
+msgstr "Βλέπετε αυτή την προειδοποίηση επειδή δημιουργήσατε αυτό το περιεχόμενο."
 
 msgid "You are seeing this alert because you are following the item's project or group."
-msgstr ""
+msgstr "Βλέπετε αυτή την προειδοποίηση επειδή ακολουθείτε το έργο ή την ομάδα του στοιχείου."
 
 msgid "You are seeing this alert because you are following this item."
-msgstr ""
+msgstr "Βλέπετε αυτή την προειδοποίηση επειδή ακολουθείτε αυτό το στοιχείο."
 
 msgid "Notifications"
-msgstr ""
+msgstr "Ειδοποιήσεις"
 
 msgctxt "the_app"
 msgid "notifications"
-msgstr ""
+msgstr "ειδοποιήσεις"
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
-msgstr ""
+msgstr "Η ημερήσια σύνοψή σας για %(portal_name)s"
 
 msgid "This is what happened during the last day!"
-msgstr ""
+msgstr "Αυτό συνέβη την τελευταία ημέρα!"
 
 #, python-format
 msgid "Your weekly digest for %(portal_name)s"
-msgstr ""
+msgstr "Η εβδομαδιαία σύνοψή σας για %(portal_name)s"
 
 msgid "This is what happened during the last week!"
-msgstr ""
+msgstr "Αυτό συνέβη την τελευταία εβδομάδα!"
 
 msgctxt "notification frequency"
 msgid "Never"
-msgstr ""
+msgstr "Ποτέ"
 
 msgctxt "notification frequency"
 msgid "Immediately"
-msgstr ""
+msgstr "Άμεσα"
 
 msgctxt "notification frequency"
 msgid "Daily"
-msgstr ""
+msgstr "Καθημερινά"
 
 msgctxt "notification frequency"
 msgid "Weekly"
-msgstr ""
+msgstr "Εβδομαδιαία"
 
 msgid "Notification Preference for User"
-msgstr ""
+msgstr "Προτίμηση Ειδοποίησης για τον Χρήστη"
 
 msgid "Notification ID"
-msgstr ""
+msgstr "Ταυτότητα Ειδοποίησης"
 
 msgid "Notification Preference"
-msgstr ""
+msgstr "Προτίμηση Ειδοποίησης"
 
 msgid "Notification Preferences"
-msgstr ""
+msgstr "Προτιμήσεις Ειδοποίησης"
 
 msgid "Portal"
-msgstr ""
+msgstr "Πύλη"
 
 msgid "Multi Notification ID"
-msgstr ""
+msgstr "Ταυτότητα Πολλαπλής Ειδοποίησης"
 
 msgid "Multi Notification Preference"
-msgstr ""
+msgstr "Προτίμηση Πολλαπλής Ειδοποίησης"
 
 msgid "Multi Notification Preferences"
-msgstr ""
+msgstr "Προτιμήσεις Πολλαπλής Ειδοποίησης"
 
 msgid "User who caused this notification event"
-msgstr ""
+msgstr "Ο χρήστης που ενεργοποίησε αυτό το συμβάν ειδοποίησης"
 
 msgid "Audience"
-msgstr ""
+msgstr "Κοινό"
 
 msgid "Owner of the alert"
-msgstr ""
+msgstr "Κάτοχος της προειδοποίησης"
 
 msgid "Alert Reason key"
-msgstr ""
+msgstr "Κλειδί Λόγου Προειδοποίησης"
 
 msgid "Last user who caused this notification event"
-msgstr ""
+msgstr "Ο τελευταίος χρήστης που ενεργοποίησε αυτό το συμβάν ειδοποίησης"
 
 msgid "Alert State"
-msgstr ""
+msgstr "Κατάσταση Συναγερμού"
 
 msgid "You are following this content or its Project or Group"
-msgstr ""
+msgstr "Ακολουθείτε αυτό το περιεχόμενο ή το Έργο ή την Ομάδα του"
 
 msgid "All notifications"
-msgstr ""
+msgstr "Όλες οι ειδοποιήσεις"
 
 msgid "No notifications"
-msgstr ""
+msgstr "Καμία ειδοποίηση"
 
 msgid "For content that I am following, I wish to receive notification emails"
-msgstr ""
+msgstr "Για το περιεχόμενο που ακολουθώ, επιθυμώ να λαμβάνω email ειδοποίησης"
 
 msgid "You are getting this notification because you are subscribed to these kinds of events in your project or group."
-msgstr ""
+msgstr "Λαμβάνετε αυτή την ειδοποίηση επειδή έχετε εγγραφεί σε τέτοιου είδους συμβάντα στο έργο ή την ομάδα σας."
 
 msgid "You are getting this notification because you are an administrator of this project or group."
-msgstr ""
+msgstr "Λαμβάνετε αυτή την ειδοποίηση επειδή είστε ο διαχειριστής αυτού του έργου ή της ομάδας."
 
 msgid "You are getting this notification because you are an administrator of this portal."
-msgstr ""
+msgstr "Λαμβάνετε αυτή την ειδοποίηση επειδή είστε ο διαχειριστής αυτής της πύλης."
 
 msgid "You are getting this email because you are subscribed to one or more daily notifications."
-msgstr ""
+msgstr "Λαμβάνετε αυτό το email επειδή έχετε εγγραφεί σε μία ή περισσότερες καθημερινές ειδοποιήσεις."
 
 msgid "You are getting this email because you are subscribed to one or more weekly notifications."
-msgstr ""
+msgstr "Λαμβάνετε αυτό το email επειδή έχετε εγγραφεί σε μία ή περισσότερες εβδομαδιαίες ειδοποιήσεις."
 
 msgid "New item"
-msgstr ""
+msgstr "Νέο στοιχείο"
 
 msgid "Like"
-msgstr ""
+msgstr "Μου αρέσει"
 
 msgid "Follow"
-msgstr ""
+msgstr "Ακολουθώ"
 
 #, python-format
 msgid "View on %(portal_name)s"
-msgstr ""
+msgstr "Προβολή σε %(portal_name)s"
 
 msgid "Untitled"
-msgstr ""
+msgstr "Χωρίς τίτλο"
 
 msgid "Your Profile"
-msgstr ""
+msgstr "Το Προφίλ Σας"
 
 msgid "Select which notifications you would like to receive for each group or project you are involved in."
-msgstr ""
+msgstr "Επιλέξτε ποιες ειδοποιήσεις θα θέλατε να λαμβάνετε για κάθε ομάδα ή έργο με το οποίο ασχολείστε."
 
 msgid "These notifications will be sent to your configured email address:"
-msgstr ""
+msgstr "Αυτές οι ειδοποιήσεις θα σταλούν στη διεύθυνση email που έχετε ορίσει:"
 
 msgid "You can choose to receive notifications as soon as they happen, or you can receive a daily (or weekly) e-mail digest."
-msgstr ""
+msgstr "Μπορείτε να επιλέξετε να λαμβάνετε ειδοποιήσεις μόλις αυτές συμβούν, ή μπορείτε να λαμβάνετε μια καθημερινή (ή εβδομαδιαία) σύνοψη μέσω e-mail."
 
 msgid "The digest will aggregate all notifications with the \"Daily\" (or \"Weekly\") setting from all groups and projects. So you will receive only a single e-mail per day (or week) containing everything interesting that happend."
-msgstr ""
+msgstr "Η σύνοψη θα συγκεντρώνει όλες τις ειδοποιήσεις με ρύθμιση \"Καθημερινή\" (ή \"Εβδομαδιαία) από όλες τις ομάδες ή τα έργα. Επίσης θα λάβετε μόνο ένα e-mail ημερησίως (ή εβδομαδιαίως) που θα περιέχει όλα τα ενδιαφέροντα συμβάντα."
 
 msgid "Notifications you set to \"Immediately\" will be e-mailed to you as soon as they happen, with one e-mail per notification."
-msgstr ""
+msgstr "Οι ειδοποιήσεις που ορίζετε με \"Άμεσα\" θα σας αποστέλλονται στο email σας μόλις συμβούν με ένα e-mail ανά ειδοποίηση."
 
 msgid "Don't forget to save your settings once you are done editing them!"
-msgstr ""
+msgstr "Μην ξεχνάτε να αποθηκεύετε τις ρυθμίσεις σας όταν ολοκληρώνετε την επεξεργασία τους!"
 
 msgid "more"
-msgstr ""
+msgstr "περισσότερα"
 
 msgid "I wish to receive notification emails"
-msgstr ""
-
-msgid "I wish to receive RocketChat notification emails"
-msgstr ""
-
-msgid "Receive notification emails in this language"
-msgstr ""
+msgstr "Επιθυμώ να λαμβάνω email ειδοποίησης"
 
 msgid "Moderator Status (Portal-Admins only)"
-msgstr ""
+msgstr "Κατάσταση Συντονιστή (μόνο Διαχειριστές Πύλης)"
 
 msgid "I wish to be a Moderator for this portal"
-msgstr ""
+msgstr "Επιθυμώ να είμαι ο Συντονιστής αυτής της πύλης"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
-msgstr ""
+msgstr "Ως Συντονιστής θα λαμβάνετε μια άμεση ειδοποίηση όταν αναρτάται ΟΠΟΙΟΔΗΠΟΤΕ περιεχόμενο προβάλλεται δημόσια σε αυτή την πύλη. Εφόσον είστε διαχειριστής πύλης μπορείτε επίσης να διαγράφετε το περιεχόμενο σε περίπτωση που είναι προσβλητικό ή επικριτικό. Για να το διαγράψετε, επισκεφτείτε την σελίδα του περιεχομένου στην ιστοσελίδα εφόσον έχετε συνδεθεί σε αυτόν τον λογαριασμό."
+
+msgid "Receive notification emails in this language"
+msgstr "Λήψη email ειδοποίησης σε αυτή τη γλώσσα"
 
 msgid "Immediately"
-msgstr ""
+msgstr "Άμεσα"
 
 msgid "Daily"
-msgstr ""
+msgstr "Καθημερινά"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Εβδομαδιαίως"
 
 msgid "Custom"
-msgstr ""
+msgstr "Προσαρμοσμένη Ρύθμιση"
 
 msgid "Reset to default"
-msgstr ""
+msgstr "Επαναφορά στην προεπιλογή"
 
 msgid "Save"
-msgstr ""
+msgstr "Αποθήκευση"
 
 msgid "This will reset all of your notification preferences to their default setting. Are you sure you wish to do that?"
-msgstr ""
+msgstr "Με αυτό τον τρόπο θα επαναφέρετε όλες τις προτιμήσεις ειδοποίησής σας στη ρύθμιση προεπιλογής. Είστε βέβαιοι ότι επιθυμείτε να προχωρήσετε σε αυτή την ενέργεια;"
 
 msgid "Your notification preferences were updated successfully."
-msgstr ""
-
-msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
-msgstr ""
+msgstr "Οι προτιμήσεις ειδοποίησης ενημερώθηκαν με επιτυχία."
 
 msgid "Your notifications preferences were reset to default!"
-msgstr ""
+msgstr "Οι προτιμήσεις ειδοποιήσεων έχουν επανέλθει στην προεπιλογή!"
