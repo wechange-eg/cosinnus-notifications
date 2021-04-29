@@ -358,8 +358,8 @@ def init_notifications():
                 for key, default in list(NOTIFICATIONS_DEFAULTS.items()):
                     if options.get(key, None) is None:
                         if default == REQUIRED_NOTIFICATION_ATTRIBUTE or \
-                                (options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML) or \
-                                (not options.get('is_html', False) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_NON_HTML):
+                                (options.get('is_html', False) and options.get('can_be_email', True) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_HTML) or \
+                                (not options.get('is_html', False) and options.get('can_be_email', True) and default == REQUIRED_NOTIFICATION_ATTRIBUTE_FOR_NON_HTML):
                             raise ImproperlyConfigured('Notification options key "%s" in notification signal "%s" is required!' % (key, signal_id))
                         options[key] = default
                 for datakey, datadefault in list(NOTIFICATIONS_DEFAULTS['data_attributes'].items()):
@@ -765,7 +765,7 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
         options = notifications[notification_event.notification_id]
         
         # stub for missing notification for this digest
-        if not options.get('is_html', False):
+        if not options.get('is_html', False) and not only_compile_alert_data:
             logger.exception('Missing HTML snippet configuration for digest encountered for notification setting "%s". Skipping this notification type in this digest!' % notification_event.notification_id)
             return ''
             """
