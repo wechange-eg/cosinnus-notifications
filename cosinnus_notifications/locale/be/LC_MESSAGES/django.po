@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-22 12:51+0200\n"
+"POT-Creation-Date: 2021-05-05 11:03+0200\n"
 "PO-Revision-Date: 2019-05-07 13:19+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -185,10 +185,8 @@ msgstr "больш"
 msgid "I wish to receive notification emails"
 msgstr "Я жадаю атрымліваць электронныя лісты с апавяшчэннямі"
 
-#, fuzzy
-#| msgid "I wish to receive notification emails"
-msgid "I wish to receive RocketChat notification emails"
-msgstr "Я жадаю атрымліваць электронныя лісты с апавяшчэннямі"
+msgid "I would like to receive instant messages by email for RocketChat mentions and direct messages to me"
+msgstr ""
 
 msgid "Receive notification emails in this language"
 msgstr "Атрымліваць электронныя лісты с апавяшчэннямі на гэтай мове"
@@ -231,3 +229,8 @@ msgstr ""
 
 msgid "Your notifications preferences were reset to default!"
 msgstr "Вашы параметры апавяшчэнняў скінутыя да прадвызначаных!"
+
+#, fuzzy
+#~| msgid "I wish to receive notification emails"
+#~ msgid "I wish to receive RocketChat notification emails"
+#~ msgstr "Я жадаю атрымліваць электронныя лісты с апавяшчэннямі"

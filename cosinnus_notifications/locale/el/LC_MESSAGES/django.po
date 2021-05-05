@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-30 19:20+0200\n"
+"POT-Creation-Date: 2021-05-05 11:03+0200\n"
 "PO-Revision-Date: 2021-04-26 14:17+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 2.4.2\n"
 
 msgid "You are seeing this alert because you created this content."
@@ -176,6 +176,12 @@ msgstr "περισσότερα"
 msgid "I wish to receive notification emails"
 msgstr "Επιθυμώ να λαμβάνω email ειδοποίησης"
 
+msgid "I would like to receive instant messages by email for RocketChat mentions and direct messages to me"
+msgstr ""
+
+msgid "Receive notification emails in this language"
+msgstr "Λήψη email ειδοποίησης σε αυτή τη γλώσσα"
+
 msgid "Moderator Status (Portal-Admins only)"
 msgstr "Κατάσταση Συντονιστή (μόνο Διαχειριστές Πύλης)"
 
@@ -184,9 +190,6 @@ msgstr "Επιθυμώ να είμαι ο Συντονιστής αυτής τη
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "Ως Συντονιστής θα λαμβάνετε μια άμεση ειδοποίηση όταν αναρτάται ΟΠΟΙΟΔΗΠΟΤΕ περιεχόμενο προβάλλεται δημόσια σε αυτή την πύλη. Εφόσον είστε διαχειριστής πύλης μπορείτε επίσης να διαγράφετε το περιεχόμενο σε περίπτωση που είναι προσβλητικό ή επικριτικό. Για να το διαγράψετε, επισκεφτείτε την σελίδα του περιεχομένου στην ιστοσελίδα εφόσον έχετε συνδεθεί σε αυτόν τον λογαριασμό."
-
-msgid "Receive notification emails in this language"
-msgstr "Λήψη email ειδοποίησης σε αυτή τη γλώσσα"
 
 msgid "Immediately"
 msgstr "Άμεσα"
@@ -212,5 +215,13 @@ msgstr "Με αυτό τον τρόπο θα επαναφέρετε όλες τ�
 msgid "Your notification preferences were updated successfully."
 msgstr "Οι προτιμήσεις ειδοποίησης ενημερώθηκαν με επιτυχία."
 
+msgid "Your rocketchat setting could not be saved. If this error persists, please configure the setting in the rocketchat user preferences manually!"
+msgstr ""
+
 msgid "Your notifications preferences were reset to default!"
 msgstr "Οι προτιμήσεις ειδοποιήσεων έχουν επανέλθει στην προεπιλογή!"
+
+#, fuzzy
+#~| msgid "I wish to receive notification emails"
+#~ msgid "I wish to receive RocketChat notification emails"
+#~ msgstr "Επιθυμώ να λαμβάνω email ειδοποίησης"
