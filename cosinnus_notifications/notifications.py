@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils import translation, formats
 from importlib import import_module
 from django.utils.timezone import localtime
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext, ugettext_lazy as _
 from django.template.loader import render_to_string
 
 from cosinnus.conf import settings
@@ -459,7 +459,7 @@ class NotificationsThread(Thread):
         
         # the first and foremost global check if we should ever send a mail at all
         if not check_user_can_receive_emails(user):
-            return False
+            return True
         # anonymous authors count as YES, used for recruiting users
         if not user.is_authenticated:
             return True
@@ -725,11 +725,37 @@ class NotificationsThread(Thread):
                     logger.exception('An unknown error occured during NotificationAlert check/creation! Exception in extra.', extra={'exception': force_text(e)})
                     if settings.DEBUG:
                         raise
+
+
+                        # Works not with False
+            # if getattr(settings, 'COSINNUS_NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING', False):
+            #     if options['can_be_email']:
+            #         if receiver.email:
+            #             self.check_user_wants_notification(receiver, self.notification_id, self.obj)
+            #             self.send_instant_notification(notification_event, receiver)
+            #         elif not receiver.email in self.already_emailed_user_emails:
+            #             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
+            #                 self.send_instant_notification(notification_event, receiver)
+            #                 self.already_emailed_user_emails.append(receiver.email)
+
+                        # WORKING CODE!
+            if getattr(settings, 'COSINNUS_NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING', False):
+                if options['can_be_email'] and receiver.email:
+                    self.check_user_wants_notification(receiver, self.notification_id, self.obj)
+                    self.send_instant_notification(notification_event, receiver)    
+            else:
+                if options['can_be_email'] and not receiver.email in self.already_emailed_user_emails:
+                    if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
+                        self.send_instant_notification(notification_event, receiver)
+                        self.already_emailed_user_emails.append(receiver.email)
+
+
             # check for notifications and that we do not email a user for this session twice
-            if options['can_be_email'] and not receiver.email in self.already_emailed_user_emails:
-                if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
-                    self.send_instant_notification(notification_event, receiver)
-                    self.already_emailed_user_emails.append(receiver.email)
+            # if options['can_be_email'] and not receiver.email in self.already_emailed_user_emails:
+            #     if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
+            #         self.send_instant_notification(notification_event, receiver)
+            #         self.already_emailed_user_emails.append(receiver.email)
+
         
         # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
         if self.options['moderatable_content']:
