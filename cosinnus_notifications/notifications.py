@@ -457,9 +457,12 @@ class NotificationsThread(Thread):
             notification event. 
             @param notification_moderator_check: Do a special check to see if a moderator should receive this """
         
-        # the first and foremost global check if we should ever send a mail at all
-        if not check_user_can_receive_emails(user):
-            return True
+        if getattr(settings, 'COSINNUS_NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING', False):
+            # the first and foremost global check if we should ever send a mail at all (considering the state of NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING)
+            if not check_user_can_receive_emails(user):
+                return True
+            else:
+                return False
         # anonymous authors count as YES, used for recruiting users
         if not user.is_authenticated:
             return True
@@ -726,19 +729,7 @@ class NotificationsThread(Thread):
                     if settings.DEBUG:
                         raise
 
-
-                        # Works not with False
-            # if getattr(settings, 'COSINNUS_NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING', False):
-            #     if options['can_be_email']:
-            #         if receiver.email:
-            #             self.check_user_wants_notification(receiver, self.notification_id, self.obj)
-            #             self.send_instant_notification(notification_event, receiver)
-            #         elif not receiver.email in self.already_emailed_user_emails:
-            #             if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
-            #                 self.send_instant_notification(notification_event, receiver)
-            #                 self.already_emailed_user_emails.append(receiver.email)
-
-                        # WORKING CODE!
+            # check for notifications and that we do not email a user for this session twice (except if NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING is True)
             if getattr(settings, 'COSINNUS_NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING', False):
                 if options['can_be_email'] and receiver.email:
                     self.check_user_wants_notification(receiver, self.notification_id, self.obj)
@@ -748,14 +739,6 @@ class NotificationsThread(Thread):
                     if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
                         self.send_instant_notification(notification_event, receiver)
                         self.already_emailed_user_emails.append(receiver.email)
-
-
-            # check for notifications and that we do not email a user for this session twice
-            # if options['can_be_email'] and not receiver.email in self.already_emailed_user_emails:
-            #     if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
-            #         self.send_instant_notification(notification_event, receiver)
-            #         self.already_emailed_user_emails.append(receiver.email)
-
         
         # for moderatable notifications, also always mix in portal admins into audience, because they might be portal moderators
         if self.options['moderatable_content']:
