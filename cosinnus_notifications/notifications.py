@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils import translation, formats
 from importlib import import_module
 from django.utils.timezone import localtime
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext, ugettext_lazy as _
 from django.template.loader import render_to_string
 
 from cosinnus.conf import settings
@@ -457,8 +457,16 @@ class NotificationsThread(Thread):
             notification event. 
             @param notification_moderator_check: Do a special check to see if a moderator should receive this """
         
+        # considers the current state of the NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING switcher
+        #   as well as
+        # the state of notification_id in order to manage the instant email notifications of group invitations 
+        notification_invite_special = getattr(settings, 'COSINNUS_NOTIFICATIONS_GROUP_INVITATIONS_IGNORE_USER_SETTING', False) and notification_id == 'cosinnus__user_group_invited'
+
+
         # the first and foremost global check if we should ever send a mail at all
-        if not check_user_can_receive_emails(user):
+        #   as well as 
+        # check if user receives an instant email notification of being invited to a group even if his/her notification settings say otherwise (never)
+        if not check_user_can_receive_emails(user) and not notification_invite_special:
             return False
         # anonymous authors count as YES, used for recruiting users
         if not user.is_authenticated:
@@ -482,7 +490,11 @@ class NotificationsThread(Thread):
         # user must be able to read object, unless it is a group (otherwise group invitations would never be sent)
         if not check_object_read_access(obj, user) and not (type(obj) is get_cosinnus_group_model() or issubclass(obj.__class__, get_cosinnus_group_model())):
             return False
-        
+
+        # check if user receives an instant email notification of being invited to a group even if his/her notification settings say otherwise (daily/ weekly)
+        if notification_invite_special:
+            return True
+
         # if a user has marked themselves as moderator (portal admins only), 
         # they will receive all publicly visible items immediately for this portal
         if notification_moderator_check:
@@ -725,6 +737,7 @@ class NotificationsThread(Thread):
                     logger.exception('An unknown error occured during NotificationAlert check/creation! Exception in extra.', extra={'exception': force_text(e)})
                     if settings.DEBUG:
                         raise
+
             # check for notifications and that we do not email a user for this session twice
             if options['can_be_email'] and not receiver.email in self.already_emailed_user_emails:
                 if self.check_user_wants_notification(receiver, self.notification_id, self.obj):
