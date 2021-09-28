@@ -279,8 +279,10 @@ class NotificationAlert(models.Model):
             group=self.group, user=self.action_user, 
             notification_id=self.notification_id, target_object=self.target_object
         )
+        # since the object title/text is cached into the same alert *for all users*, 
+        # we disable multilingual adjusting of the target object translated_fields to always cache the main text
         notification_event_data = render_digest_item_for_notification_event(
-            notification_event, only_compile_alert_data=True)
+            notification_event, only_compile_alert_data=True, enable_translated_fields=False)
         
         self.target_title = notification_event_data['object_name']
         self.target_url = notification_event_data['object_url']

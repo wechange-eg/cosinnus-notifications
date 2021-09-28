@@ -771,11 +771,16 @@ class NotificationsThread(Thread):
         return
 
 
-def render_digest_item_for_notification_event(notification_event, return_data=False, only_compile_alert_data=False):
+def render_digest_item_for_notification_event(notification_event, return_data=False, only_compile_alert_data=False,
+                                              enable_translated_fields=True):
     """ Renders the HTML of a single notification event for a receiving user """
     try:
         obj = getattr(notification_event, '_target_object', notification_event.target_object)
         options = notifications[notification_event.notification_id]
+        
+        # Support for `TranslateableFieldsModelMixin
+        if enable_translated_fields and hasattr(obj, 'get_translated_readonly_instance'):
+            obj = obj.get_translated_readonly_instance()
         
         # stub for missing notification for this digest
         if not options.get('is_html', False) and not only_compile_alert_data:
