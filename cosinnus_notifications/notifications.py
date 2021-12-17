@@ -600,21 +600,14 @@ class NotificationsThread(Thread):
         # switch language to user's preference language
         cur_language = translation.get_language()
         try:
-            if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
-                translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
-            elif hasattr(self.user, 'cosinnus_profile'): # if receiver is a virtual user, set language to sender's
-                translation.activate(getattr(self.user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
-
-
             # switch time zone to user's preference time zone
             cur_time_zone = timezone.get_current_timezone()
-            user_time_zone = self.user.cosinnus_profile.timezone.zone # time zone of sender
-            receiver_user_time_zone = receiver.cosinnus_profile.timezone.zone # time zone of receiver
-
-            if hasattr(receiver, 'cosinnus_profile'):
-                timezone.activate(receiver_user_time_zone)
-            elif hasattr(self.user, 'cosinnus_profile'):
-                timezone.activate(user_time_zone)
+            if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
+                translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+                timezone.activate(receiver.cosinnus_profile.timezone.zone) # time zone of receiver
+            elif hasattr(self.user, 'cosinnus_profile'): # if receiver is a virtual user, set language to sender's
+                translation.activate(getattr(self.user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+                timezone.activate(self.user.cosinnus_profile.timezone.zone) # time zone of sender
 
             
             portal = CosinnusPortal.get_current()
