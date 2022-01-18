@@ -655,7 +655,10 @@ class NotificationsThread(Thread):
                 if data.get('object_name', None):
                     context['preview_summary'] = data.get('object_name')
                 subject = _unescape(self.options.get('subject_text') % data.get('string_variables'))
-            
+                # prefix "[Goupname]" before subject
+                team_name_prefix = data.get('string_variables').get('team_name_short', None)
+                if team_name_prefix:
+                    subject = f'[{team_name_prefix}] {subject}'
             else:
                 
                 template = self.options['mail_template']
@@ -685,8 +688,13 @@ class NotificationsThread(Thread):
                     pass
                 subject = render_to_string(subj_template, context)
             
-            
-            send_mail_or_fail(receiver.email, subject, template, context, is_html=is_html)
+            portal_name =  force_text(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS))
+            username = strip_tags(full_name(notification_event.user))
+            # add from-email readable name (yes, this is how this works)
+            from_email = '%(username)s via %(portal_name)s <%(from_email)s>' % {'username': username,'portal_name': portal_name, 'from_email': settings.COSINNUS_DEFAULT_FROM_EMAIL}
+            # Workaround: django 2.x does not support non-ascii chars in the from_email, so strip all non-ascii chars!
+            from_email = from_email.encode("ascii", errors="ignore").decode()
+            send_mail_or_fail(receiver.email, subject, template, context, from_email=from_email, is_html=is_html)
             
         finally:
             translation.activate(cur_language)
@@ -806,7 +814,9 @@ def render_digest_item_for_notification_event(notification_event, return_data=Fa
             'object_name': escape(object_name) if object_name else '',
             'portal_name': escape(_(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)),
             'team_name': escape(notification_event.group['name']) if getattr(notification_event, 'group', None) is not None else '(unknowngroup)',
+            'team_name_short': escape(notification_event.group['name'][:11]) if getattr(notification_event, 'group', None) is not None else '(unknowngroup)', # first 10 characters given
         }
+
         event_text = options['event_text']
         
         # make the 'sender_name' variable in event_text bold
