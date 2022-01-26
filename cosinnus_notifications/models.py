@@ -9,6 +9,7 @@ import six
 from annoying.functions import get_object_or_None
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import Q
 from django.template.defaultfilters import date
@@ -237,10 +238,10 @@ class NotificationAlert(models.Model):
     counter = models.PositiveIntegerField(default=0,
             help_text='A counter for displaying a number in the alert like "Amy and [counter] more liked your post".' +\
                         'Used in multi and bundle alerts.')
-    multi_user_list = models.JSONField(null=True, blank=True,
+    multi_user_list = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder,
             help_text='Only filled if type==TYPE_MULTI_USER_ALERT, None else.' +\
             'Contains a list of objects for referenced users [{"user_id", "title" (username), "url", "icon_or_image_url"}, ...]')
-    bundle_list = models.JSONField(null=True, blank=True,
+    bundle_list = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder,
             help_text='Only filled if type==TYPE_BUNDLE_ALERT, None else.' +\
             'Contains a list of objects for referenced content objects [{"object_id", "title", "url", "icon_or_image_url"}, ...]')
     
