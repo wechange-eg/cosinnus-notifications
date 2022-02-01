@@ -4,16 +4,16 @@ from __future__ import unicode_literals
 from builtins import object
 from builtins import str
 import logging
+import six
 
 from annoying.functions import get_object_or_None
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields.jsonb import JSONField
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import Q
 from django.template.defaultfilters import date
 from django.templatetags.static import static
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
@@ -64,7 +64,7 @@ class BaseUserNotificationPreference(models.Model):
         abstract = True
         
     
-@python_2_unicode_compatible
+@six.python_2_unicode_compatible
 class UserNotificationPreference(BaseUserNotificationPreference):
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -91,7 +91,7 @@ class UserNotificationPreference(BaseUserNotificationPreference):
         }
 
 
-@python_2_unicode_compatible
+@six.python_2_unicode_compatible
 class UserMultiNotificationPreference(BaseUserNotificationPreference):
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -131,7 +131,7 @@ class UserMultiNotificationPreference(BaseUserNotificationPreference):
             return MULTI_NOTIFICATION_IDS[multi_notification_id]
 
 
-@python_2_unicode_compatible
+@six.python_2_unicode_compatible
 class NotificationEvent(models.Model):
     
     class Meta(object):
@@ -163,7 +163,7 @@ class NotificationEvent(models.Model):
         }
 
 
-@python_2_unicode_compatible
+@six.python_2_unicode_compatible
 class NotificationAlert(models.Model):
     """ An instant notification alert for something relevant that happened for a user, shown in the navbar dropdown.
         
@@ -238,10 +238,10 @@ class NotificationAlert(models.Model):
     counter = models.PositiveIntegerField(default=0,
             help_text='A counter for displaying a number in the alert like "Amy and [counter] more liked your post".' +\
                         'Used in multi and bundle alerts.')
-    multi_user_list = JSONField(null=True, blank=True,
+    multi_user_list = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder,
             help_text='Only filled if type==TYPE_MULTI_USER_ALERT, None else.' +\
             'Contains a list of objects for referenced users [{"user_id", "title" (username), "url", "icon_or_image_url"}, ...]')
-    bundle_list = JSONField(null=True, blank=True,
+    bundle_list = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder,
             help_text='Only filled if type==TYPE_BUNDLE_ALERT, None else.' +\
             'Contains a list of objects for referenced content objects [{"object_id", "title", "url", "icon_or_image_url"}, ...]')
     
