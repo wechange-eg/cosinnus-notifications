@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.db.models import Q
 from django.template.loader import render_to_string
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.html import strip_tags
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
@@ -98,7 +98,11 @@ def send_digest_for_current_portal(digest_setting):
         if (digest_setting == UserNotificationPreference.SETTING_DAILY and global_setting == GlobalUserNotificationSetting.SETTING_DAILY) \
                 or (digest_setting == UserNotificationPreference.SETTING_WEEKLY and global_setting == GlobalUserNotificationSetting.SETTING_WEEKLY):
             global_wanted = True # user wants ALL events in his digest for this digest setting
-        
+
+
+        cur_time_zone = timezone.get_current_timezone()
+        user_time_zone = user.cosinnus_profile.timezone.zone
+
         cur_language = translation.get_language()
         try:
             # only active users that have logged in before accepted the TOS get notifications
@@ -107,6 +111,9 @@ def send_digest_for_current_portal(digest_setting):
             
             # switch language to user's preference language so all i18n and date formats are in their language
             translation.activate(getattr(user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+
+            # switch time zone to user's preference time zone so all time formats are in their time zones
+            timezone.activate(user_time_zone)
             
             # get all notification events where the user is in the intended audience
             events = timescope_notification_events.filter(audience__contains=',%d,' % user.id)
@@ -232,6 +239,7 @@ def send_digest_for_current_portal(digest_setting):
         finally:
             # switch language back
             translation.activate(cur_language)
+            timezone.activate(cur_time_zone)
         
             
     # save the end time of the digest period as last digest time for this type

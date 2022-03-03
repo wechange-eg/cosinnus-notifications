@@ -4,10 +4,11 @@ from __future__ import unicode_literals
 from builtins import str
 import logging
 import datetime
+from cosinnus.utils.context_processors import cosinnus
 
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
-from django.utils import translation, formats
+from django.utils import translation, formats, timezone
 from importlib import import_module
 from django.utils.timezone import localtime
 from django.utils.translation import gettext, ugettext_lazy as _
@@ -595,14 +596,19 @@ class NotificationsThread(Thread):
         """ Sends out an instant notification for this thread's event to someone who wants it """
         
         from cosinnus.utils.context_processors import cosinnus as cosinnus_context
-        
+
         # switch language to user's preference language
         cur_language = translation.get_language()
         try:
+            # switch time zone to user's preference time zone
+            cur_time_zone = timezone.get_current_timezone()
             if hasattr(receiver, 'cosinnus_profile'): # receiver can be a virtual user
                 translation.activate(getattr(receiver.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+                timezone.activate(receiver.cosinnus_profile.timezone.zone) # time zone of receiver
             elif hasattr(self.user, 'cosinnus_profile'): # if receiver is a virtual user, set language to sender's
                 translation.activate(getattr(self.user.cosinnus_profile, 'language', settings.LANGUAGES[0][0]))
+                timezone.activate(self.user.cosinnus_profile.timezone.zone) # time zone of sender
+
             
             portal = CosinnusPortal.get_current()
             site = portal.site
@@ -698,6 +704,7 @@ class NotificationsThread(Thread):
             
         finally:
             translation.activate(cur_language)
+            timezone.activate(cur_time_zone)
 
     def create_new_user_alert(self, notification_event, receiver, reason_key=None):
         """ Creates a NotificationAlert for this Thread for a NotificationEvent to someone who wants it """
