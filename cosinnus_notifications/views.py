@@ -34,6 +34,7 @@ from cosinnus_notifications.notifications import notifications, \
     ALL_NOTIFICATIONS_ID, NO_NOTIFICATIONS_ID, \
     set_user_group_notifications_special, MULTI_NOTIFICATION_IDS, \
     MULTI_NOTIFICATION_LABELS
+from django.core.cache import cache
 
 
 class NotificationPreferenceView(ListView):
@@ -264,7 +265,9 @@ def notification_reset_view(request):
 
 
 class AlertsRetrievalView(BasePagedOffsetWidgetView):
-
+    
+    ALERTS_USER_DATA_CACHE_KEY = 'cosinnus/core/alerts/user/%(user_id)s/data'
+    
     default_page_size = 10
     offset_model_field = 'last_event_at'
     
@@ -323,21 +326,27 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
         return items
     
     def get_data(self, **kwargs):
-        data = super(AlertsRetrievalView, self).get_data(**kwargs)
-        data.update({
-            'newest_timestamp': self.newest_timestamp,
-            'unseen_count': self.unseen_count,
-        })
-        # if the query was a poll:
-        if self.newer_than_timestamp:
+        # we cache this data, even if polling is slower than the cache timeout, to prevent
+        # high load on many open tabs by the same user
+        cache_key = self.ALERTS_USER_DATA_CACHE_KEY % {'user_id': self.request.user.id}
+        data = cache.get(cache_key)
+        if not data:
+            data = super(AlertsRetrievalView, self).get_data(**kwargs)
             data.update({
-                'polled_timestamp': self.newer_than_timestamp,
+                'newest_timestamp': self.newest_timestamp,
+                'unseen_count': self.unseen_count,
             })
-        # if the query was not a load-more request:
-        if not self.offset_timestamp:
-            data.update({
-                'unread_messages_count': get_unread_message_count_for_user(self.request.user),
-            })
+            # if the query was a poll:
+            if self.newer_than_timestamp:
+                data.update({
+                    'polled_timestamp': self.newer_than_timestamp,
+                })
+            # if the query was not a load-more request:
+            if not self.offset_timestamp:
+                data.update({
+                    'unread_messages_count': get_unread_message_count_for_user(self.request.user),
+                })
+            cache.set(cache_key, data, settings.COSINNUS_NOTIFICATION_ALERTS_CACHE_TIMEOUT)
         return data
     
 alerts_retrieval_view = AlertsRetrievalView.as_view()
