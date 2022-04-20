@@ -35,6 +35,9 @@ from cosinnus_notifications.notifications import notifications, \
     set_user_group_notifications_special, MULTI_NOTIFICATION_IDS, \
     MULTI_NOTIFICATION_LABELS
 from django.core.cache import cache
+from cosinnus_notifications.alerts import ALERTS_USER_DATA_CACHE_KEY
+
+
 
 
 class NotificationPreferenceView(ListView):
@@ -266,8 +269,6 @@ def notification_reset_view(request):
 
 class AlertsRetrievalView(BasePagedOffsetWidgetView):
     
-    ALERTS_USER_DATA_CACHE_KEY = 'cosinnus/core/alerts/user/%(user_id)s/data'
-    
     default_page_size = 10
     offset_model_field = 'last_event_at'
     
@@ -328,7 +329,7 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
     def get_data(self, **kwargs):
         # we cache this data, even if polling is slower than the cache timeout, to prevent
         # high load on many open tabs by the same user
-        cache_key = self.ALERTS_USER_DATA_CACHE_KEY % {'user_id': self.request.user.id}
+        cache_key = ALERTS_USER_DATA_CACHE_KEY % {'user_id': self.request.user.id}
         data = cache.get(cache_key)
         if not data:
             data = super(AlertsRetrievalView, self).get_data(**kwargs)
@@ -377,6 +378,11 @@ def alerts_mark_seen(request, before_timestamp=None):
         seen=False
     )
     unseen_alerts.update(seen=True)
+    
+    # delete user-entry cache to be fresh instantly alerts on refresh
+    cache_key = ALERTS_USER_DATA_CACHE_KEY % {'user_id': request.user.id}
+    cache.delete(cache_key)
+    
     return HttpResponse('ok')
 
     
