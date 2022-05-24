@@ -37,7 +37,7 @@ from cosinnus.utils.functions import resolve_attributes
 logger = logging.getLogger('cosinnus')
 
 
-def send_digest_for_current_portal(digest_setting):
+def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
     """ Sends out a daily/weekly digest email to all users *IN THE CURRENT PORTAL*
              who have any notification preferences set to that frequency.
         We will send all events that happened within this
@@ -47,6 +47,8 @@ def send_digest_for_current_portal(digest_setting):
               to balance loads better.
     
         @param digest_setting: UserNotificationPreference.SETTING_DAILY or UserNotificationPreference.SETTING_WEEKLY
+        @param debug_run_for_user: if set to a User object, this will only generate a test digest for the given user
+            and return it as html string. no portal modifications will be made
     """
     portal = CosinnusPortal.get_current()
     portal_group_ids = portal.groups.all().filter(is_active=True).values_list('id', flat=True)
@@ -60,49 +62,55 @@ def send_digest_for_current_portal(digest_setting):
     
     # the main Notification Events QS. anything not in here did not happen in the digest's time span
     timescope_notification_events = NotificationEvent.objects.filter(date__gte=TIME_DIGEST_START, date__lt=TIME_DIGEST_END)
-    users = get_user_model().objects.all().filter(id__in=portal.members)
+    if debug_run_for_user:
+        users = [debug_run_for_user]
+    else:
+        users = get_user_model().objects.all().filter(id__in=portal.members)
+        extra_info = {
+            'notification_event_count': timescope_notification_events.count(),
+            'potential_user_count': users.count(), 
+        }
+        logger.info('Now starting to sending out digests of SETTING=%s in Portal "%s". Data in extra.' % \
+                    (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_info)
+        if settings.DEBUG:
+            print((">> ", extra_info))
     
-    extra_info = {
-        'notification_event_count': timescope_notification_events.count(),
-        'potential_user_count': users.count(), 
-    }
-    logger.info('Now starting to sending out digests of SETTING=%s in Portal "%s". Data in extra.' % \
-                (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_info)
-    if settings.DEBUG:
-        print((">> ", extra_info))
     
     emailed = 0
     for user in users:
-        if getattr(settings, 'COSINNUS_DIGEST_ONLY_FOR_ADMINS', False) and not user.is_superuser:
-            continue
-        if not check_user_can_receive_emails(user):
-            continue
+        if debug_run_for_user:
+            global_wanted = True
+            multi_prefs = list(UserMultiNotificationPreference.objects.filter(user=user, portal=CosinnusPortal.get_current(), setting=digest_setting)\
+                    .values_list('multi_notification_id', flat=True))
+        else:
+            if getattr(settings, 'COSINNUS_DIGEST_ONLY_FOR_ADMINS', False) and not user.is_superuser:
+                continue
+            if not check_user_can_receive_emails(user):
+                continue
         
-        # get all of user's multi prefs for this digest setting 
-        only_multi_prefs_wanted = False
-        multi_prefs = list(UserMultiNotificationPreference.objects.filter(user=user, portal=CosinnusPortal.get_current(), setting=digest_setting)\
-                .values_list('multi_notification_id', flat=True))
-        # check global blanket settings
-        global_wanted = False # flag to allow all events
-        global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
-        
-        # check if global blanketing settings allow for sending this digest to the user
-        if global_setting != digest_setting and global_setting != GlobalUserNotificationSetting.SETTING_GROUP_INDIVIDUAL:
-            if not multi_prefs:
-                # users who don't have the global setting AND the multi pref setting set to this digest never get an email
-                continue 
-            else:
-                # user still has a multi pref setting for this digest_setting, so go on and check
-                only_multi_prefs_wanted = True 
-        
-        if (digest_setting == UserNotificationPreference.SETTING_DAILY and global_setting == GlobalUserNotificationSetting.SETTING_DAILY) \
-                or (digest_setting == UserNotificationPreference.SETTING_WEEKLY and global_setting == GlobalUserNotificationSetting.SETTING_WEEKLY):
-            global_wanted = True # user wants ALL events in his digest for this digest setting
-
+            # get all of user's multi prefs for this digest setting 
+            only_multi_prefs_wanted = False
+            multi_prefs = list(UserMultiNotificationPreference.objects.filter(user=user, portal=CosinnusPortal.get_current(), setting=digest_setting)\
+                    .values_list('multi_notification_id', flat=True))
+            # check global blanket settings
+            global_wanted = False # flag to allow all events
+            global_setting = GlobalUserNotificationSetting.objects.get_for_user(user)
+            
+            # check if global blanketing settings allow for sending this digest to the user
+            if global_setting != digest_setting and global_setting != GlobalUserNotificationSetting.SETTING_GROUP_INDIVIDUAL:
+                if not multi_prefs:
+                    # users who don't have the global setting AND the multi pref setting set to this digest never get an email
+                    continue 
+                else:
+                    # user still has a multi pref setting for this digest_setting, so go on and check
+                    only_multi_prefs_wanted = True 
+            
+            if (digest_setting == UserNotificationPreference.SETTING_DAILY and global_setting == GlobalUserNotificationSetting.SETTING_DAILY) \
+                    or (digest_setting == UserNotificationPreference.SETTING_WEEKLY and global_setting == GlobalUserNotificationSetting.SETTING_WEEKLY):
+                global_wanted = True # user wants ALL events in his digest for this digest setting
 
         cur_time_zone = timezone.get_current_timezone()
         user_time_zone = user.cosinnus_profile.timezone.zone
-
         cur_language = translation.get_language()
         try:
             # only active users that have logged in before accepted the TOS get notifications
@@ -224,6 +232,8 @@ def send_digest_for_current_portal(digest_setting):
                     group_html = render_to_string('cosinnus/html_mail/summary_group.html', context=group_template_context)
                     body_html += group_html + '\n'
             
+            if debug_run_for_user:
+                return body_html
             # send actual email with full frame template
             if body_html:
                 _send_digest_email(user, mark_safe(body_html), TIME_DIGEST_END, digest_setting)
@@ -257,12 +267,11 @@ def send_digest_for_current_portal(digest_setting):
     logger.info('Finished sending out digests of SETTING=%s in Portal "%s". Data in extra.' % (UserNotificationPreference.SETTING_CHOICES[digest_setting][1], portal.slug), extra=extra_log)
     if settings.DEBUG:
         print(extra_log)
-    
 
-def _send_digest_email(receiver, body_html, digest_generation_time, digest_setting):
-    """ Prepares the actual digest mail and sends it """
-    
-    template = '/cosinnus/html_mail/digest.html'
+
+def _get_digest_email_context(receiver, body_html, digest_generation_time, digest_setting):
+    """ Gets the context for rendering the template for the actual digest mail.
+        Used for `_send_digest_email()` """
     portal_name =  _(settings.COSINNUS_BASE_PAGE_TITLE_TRANS)
     if digest_setting == UserNotificationPreference.SETTING_DAILY:
         subject = _('Your daily digest for %(portal_name)s') % {'portal_name': portal_name}
@@ -292,8 +301,16 @@ def _send_digest_email(receiver, body_html, digest_generation_time, digest_setti
         'prefs_url': mark_safe(preference_url),
         'notification_reason': reason,
         'digest_setting': digest_setting,
+        'subject': subject,
     }
-    send_mail_or_fail(receiver.email, subject, template, context, is_html=True)
+    return context
+
+
+def _send_digest_email(receiver, body_html, digest_generation_time, digest_setting):
+    """ Prepares the actual digest mail and sends it """
+    template = '/cosinnus/html_mail/digest.html'
+    context = _get_digest_email_context(receiver, body_html, digest_generation_time, digest_setting)
+    send_mail_or_fail(receiver.email, context['subject'], template, context, is_html=True)
 
 
 def cleanup_stale_notifications():
