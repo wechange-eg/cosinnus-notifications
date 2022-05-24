@@ -33,8 +33,17 @@ import traceback
 from django.templatetags.static import static
 from cosinnus.models.profile import GlobalUserNotificationSetting
 from cosinnus.utils.functions import resolve_attributes
+from cosinnus.utils.files import get_image_url_for_icon
+from cosinnus.utils.user import is_user_active
+import copy
 
 logger = logging.getLogger('cosinnus')
+
+# this category header will only be shown if there is at least one other category defined in
+# COSINNUS_NOTIFICATIONS_DIGEST_CATEGORIES
+DEFAULT_DIGEST_CATEGORY = [
+    (_('Groups and Projects'), [], 'fa-sitemap', 'cosinnus:user-dashboard'),
+]
 
 
 def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
@@ -177,60 +186,96 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                     'notification_id': pref.notification_id,
                 } for pref in prefs]
             
-            # cluster event messages by group. from here on, the user will almost definitely get an email.
+            # cluster event messages by categories and then by group. 
+            # from here on, the user will almost definitely get an email.
+            categories = copy.deepcopy(settings.COSINNUS_NOTIFICATIONS_DIGEST_CATEGORIES) or []
+            categories += DEFAULT_DIGEST_CATEGORY
             body_html = ''
-            for group in list(set(events.values_list('group', flat=True))): 
-                group_events = events.filter(group=group).order_by('-id') # id faster than ordering by created date 
-                
-                # filter only those events that the user actually has in his prefs, for this group and also
-                # check for target object existing, being visible to user, and other sanity checks if the user should see this object
-                wanted_group_events = []
-                for event in group_events:
-                    is_multipref = is_notification_multipref(event.notification_id)
-                    statecheck = get_requires_object_state_check(event.notification_id)
-                    if user == event.user:
-                        continue  # users don't receive infos about events they caused
-                    if not is_multipref and not global_wanted and not only_multi_prefs_wanted: # skip finegrained preference check on blanket YES
-                        if not (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
-                                ('%d__%s' % (event.group_id, event.notification_id) in wanted_group_notifications)):
-                            continue  # must have an actual subscription to that event type
-                    if event.target_object is None:
-                        continue  # referenced object has been deleted by now
-                    if not check_object_read_access(event.target_object, user):
-                        continue  # user must be able to even see referenced object 
-                    # statecheck if defined, for example for checking if the user is still following the object
-                    if statecheck:
-                        if not resolve_attributes(event.target_object, statecheck, func_args=[user]):
-                            continue
-                    wanted_group_events.append(event)
-                
-                wanted_group_events = sorted(wanted_group_events,  key=lambda e: e.date)
-                
-                # Throw out duplicate events (eg "X was updated" multiple times) for the same object and superceded events. 
-                # The most recent event is always kept.
-                # - follow-events have a supercede list of events that are always less important than the follow-event
-                # - this means that a "created" event would be thrown out by a later "an item you followed was updated" on the same object
-                for this_event in wanted_group_events[:]:
-                    for other_event in wanted_group_events[:]:
-                        if not other_event == this_event:
-                            unprefixed_this_notification_id = this_event.notification_id.split('__')[1]
-                            if this_event.target_object == other_event.target_object and \
-                                    (this_event.notification_id == other_event.notification_id or \
-                                     unprefixed_this_notification_id in get_superceded_multi_preferences(other_event.notification_id)):
-                                wanted_group_events.remove(this_event)
-                                break
-                
-                if wanted_group_events:
-                    group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
-                    group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
-                    group_template_context = {
-                        'group_body_html': mark_safe(group_body_html),
-                        'group_image_url': CosinnusPortal.get_current().get_domain() + group.get_avatar_thumbnail_url(),
-                        'group_url': group.get_absolute_url(),
-                        'group_name': group['name'],
+            categorized_notification_ids = [nid for __,nids,__,__ in categories for nid in nids]
+            for cat_label, cat_notification_ids, cat_icon, cat_url_rev in categories:
+                # add category header if there is more than one category
+                if len(categories) > 1:
+                    header_context = {
+                        'group_body_html': '', # empty on purpose as a header has no body
+                        'group_image_url': get_image_url_for_icon(cat_icon, large=True),
+                        'group_url': reverse(cat_url_rev),
+                        'group_name': cat_label,
                     }
-                    group_html = render_to_string('cosinnus/html_mail/summary_group.html', context=group_template_context)
-                    body_html += group_html + '\n'
+                    category_header_html = render_to_string('cosinnus/html_mail/summary_group.html', context=header_context)
+                    body_html += category_header_html + '\n'
+                
+                for group in list(set(events.values_list('group', flat=True))): 
+                    group_events = events.filter(group=group).order_by('-id') # id faster than ordering by created date 
+                    
+                    # filter only those events that the user actually has in his prefs, for this group and also
+                    # check for target object existing, being visible to user, and other sanity checks if the user should see this object
+                    wanted_group_events = []
+                    for event in group_events:
+                        # include the event only if it belongs to the right category,
+                        # i.e. it is either in the current list of category-ids or 
+                        # the current list is empty ("all ids") and the id does not 
+                        # appear in any other category
+                        _app_label, current_notification_id = event.notification_id.split('__')
+                        if not (current_notification_id in cat_notification_ids or \
+                                (len(cat_notification_ids) == 0 and current_notification_id not in categorized_notification_ids)):
+                            continue
+                        is_multipref = is_notification_multipref(event.notification_id)
+                        statecheck = get_requires_object_state_check(event.notification_id)
+                        if user == event.user:
+                            continue  # users don't receive infos about events they caused
+                        if not is_user_active(event.user):
+                            continue # users who are inactive by now are probably banned, so ignore their content
+                        if not is_multipref and not global_wanted and not only_multi_prefs_wanted: # skip finegrained preference check on blanket YES
+                            if not (('%d__%s' % (event.group_id, ALL_NOTIFICATIONS_ID) in wanted_group_notifications) or \
+                                    ('%d__%s' % (event.group_id, event.notification_id) in wanted_group_notifications)):
+                                continue  # must have an actual subscription to that event type
+                        if event.target_object is None:
+                            continue  # referenced object has been deleted by now
+                        if not check_object_read_access(event.target_object, user):
+                            continue  # user must be able to even see referenced object 
+                        # statecheck if defined, for example for checking if the user is still following the object
+                        if statecheck:
+                            if not resolve_attributes(event.target_object, statecheck, func_args=[user]):
+                                continue
+                        wanted_group_events.append(event)
+                    
+                    wanted_group_events = sorted(wanted_group_events,  key=lambda e: e.date)
+                    
+                    # Throw out duplicate events (eg "X was updated" multiple times) for the same object and superceded events. 
+                    # The most recent event is always kept.
+                    # - follow-events have a supercede list of events that are always less important than the follow-event
+                    # - this means that a "created" event would be thrown out by a later "an item you followed was updated" on the same object
+                    for this_event in wanted_group_events[:]:
+                        for other_event in wanted_group_events[:]:
+                            if not other_event == this_event:
+                                unprefixed_this_notification_id = this_event.notification_id.split('__')[1]
+                                if this_event.target_object == other_event.target_object and \
+                                        (this_event.notification_id == other_event.notification_id or \
+                                         unprefixed_this_notification_id in get_superceded_multi_preferences(other_event.notification_id)):
+                                    wanted_group_events.remove(this_event)
+                                    break
+                    
+                    if wanted_group_events:
+                        group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
+                        group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
+                        # categories display their items in a condensed list directly under their header
+                        # and the default category displays in a clustered form within a header for each group
+                        if len(cat_notification_ids) > 0:
+                            body_html += group_body_html + '\n'
+                        else:
+                            group_template_context = {
+                                'group_body_html': mark_safe(group_body_html),
+                                'group_image_url': CosinnusPortal.get_current().get_domain() + group.get_avatar_thumbnail_url(),
+                                'group_url': group.get_absolute_url(),
+                                'group_name': group['name'],
+                            }
+                            group_html = render_to_string('cosinnus/html_mail/summary_group.html', context=group_template_context)
+                            body_html += group_html + '\n'
+                        
+                # end for group
+            # end for category
+                    
+                    
             
             if debug_run_for_user:
                 return body_html
