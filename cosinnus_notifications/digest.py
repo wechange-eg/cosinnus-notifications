@@ -194,6 +194,8 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
             categorized_notification_ids = [nid for __,nids,__,__ in categories for nid in nids]
             for cat_label, cat_notification_ids, cat_icon, cat_url_rev in categories:
                 # add category header if there is more than one category
+                category_header_html = ''
+                category_html = ''
                 if len(categories) > 1:
                     header_context = {
                         'group_body_html': '', # empty on purpose as a header has no body
@@ -202,7 +204,6 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                         'group_name': cat_label,
                     }
                     category_header_html = render_to_string('cosinnus/html_mail/summary_group.html', context=header_context)
-                    body_html += category_header_html + '\n'
                 
                 for group in list(set(events.values_list('group', flat=True))): 
                     group_events = events.filter(group=group).order_by('-id') # id faster than ordering by created date 
@@ -256,12 +257,14 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                                     break
                     
                     if wanted_group_events:
+                        
+                        
                         group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
                         group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
                         # categories display their items in a condensed list directly under their header
                         # and the default category displays in a clustered form within a header for each group
                         if len(cat_notification_ids) > 0:
-                            body_html += group_body_html + '\n'
+                            category_html += group_body_html + '\n'
                         else:
                             group_template_context = {
                                 'group_body_html': mark_safe(group_body_html),
@@ -270,9 +273,12 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                                 'group_name': group['name'],
                             }
                             group_html = render_to_string('cosinnus/html_mail/summary_group.html', context=group_template_context)
-                            body_html += group_html + '\n'
-                        
+                            category_html += group_html + '\n'
                 # end for group
+                
+                if category_html:
+                    category_html = category_header_html + '\n' + category_html
+                    body_html += category_html + '\n'
             # end for category
                     
                     
