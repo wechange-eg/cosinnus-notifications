@@ -42,7 +42,7 @@ logger = logging.getLogger('cosinnus')
 # this category header will only be shown if there is at least one other category defined in
 # COSINNUS_NOTIFICATIONS_DIGEST_CATEGORIES
 DEFAULT_DIGEST_CATEGORY = [
-    (_('Groups and Projects'), [], 'fa-sitemap', 'cosinnus:user-dashboard'),
+    (_('Groups and Projects'), [], 'fa-sitemap', 'cosinnus:user-dashboard', None),
 ]
 
 
@@ -191,8 +191,8 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
             categories = copy.deepcopy(settings.COSINNUS_NOTIFICATIONS_DIGEST_CATEGORIES) or []
             categories += DEFAULT_DIGEST_CATEGORY
             body_html = ''
-            categorized_notification_ids = [nid for __,nids,__,__ in categories for nid in nids]
-            for cat_label, cat_notification_ids, cat_icon, cat_url_rev in categories:
+            categorized_notification_ids = [nid for __,nids,__,__,__ in categories for nid in nids]
+            for cat_label, cat_notification_ids, cat_icon, cat_url_rev, cat_group_func in categories:
                 # add category header if there is more than one category
                 category_header_html = ''
                 category_html = ''
@@ -220,6 +220,9 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                         if not (current_notification_id in cat_notification_ids or \
                                 (len(cat_notification_ids) == 0 and current_notification_id not in categorized_notification_ids)):
                             continue
+                        if cat_group_func is not None and hasattr(event, 'group') and event.group and not cat_group_func(event.group):
+                            continue
+                        
                         is_multipref = is_notification_multipref(event.notification_id)
                         statecheck = get_requires_object_state_check(event.notification_id)
                         if user == event.user:
@@ -257,13 +260,13 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                                     break
                     
                     if wanted_group_events:
-                        
-                        
                         group = wanted_group_events[0].group # needs to be resolved, values_list returns only id ints
                         group_body_html = '\n'.join([render_digest_item_for_notification_event(event) for event in wanted_group_events])
-                        # categories display their items in a condensed list directly under their header
+                        # categories may display their items in a condensed list directly under their header
                         # and the default category displays in a clustered form within a header for each group
-                        if len(cat_notification_ids) > 0:
+                        # note: currently disabled and not extracted into a conf setting until it is wished for
+                        condense_categories = False
+                        if condense_categories and len(cat_notification_ids) > 0:
                             category_html += group_body_html + '\n'
                         else:
                             group_template_context = {
@@ -279,6 +282,9 @@ def send_digest_for_current_portal(digest_setting, debug_run_for_user=None):
                 if category_html:
                     category_html = category_header_html + '\n' + category_html
                     body_html += category_html + '\n'
+                    # we currently don't have a proper category header, so add a larger space in-between categories, except for the last
+                    if len(cat_notification_ids) > 0:
+                        body_html += '<br/><br/>\n'
             # end for category
                     
                     
