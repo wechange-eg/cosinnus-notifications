@@ -332,7 +332,7 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
         data = None
         cache_key = ALERTS_USER_DATA_CACHE_KEY % {'user_id': self.request.user.id}
         # only cache initial full-data retrieves, not the polled requests from a specific timestamp
-        if not self.newer_than_timestamp:
+        if not self.newer_than_timestamp and not self.offset_timestamp:
             data = cache.get(cache_key)
         if not data:
             data = super(AlertsRetrievalView, self).get_data(**kwargs)
@@ -351,7 +351,7 @@ class AlertsRetrievalView(BasePagedOffsetWidgetView):
                     'unread_messages_count': get_unread_message_count_for_user(self.request.user),
                 })
             # only cache initial full-data retrieves, not the polled requests from a specific timestamp
-            if not self.newer_than_timestamp:
+            if not self.newer_than_timestamp and not self.offset_timestamp:
                 cache.set(cache_key, data, settings.COSINNUS_NOTIFICATION_ALERTS_CACHE_TIMEOUT)
         return data
     
