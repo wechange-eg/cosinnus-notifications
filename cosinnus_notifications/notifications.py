@@ -94,7 +94,6 @@ NOTIFICATION_REASONS = {
     'daily_digest': _('You are getting this email because you are subscribed to one or more daily notifications.'),
     'weekly_digest': _('You are getting this email because you are subscribed to one or more weekly notifications.'),
     'moderator_alert': 'This is a Portal Moderator notification. Filter your mails using this token: PORTALMODERATORALERT.', # this is untranslated so that moderators can filter their mails for it
-    'conference_member_or_pending': _('You are getting this notification because you are a member of this conference or have applied for membership.'),
     'none': None, # the entire lower section won't be shown
 }
 
