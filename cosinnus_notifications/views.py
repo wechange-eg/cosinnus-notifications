@@ -234,7 +234,6 @@ class NotificationPreferenceView(ListView):
             })
         
         # get conferences user is pending for or is a member of
-        # TODO: this part shares the same bug with `core:ConferenceRemindersForm:__init__`; check this one out for changes as soon as the bug gets fixed 
         user = self.request.user
         user_conferences = CosinnusConference.objects.get_for_user_pks(user)
         pending_application_qs = CosinnusConferenceApplication.objects.filter(user=user).pending().filter(may_be_contacted=True)
