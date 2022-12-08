@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-01 15:43+0200\n"
+"POT-Creation-Date: 2022-12-08 14:50+0100\n"
 "PO-Revision-Date: 2020-10-11 23:25+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -33,6 +33,9 @@ msgstr "Notificare"
 msgctxt "the_app"
 msgid "notifications"
 msgstr "notificări"
+
+msgid "Groups and Projects"
+msgstr ""
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
@@ -193,6 +196,9 @@ msgstr "Doresc să fiu Moderator pentru acest portal"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "Ca Moderator, veți primi o notificare instantanee ori de câte ori ORICE conținut vizibil public este publicat pe acest portal. Deoarece sunteți administrator de portal, puteți șterge conținutul, de asemenea, dacă acesta este ofensiv sau critic. Pentru a o șterge, vizitați pagina de conținut de pe site-ul web în timp ce vă conectați la acest cont."
+
+msgid "Additionally, you have opted in to receive emails from organizers from these conferences. <br/> You may opt out by revoking your application or by leaving the conference:"
+msgstr ""
 
 msgid "Immediately"
 msgstr "Imediat"

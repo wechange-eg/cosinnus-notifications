@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-01 15:43+0200\n"
+"POT-Creation-Date: 2022-12-08 14:50+0100\n"
 "PO-Revision-Date: 2020-09-23 18:41+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -33,6 +33,9 @@ msgstr "Oznámení"
 msgctxt "the_app"
 msgid "notifications"
 msgstr "oznámení"
+
+msgid "Groups and Projects"
+msgstr ""
 
 #, python-format
 msgid "Your daily digest for %(portal_name)s"
@@ -193,6 +196,9 @@ msgstr "Chtěl bych být moderátorem tohoto portálu"
 
 msgid "As a Moderator, you will receive an instant notification whenever ANY publicly visible content is posted on this portal. Since you are a portal administrator you can then also delete the content if it is offensive or critical. To delete it, visit the content page on the website while logged into this account."
 msgstr "Jako moderátor obdržíte okamžité oznámení, kdykoli se na tomto portálu zveřejní JAKÝKOLI veřejně viditelný obsah. Jelikož jste správcem portálu, můžete také odstranit obsah, pokud je urážlivý nebo kritický. Chcete-li jej smazat, přihlaste se k tomuto účtu na stránce s obsahem na webu."
+
+msgid "Additionally, you have opted in to receive emails from organizers from these conferences. <br/> You may opt out by revoking your application or by leaving the conference:"
+msgstr ""
 
 msgid "Immediately"
 msgstr "Okamžitě"
