@@ -237,9 +237,10 @@ class NotificationPreferenceView(ListView):
         user = self.request.user
         user_conferences = CosinnusConference.objects.get_for_user_pks(user)
         pending_application_qs = CosinnusConferenceApplication.objects.filter(user=user).pending().filter(may_be_contacted=True)
+        accepted_application_qs = CosinnusConferenceApplication.objects.filter(user=user).accepted_in_past().filter(may_be_contacted=True)
         subscribed_conferences = list(set(CosinnusConference.objects.filter(
             Q(membership_mode=CosinnusConference.MEMBERSHIP_MODE_APPLICATION) & (
-                Q(conference_applications__in=pending_application_qs) | Q(id__in=user_conferences)))))
+                Q(conference_applications__in=pending_application_qs) | Q(id__in=accepted_application_qs) | Q(id__in=user_conferences)))))
         
         context.update({
             #'object_list': self.queryset,
