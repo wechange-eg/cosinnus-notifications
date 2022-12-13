@@ -233,11 +233,13 @@ class NotificationPreferenceView(ListView):
                 'multi_preference_setting': UserMultiNotificationPreference.get_setting_for_user(self.request.user, multi_notification_id),
             })
         
-        # get conferences user is pending for or is a member of
+        # get conferences with application method `Request application` the user is pending for or is a member of
         user = self.request.user
-        user_conferences = CosinnusConference.objects.get_for_user_pks(user)
-        pending_application_qs = CosinnusConferenceApplication.objects.filter(user=user).pending().filter(may_be_contacted=True)
-        subscribed_conferences = list(set(CosinnusConference.objects.filter(Q(conference_applications__in=pending_application_qs) | Q(id__in=user_conferences))))
+        accepted_pending_application_qs = CosinnusConferenceApplication.objects.filter(user=user).pending_and_accepted().filter(may_be_contacted=True)
+        subscribed_conferences = list(set(CosinnusConference.objects.filter(
+            membership_mode=CosinnusConference.MEMBERSHIP_MODE_APPLICATION,
+            conference_applications__id__in=accepted_pending_application_qs
+        )))
         
         context.update({
             #'object_list': self.queryset,
